@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Boot Two VMs: Linux1 and Linux2 - hvisor Manual</title>
+        <title>Booting two VMs: Linux1 and Linux2 - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -155,14 +155,14 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="如何启动nonroot-linux"><a class="header" href="#如何启动nonroot-linux">如何启动NonRoot Linux</a></h1>
-<p>hvisor对NonRoot的启动做了妥善处理，使得启动较为简单，方式如下：</p>
+                        <h1 id="how-to-boot-nonroot-linux"><a class="header" href="#how-to-boot-nonroot-linux">How to Boot NonRoot Linux</a></h1>
+<p>Hvisor has properly handled the booting of NonRoot, making it relatively simple to do so, as follows:</p>
 <ol>
 <li>
-<p>准备好用于 NonRoot Linux 的内核镜像，设备树，以及文件系统。将内核和设备树放置在 Root Linux 的文件系统中。</p>
+<p>Prepare the kernel image, device tree, and file system for NonRoot Linux. Place the kernel and device tree in the file system of Root Linux.</p>
 </li>
 <li>
-<p>在给 NonRoot Linux 的设备树文件中指定好此 NonRoot Linux所使用的串口和需要挂载的文件系统，示例如下：</p>
+<p>Specify the serial port and file system to be mounted for NonRoot Linux in the device tree file, as shown below:</p>
 </li>
 </ol>
 <pre><code>	chosen {
@@ -172,21 +172,21 @@
 </code></pre>
 <ol start="3">
 <li>
-<p>编译用于 Hvisor 的<a href="https://github.com/syswonder/hvisor-tool?tab=readme-ov-file">内核模块和命令行工具</a>，将其放置在 Root Linux 的文件系统中。</p>
+<p>Compile the <a href="https://github.com/syswonder/hvisor-tool?tab=readme-ov-file">kernel module and command line tool</a> for Hvisor and place it in the file system of Root Linux.</p>
 </li>
 <li>
-<p>启动 Hvisor 的 Root Linux，注入刚才编译好的内核模块：</p>
+<p>Boot Hvisor's Root Linux and inject the kernel module that was just compiled:</p>
 </li>
 </ol>
 <pre><code>insmod hvisor.ko
 </code></pre>
 <ol start="5">
-<li>使用命令行工具，这里假定其名字为<code>hvisor</code>，启动 NonRoot Linux。</li>
+<li>Use the command line tool, here assumed to be named <code>hvisor</code>, to boot NonRoot Linux.</li>
 </ol>
-<pre><code>./hvisor zone start --kernel 内核镜像,addr=0x70000000 --dtb 设备树文件,addr=0x91000000 --id 虚拟机编号（从1开始指定）
+<pre><code>./hvisor zone start --kernel kernel image,addr=0x70000000 --dtb device tree file,addr=0x91000000 --id virtual machine number (starting from 1)
 </code></pre>
 <ol start="6">
-<li>NonRoot Linux 启动完毕，打开刚才指定的串口即可使用。</li>
+<li>Once NonRoot Linux has booted, open the specified serial port to use it.</li>
 </ol>
 
                     </main>

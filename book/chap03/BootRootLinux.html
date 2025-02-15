@@ -155,39 +155,39 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="如何启动-root-linux"><a class="header" href="#如何启动-root-linux">如何启动 Root Linux</a></h1>
+                        <h1 id="how-to-start-root-linux"><a class="header" href="#how-to-start-root-linux">How to Start Root Linux</a></h1>
 <h2 id="qemu"><a class="header" href="#qemu">QEMU</a></h2>
-<h3 id="安装依赖"><a class="header" href="#安装依赖">安装依赖</a></h3>
-<h4 id="1-安装依赖"><a class="header" href="#1-安装依赖">1. 安装依赖</a></h4>
+<h3 id="install-dependencies"><a class="header" href="#install-dependencies">Install Dependencies</a></h3>
+<h4 id="1-install-dependencies"><a class="header" href="#1-install-dependencies">1. Install Dependencies</a></h4>
 <pre><code class="language-bash">apt-get install -y jq wget build-essential \
  libglib2.0-0 libfdt1 libpixman-1-0 zlib1g \
  libfdt-dev libpixman-1-dev libglib2.0-dev \
  zlib1g-dev ninja-build
 </code></pre>
-<h4 id="1-下载并解压qemu"><a class="header" href="#1-下载并解压qemu">1. 下载并解压QEMU</a></h4>
+<h4 id="1-download-and-extract-qemu"><a class="header" href="#1-download-and-extract-qemu">1. Download and Extract QEMU</a></h4>
 <pre><code class="language-bash">wget https://download.qemu.org/qemu-7.0.0.tar.xz
 tar -xvf qemu-${QEMU_VERSION}.tar.xz
 </code></pre>
-<h4 id="2-条件编译并安装qemu"><a class="header" href="#2-条件编译并安装qemu">2. 条件编译并安装QEMU</a></h4>
-<p>这里我们只编译用于仿真 aarch64 的 QEMU，如果需要其他架构的 QEMU，可以参考<a href="https://wiki.qemu.org/Hosts/Linux">QEMU官方文档</a>。</p>
+<h4 id="2-conditionally-compile-and-install-qemu"><a class="header" href="#2-conditionally-compile-and-install-qemu">2. Conditionally Compile and Install QEMU</a></h4>
+<p>Here we only compile QEMU for simulating aarch64. If you need QEMU for other architectures, you can refer to <a href="https://wiki.qemu.org/Hosts/Linux">QEMU Official Documentation</a>.</p>
 <pre><code class="language-bash">cd qemu-7.0.0 &amp;&amp; \
 ./configure --target-list=aarch64-softmmu,aarch64-linux-user &amp;&amp; \
 make -j$(nproc) &amp;&amp; \
 make install
 </code></pre>
-<h4 id="3-测试qemu是否安装成功"><a class="header" href="#3-测试qemu是否安装成功">3. 测试QEMU是否安装成功</a></h4>
+<h4 id="3-test-if-qemu-is-successfully-installed"><a class="header" href="#3-test-if-qemu-is-successfully-installed">3. Test if QEMU is Successfully Installed</a></h4>
 <pre><code class="language-bash">qemu-system-aarch64 --version
 </code></pre>
-<h3 id="启动root-linux"><a class="header" href="#启动root-linux">启动Root Linux</a></h3>
-<h4 id="1-准备root文件系统和内核镜像"><a class="header" href="#1-准备root文件系统和内核镜像">1. 准备Root文件系统和内核镜像</a></h4>
-<p>将镜像文件放置于<code>hvisor/images/aarch64/kernel/</code>,命名为<code>Image</code>。</p>
-<p>将Root文件系统放置于<code>hvisor/images/aarch64/virtdisk/</code>,命名为<code>rootfs1.ext4</code>。</p>
-<h4 id="2-启动qemu"><a class="header" href="#2-启动qemu">2. 启动QEMU</a></h4>
-<p>在hviosr目录下执行以下命令：</p>
+<h3 id="start-root-linux"><a class="header" href="#start-root-linux">Start Root Linux</a></h3>
+<h4 id="1-prepare-root-file-system-and-kernel-image"><a class="header" href="#1-prepare-root-file-system-and-kernel-image">1. Prepare Root File System and Kernel Image</a></h4>
+<p>Place the image file in <code>hvisor/images/aarch64/kernel/</code>, named <code>Image</code>.</p>
+<p>Place the Root file system in <code>hvisor/images/aarch64/virtdisk/</code>, named <code>rootfs1.ext4</code>.</p>
+<h4 id="2-start-qemu"><a class="header" href="#2-start-qemu">2. Start QEMU</a></h4>
+<p>Execute the following command in the hviosr directory:</p>
 <pre><code class="language-bash">make run
 </code></pre>
-<h4 id="3-进入qemu"><a class="header" href="#3-进入qemu">3. 进入QEMU</a></h4>
-<p>将自动加载uboot，等待uboot加载完成后，输入<code>bootm 0x40400000 - 0x40000000</code>，即可进入Root Linux。</p>
+<h4 id="3-enter-qemu"><a class="header" href="#3-enter-qemu">3. Enter QEMU</a></h4>
+<p>It will automatically load uboot. After uboot loading is complete, enter <code>bootm 0x40400000 - 0x40000000</code> to enter Root Linux.</p>
 
                     </main>
 

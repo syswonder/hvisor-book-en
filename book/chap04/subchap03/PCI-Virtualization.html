@@ -155,56 +155,56 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p>PCI设备主要有三个空间：配置空间（Configuration Space）、内存空间（Memory Space）和I/O空间（I/O Space）。</p>
-<h3 id="1-配置空间configuration-space"><a class="header" href="#1-配置空间configuration-space">1. 配置空间（Configuration Space）</a></h3>
+                        <p>PCI devices primarily have three spaces: Configuration Space, Memory Space, and I/O Space.</p>
+<h3 id="1-configuration-space"><a class="header" href="#1-configuration-space">1. Configuration Space</a></h3>
 <ul>
-<li><strong>用途</strong>：用于设备初始化和配置。</li>
-<li><strong>大小</strong>：每个PCI设备都有256字节的配置空间。</li>
-<li><strong>访问方式</strong>：通过总线编号、设备编号和功能编号进行访问。</li>
-<li><strong>内容</strong>：
+<li><strong>Purpose</strong>: Used for device initialization and configuration.</li>
+<li><strong>Size</strong>: Each PCI device has 256 bytes of configuration space.</li>
+<li><strong>Access Method</strong>: Accessed through bus number, device number, and function number.</li>
+<li><strong>Content</strong>:
 <ul>
-<li>设备标识信息（如供应商ID、设备ID）。</li>
-<li>状态和命令寄存器。</li>
-<li>基地址寄存器（BARs），用于映射设备的内存空间和I/O空间。</li>
-<li>中断线和中断引脚等信息。</li>
+<li>Device identification information (such as Vendor ID, Device ID).</li>
+<li>Status and command registers.</li>
+<li>Base Address Registers (BARs), used to map the device's memory space and I/O space.</li>
+<li>Information on interrupt lines and interrupt pins.</li>
 </ul>
 </li>
 </ul>
-<h3 id="2-内存空间memory-space"><a class="header" href="#2-内存空间memory-space">2. 内存空间（Memory Space）</a></h3>
+<h3 id="2-memory-space"><a class="header" href="#2-memory-space">2. Memory Space</a></h3>
 <ul>
-<li><strong>用途</strong>：用于访问设备的寄存器和内存，适用于高带宽访问。</li>
-<li><strong>大小</strong>：由设备制造商定义，映射到系统内存地址空间中。</li>
-<li><strong>访问方式</strong>：通过内存读写指令进行访问。</li>
-<li><strong>内容</strong>：
+<li><strong>Purpose</strong>: Used to access the device's registers and memory, suitable for high bandwidth access.</li>
+<li><strong>Size</strong>: Defined by the device manufacturer, mapped into the system memory address space.</li>
+<li><strong>Access Method</strong>: Accessed through memory read and write instructions.</li>
+<li><strong>Content</strong>:
 <ul>
-<li>设备寄存器：用于控制和状态读取。</li>
-<li>设备专用内存：如帧缓冲区、DMA缓冲区等。</li>
+<li>Device registers: Used for control and status reading.</li>
+<li>Device-specific memory: such as frame buffers, DMA buffers, etc.</li>
 </ul>
 </li>
 </ul>
-<h3 id="3-io空间io-space"><a class="header" href="#3-io空间io-space">3. I/O空间（I/O Space）</a></h3>
+<h3 id="3-io-space"><a class="header" href="#3-io-space">3. I/O Space</a></h3>
 <ul>
-<li><strong>用途</strong>：用于访问设备的控制寄存器，适用于低带宽访问。</li>
-<li><strong>大小</strong>：由设备制造商定义，映射到系统的I/O地址空间中。</li>
-<li><strong>访问方式</strong>：通过特殊的I/O指令（如<code>in</code>和<code>out</code>）进行访问。</li>
-<li><strong>内容</strong>：
+<li><strong>Purpose</strong>: Used to access the device's control registers, suitable for low bandwidth access.</li>
+<li><strong>Size</strong>: Defined by the device manufacturer, mapped into the system's I/O address space.</li>
+<li><strong>Access Method</strong>: Accessed through special I/O instructions (such as <code>in</code> and <code>out</code>).</li>
+<li><strong>Content</strong>:
 <ul>
-<li>设备控制寄存器：用于执行特定的I/O操作。</li>
+<li>Device control registers: Used to perform specific I/O operations.</li>
 </ul>
 </li>
 </ul>
-<h3 id="总结"><a class="header" href="#总结">总结</a></h3>
+<h3 id="summary"><a class="header" href="#summary">Summary</a></h3>
 <ul>
-<li><strong>配置空间</strong>主要用于设备初始化和配置。</li>
-<li><strong>内存空间</strong>用于高速访问设备的寄存器和内存。</li>
-<li><strong>I/O空间</strong>用于低速访问设备的控制寄存器。</li>
+<li><strong>Configuration Space</strong> is mainly used for device initialization and configuration.</li>
+<li><strong>Memory Space</strong> is used for high-speed access to the device's registers and memory.</li>
+<li><strong>I/O Space</strong> is used for low-speed access to the device's control registers.</li>
 </ul>
-<p>pci的虚拟化主要是对上述的三个空间做管理。考虑到多数设备中并不存在多条pci总线，且该pci总线的所有权一般归属于zone0，为了保证zone0中pci设备的访问速度，当不存在需要将该总线上的设备分配给其他zone时，hvisor并不会对zone0的pci总线及pci设备做任何处理。</p>
-<p>在将PCI设备分配给zone时，我们需要确保zone0中的Linux不再使用它们。只要设备被分配给其他zone，那么zone0就不应该访问这些设备。很遗憾，我们不能仅仅使用PCI热插拔来在运行时移除/重新添加设备，因为Linux可能会重新编程BARs并定位资源到我们不期望或者不允许的位置。因此，需要一个存在于zone0内核中的驱动拦截对这些PCI设备的访问，我们将目光投向了hvisor tool。</p>
-<p>hvisor tool会将自己注册为一个PCI虚拟驱动程序，并在其他zone使用这些设备时声明对这些设备的管理权。在创建zone之前，hvisor会让这些设备从他们自己的驱动程序中解绑并绑定到hvisor tool。当一个zone被销毁时，这些设备实际上已经没有zone使用，但是在zone0看来hvisor tool仍然是一个有效的虚拟驱动程序，所以设备的释放需要手动完成。hvisor tool会释放绑定到这些zone的设备，从zone0 linux的角度来看，这些设备不被绑定到任何驱动程序，那么如果需要使用这些设备linux会自动的重新绑定正确的驱动程序。</p>
-<p>现在我们需要让zone能够正确的访问到pci设备，为了尽可能简洁的完成这一目标，我们直接复用了pci总线的结构，也就是说，关于pci总线的内容会同时出现在需要使用该总线上设备的设备树中，但是除了真正拥有这条总线的zone以外，其他zone只能通过mmio由hvisor代理访问该设备，当zone试图访问一个PCI设备时，hvisor会检查是否拥有该设备的所有权，所有权在zone创建时一同被声明。如果zone访问一个属于自己的设备的配置空间，hvisor会正确的返回信息。</p>
-<p>目前，I/O空间和内存空间的处理方案与配置空间相同。因为bars资源的唯一性，配置空间不可能被直接分配给zone，且对bar空间的访问频率很低，并不会过多的影响效率。但是I/O空间和内存空间的直接分配是理论上可行，进一步会将I/O空间和内存空间直接分配给对应的zone以提高访问速度。</p>
-<p>为了方便在QEMU中测试PCI虚拟化，我们编写了一个PCI设备。</p>
+<p>The virtualization of PCI mainly involves managing the above three spaces. Considering that most devices do not have multiple PCI buses, and the ownership of the PCI bus generally belongs to zone0, to ensure the access speed of PCI devices in zone0, hvisor does not process the PCI bus and PCI devices in zone0 when there is no need to allocate devices on this bus to other zones.</p>
+<p>When allocating PCI devices to a zone, we need to ensure that Linux in zone0 no longer uses them. As long as the devices are allocated to other zones, zone0 should not access these devices. Unfortunately, we cannot simply use PCI hot-plugging to remove/re-add devices at runtime, as Linux may reprogram the BARs and allocate resources to locations we do not expect or allow. Therefore, a driver within the zone0 kernel is needed to intercept access to these PCI devices, and we turn to the hvisor tool.</p>
+<p>The hvisor tool registers itself as a PCI virtual driver and claims management of these devices when other zones use them. Before creating a zone, hvisor allows these devices to unbind from their own drivers and bind to the hvisor tool. When a zone is destroyed, these devices are no longer used by any zone, but from the perspective of zone0, the hvisor tool is still a valid virtual driver, so the release of the devices needs to be done manually. The hvisor tool releases the devices bound to these zones, from the perspective of zone0 Linux, these devices are not bound to any drivers, so if these devices are needed, Linux will automatically rebind the correct drivers.</p>
+<p>Now we need to allow the zone to correctly access the PCI devices, and to achieve this goal as simply as possible, we directly reuse the structure of the PCI bus, meaning that the content about the PCI bus will appear in the device tree of the zone that needs to use the devices on this bus, but other than the zone that actually owns this bus, other zones can only access the device through mmio by proxy of hvisor. When a zone attempts to access a PCI device, hvisor checks whether it owns the device, and ownership is declared at the time of zone creation. If a zone accesses the configuration space of a device it owns, hvisor will correctly return the information.</p>
+<p>Currently, the treatment of I/O space and memory space is the same as that of configuration space. Because of the uniqueness of BARs resources, the configuration space cannot be directly allocated to a zone, and the frequency of access to BAR space is low, which does not significantly affect efficiency. However, the direct allocation of I/O space and memory space is theoretically feasible, and further, the I/O space and memory space will be directly allocated to the corresponding zone to improve access speed.</p>
+<p>To facilitate testing PCI virtualization in QEMU, we wrote a PCI device.</p>
 
                     </main>
 

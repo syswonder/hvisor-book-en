@@ -155,43 +155,43 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="arm-gicv3模块"><a class="header" href="#arm-gicv3模块">ARM GICv3模块</a></h1>
-<h2 id="1-gicv3模块"><a class="header" href="#1-gicv3模块">1. GICv3模块</a></h2>
-<h3 id="gicv3初始化流程"><a class="header" href="#gicv3初始化流程">GICv3初始化流程</a></h3>
-<p>hvisor中的GICv3初始化流程涉及了GIC分布控制器（GICD）和GIC重新分布控制器（GICR）的初始化，以及中断处理和虚拟中断注入的机制。这一过程的关键步骤：</p>
+                        <h1 id="arm-gicv3-module"><a class="header" href="#arm-gicv3-module">ARM GICv3 Module</a></h1>
+<h2 id="1-gicv3-module"><a class="header" href="#1-gicv3-module">1. GICv3 Module</a></h2>
+<h3 id="gicv3-initialization-process"><a class="header" href="#gicv3-initialization-process">GICv3 Initialization Process</a></h3>
+<p>The GICv3 initialization process in hvisor involves the initialization of the GIC Distributor (GICD) and GIC Redistributor (GICR), as well as the mechanisms for interrupt handling and virtual interrupt injection. Key steps in this process include:</p>
 <ul>
-<li>SDEI版本检查：通过smc_arg1!(0xc4000020)获取Secure Debug Extensions Interface (SDEI)的版本信息。</li>
-<li>ICCs配置：设置icc_ctlr_el1以仅提供优先级下降功能，设置icc_pmr_el1以定义中断优先级掩码，使能Group 1 IRQs。</li>
-<li>清除待处理中断：调用gicv3_clear_pending_irqs函数，清除所有待处理的中断，确保系统处于干净状态。</li>
-<li>VMCR和HCR配置：设置ich_vmcr_el2和ich_hcr_el2寄存器，使能虚拟化CPU接口，准备虚拟中断处理。</li>
+<li>SDEI version check: Obtain the version information of the Secure Debug Extensions Interface (SDEI) through smc_arg1!(0xc4000020).</li>
+<li>ICCs configuration: Set icc_ctlr_el1 to only provide priority drop functionality, set icc_pmr_el1 to define the interrupt priority mask, and enable Group 1 IRQs.</li>
+<li>Clear pending interrupts: Call the gicv3_clear_pending_irqs function to clear all pending interrupts, ensuring the system is in a clean state.</li>
+<li>VMCR and HCR configuration: Set ich_vmcr_el2 and ich_hcr_el2 registers to enable the virtualized CPU interface, preparing for virtual interrupt handling.</li>
 </ul>
-<h3 id="待处理中断处理"><a class="header" href="#待处理中断处理">待处理中断处理</a></h3>
+<h3 id="handling-pending-interrupts"><a class="header" href="#handling-pending-interrupts">Handling Pending Interrupts</a></h3>
 <ul>
-<li><code>pending_irq</code>函数读取<code>icc_iar1_el1</code>寄存器，返回当前正在处理的中断ID，若值大于等于0x3fe则视为无效中断。</li>
-<li><code>deactivate_irq</code>函数通过写入<code>icc_eoir1_el1</code>和<code>icc_dir_el1</code>寄存器来清除中断标志，使能中断。</li>
+<li>The <code>pending_irq</code> function reads the <code>icc_iar1_el1</code> register, returning the ID of the current interrupt being processed. If the value is greater than or equal to 0x3fe, it is considered an invalid interrupt.</li>
+<li>The <code>deactivate_irq</code> function clears the interrupt flag by writing to the <code>icc_eoir1_el1</code> and <code>icc_dir_el1</code> registers, enabling the interrupt.</li>
 </ul>
-<h3 id="虚拟中断注入"><a class="header" href="#虚拟中断注入">虚拟中断注入</a></h3>
+<h3 id="virtual-interrupt-injection"><a class="header" href="#virtual-interrupt-injection">Virtual Interrupt Injection</a></h3>
 <ul>
-<li><code>inject_irq</code>函数检查是否有可用的<code>List Register (LR)</code>，并将虚拟中断信息写入其中。此函数区分硬件中断和软件生成中断，适当设置LR中的字段。</li>
+<li>The <code>inject_irq</code> function checks for an available <code>List Register (LR)</code> and writes virtual interrupt information into it. This function distinguishes between hardware interrupts and software-generated interrupts, appropriately setting fields in the LR.</li>
 </ul>
-<h3 id="gic数据结构初始化"><a class="header" href="#gic数据结构初始化">GIC数据结构初始化</a></h3>
+<h3 id="gic-data-structure-initialization"><a class="header" href="#gic-data-structure-initialization">GIC Data Structure Initialization</a></h3>
 <ul>
-<li>GIC是一个全局的Once容器，用于延迟初始化Gic结构体，其中包含了GICD和GICR的基地址及其大小。</li>
-<li>primary_init_early和primary_init_late函数分别在早期和后期初始化阶段配置GIC，使能中断。</li>
+<li>GIC is a global Once container used for the lazy initialization of the Gic structure, which includes the base addresses and sizes of GICD and GICR.</li>
+<li>The primary_init_early and primary_init_late functions configure the GIC in the early and late initialization phases, enabling interrupts.</li>
 </ul>
-<h3 id="区域zone级别的初始化"><a class="header" href="#区域zone级别的初始化">区域（Zone）级别的初始化</a></h3>
-<p>在Zone结构体中，<code>arch_irqchip_reset</code>方法负责重置分配给特定zone的所有中断，通过直接写入GICD的ICENABLER和ICACTIVER寄存器来实现。</p>
-<h2 id="2-vgicv3模块"><a class="header" href="#2-vgicv3模块">2. vGICv3模块</a></h2>
-<p>hvisor的VGICv3（Virtual Generic Interrupt Controller version 3）模块提供了对ARMv8-A架构中GICv3的虚拟化支持。它通过MMIO（Memory Mapped I/O）访问和中断比特图管理来控制和协调不同zone（虚拟机实例）间的中断请求。</p>
-<h3 id="mmio区域注册"><a class="header" href="#mmio区域注册">MMIO区域注册</a></h3>
-<p>在初始化阶段，<code>Zone</code>结构体的<code>vgicv3_mmio_init</code>方法注册了GIC分布控制器（GICD）和每个CPU的GIC重新分布控制器（GICR）的MMIO区域。MMIO区域注册是通过<code>mmio_region_register</code>函数完成的，该函数关联了特定的处理器或中断控制器地址，以及相应的处理函数<code>vgicv3_dist_handler</code>和<code>vgicv3_redist_handler</code>。</p>
-<h3 id="中断比特图初始化"><a class="header" href="#中断比特图初始化">中断比特图初始化</a></h3>
-<p><code>Zone</code>结构体的<code>irq_bitmap_init</code>方法用于初始化中断比特图，这是为了跟踪哪些中断属于当前<code>zone</code>。通过遍历提供的中断列表，每个中断都会被插入到比特图中。<code>insert_irq_to_bitmap</code>函数负责将特定的中断号映射到比特图中的相应位置。
-MMIO访问限制</p>
-<p><code>restrict_bitmask_access</code>函数用于限制对<code>GICD</code>寄存器的<code>MMIO</code>访问，确保只有属于当前<code>zone</code>的中断才能被修改。该函数检查访问是否针对当前zone的中断，如果是，则更新访问掩码，以允许或限制特定的读写操作。</p>
-<h3 id="vgicv3-mmio处理"><a class="header" href="#vgicv3-mmio处理">VGICv3 MMIO处理</a></h3>
-<p><code>vgicv3_redist_handler</code>和<code>vgicv3_dist_handler</code>函数分别处理GICR和GICD的MMIO访问。<code>vgicv3_redist_handler</code>函数处理GICR的读写操作，检查是否访问的是当前<code>zone</code>的GICR，如果是，则允许访问；否则，忽略该访问。<code>vgicv3_dist_handler</code>函数根据不同的GICD寄存器类型，调用<code>vgicv3_handle_irq_ops</code>或<code>restrict_bitmask_access</code>函数，以适当地处理中断路由和配置寄存器的访问。</p>
-<p>通过上述机制，hvisor能够有效地管理跨zone的中断，确保每个zone只能够访问和控制分配给它的中断资源，同时提供必要的隔离性。这使得在多zone环境中，VGICv3能够高效、安全地工作，支持复杂的虚拟化场景。</p>
+<h3 id="zone-level-initialization"><a class="header" href="#zone-level-initialization">Zone-Level Initialization</a></h3>
+<p>In the Zone structure, the <code>arch_irqchip_reset</code> method is responsible for resetting all interrupts allocated to a specific zone by directly writing to the GICD's ICENABLER and ICACTIVER registers.</p>
+<h2 id="2-vgicv3-module"><a class="header" href="#2-vgicv3-module">2. vGICv3 Module</a></h2>
+<p>hvisor's VGICv3 (Virtual Generic Interrupt Controller version 3) module provides virtualization support for GICv3 in the ARMv8-A architecture. It controls and coordinates interrupt requests between different zones (virtual machine instances) through MMIO (Memory Mapped I/O) access and interrupt bitmaps management.</p>
+<h3 id="mmio-region-registration"><a class="header" href="#mmio-region-registration">MMIO Region Registration</a></h3>
+<p>During initialization, the <code>Zone</code> structure's <code>vgicv3_mmio_init</code> method registers the MMIO regions for the GIC Distributor (GICD) and each CPU's GIC Redistributor (GICR). MMIO region registration is completed through the <code>mmio_region_register</code> function, which associates specific processor or interrupt controller addresses with corresponding handler functions <code>vgicv3_dist_handler</code> and <code>vgicv3_redist_handler</code>.</p>
+<h3 id="interrupt-bitmap-initialization"><a class="header" href="#interrupt-bitmap-initialization">Interrupt Bitmap Initialization</a></h3>
+<p>The <code>Zone</code> structure's <code>irq_bitmap_init</code> method initializes the interrupt bitmap to track which interrupts belong to the current <code>zone</code>. By iterating through the provided list of interrupts, each interrupt is inserted into the bitmap. The <code>insert_irq_to_bitmap</code> function is responsible for mapping specific interrupt numbers to the appropriate positions in the bitmap.</p>
+<h3 id="mmio-access-restrictions"><a class="header" href="#mmio-access-restrictions">MMIO Access Restrictions</a></h3>
+<p>The <code>restrict_bitmask_access</code> function restricts MMIO access to the <code>GICD</code> registers, ensuring that only interrupts belonging to the current <code>zone</code> can be modified. This function checks whether the access is for the current zone's interrupts and, if so, updates the access mask to allow or restrict specific read/write operations.</p>
+<h3 id="vgicv3-mmio-handling"><a class="header" href="#vgicv3-mmio-handling">VGICv3 MMIO Handling</a></h3>
+<p>The <code>vgicv3_redist_handler</code> and <code>vgicv3_dist_handler</code> functions handle MMIO access for GICR and GICD, respectively. The <code>vgicv3_redist_handler</code> function handles read and write operations for GICR, checking whether the access is for the current <code>zone</code>'s GICR and allowing access if so; otherwise, the access is ignored. The <code>vgicv3_dist_handler</code> function, depending on the type of GICD register, calls the <code>vgicv3_handle_irq_ops</code> or <code>restrict_bitmask_access</code> functions to appropriately handle interrupt routing and configuration register access.</p>
+<p>Through these mechanisms, hvisor effectively manages interrupts across zones, ensuring that each zone can only access and control the interrupts allocated to it, while providing necessary isolation. This allows VGICv3 to work efficiently and securely in a multi-zone environment, supporting complex virtualization scenarios.</p>
 
                     </main>
 

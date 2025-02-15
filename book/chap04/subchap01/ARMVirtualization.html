@@ -155,25 +155,25 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="aarch64下的cpu虚拟化"><a class="header" href="#aarch64下的cpu虚拟化">AArch64下的CPU虚拟化</a></h1>
-<h2 id="cpu启动机制"><a class="header" href="#cpu启动机制">CPU启动机制</a></h2>
-<p>在AArch64架构下，hvisor利用<code>psci::cpu_on()</code>函数唤醒指定的CPU核心，将其从关闭状态带入运行状态。该函数接收CPU的ID、启动地址以及一个不透明参数作为输入。遇到错误时，如CPU已处于唤醒状态，函数会进行适当的错误处理避免重复唤醒。</p>
-<h2 id="cpu虚拟化初始化与运行"><a class="header" href="#cpu虚拟化初始化与运行">CPU虚拟化初始化与运行</a></h2>
-<p><code>ArchCpu</code>结构体封装了特定于架构的CPU信息和功能，其<code>reset()</code>方法负责将CPU设置为虚拟化模式的初始状态。这包括：</p>
+                        <h1 id="cpu-virtualization-on-aarch64"><a class="header" href="#cpu-virtualization-on-aarch64">CPU Virtualization on AArch64</a></h1>
+<h2 id="cpu-boot-mechanism"><a class="header" href="#cpu-boot-mechanism">CPU Boot Mechanism</a></h2>
+<p>Under the AArch64 architecture, hvisor uses the <code>psci::cpu_on()</code> function to wake up a specified CPU core, bringing it from an off state to a running state. This function receives the CPU's ID, boot address, and an opaque parameter as input. If an error occurs, such as the CPU already being awake, the function handles the error appropriately to avoid reawakening.</p>
+<h2 id="cpu-virtualization-initialization-and-operation"><a class="header" href="#cpu-virtualization-initialization-and-operation">CPU Virtualization Initialization and Operation</a></h2>
+<p>The <code>ArchCpu</code> structure encapsulates architecture-specific CPU information and functionality, with its <code>reset()</code> method responsible for setting the CPU to the initial state of virtualization mode. This includes:</p>
 <ul>
-<li>设置ELR_EL2寄存器至指定的入口点</li>
-<li>配置SPSR_EL2寄存器</li>
-<li>清空通用寄存器</li>
-<li>重置虚拟机相关寄存器</li>
-<li><code>activate_vmm()</code>，激活虚拟内存管理器（VMM）</li>
+<li>Setting the ELR_EL2 register to the specified entry point</li>
+<li>Configuring the SPSR_EL2 register</li>
+<li>Clearing general registers</li>
+<li>Resetting virtual machine-related registers</li>
+<li><code>activate_vmm()</code>, activating the Virtual Memory Manager (VMM)</li>
 </ul>
-<p><code>activate_vmm()</code>方法用于配置VTCR_EL2和HCR_EL2寄存器，启用虚拟化环境。</p>
-<p><code>ArchCpu</code>的<code>run()</code>和<code>idle()</code>方法分别用于启动和闲置CPU。启动时，激活zone的GPM（Guest Page Management），重置到指定的入口点和设备树二进制（DTB）地址，然后通过<code>vmreturn</code>宏跳转到EL2入口点。在闲置模式下，CPU被重置到等待状态（WFI），并准备<code>parking</code>指令页面以供闲置期间使用。</p>
-<h2 id="el1与el2之间的切换"><a class="header" href="#el1与el2之间的切换">EL1与EL2之间的切换</a></h2>
-<p>hvisor在AArch64架构中使用EL2作为hypervisor模式，而EL1用于guest OS。<code>handle_vmexit</code>宏处理从EL1到EL2的上下文切换（VMEXIT事件），保存用户模式寄存器上下文，调用外部函数处理退出原因，之后返回到hypervisor代码段继续执行。<code>vmreturn</code>函数用于从EL2模式回到EL1模式（VMENTRY事件），恢复用户模式寄存器上下文后，通过<code>eret</code>指令返回到guest OS的代码段。</p>
-<h2 id="mmu配置与启用"><a class="header" href="#mmu配置与启用">MMU配置与启用</a></h2>
-<p>为了支持虚拟化，<code>enable_mmu()</code>函数在EL2模式下配置MMU映射，包括设置MAIR_EL2、TCR_EL2和SCTLR_EL2寄存器，允许指令和数据缓存能力，并确保虚拟范围覆盖整个48位地址空间。</p>
-<p>通过这些机制，hvisor在AArch64架构上实现了高效的CPU虚拟化，允许多个独立的zones在静态分配的资源下运行，同时保持系统稳定性和性能。</p>
+<p>The <code>activate_vmm()</code> method is used to configure the VTCR_EL2 and HCR_EL2 registers, enabling the virtualization environment.</p>
+<p>The <code>run()</code> and <code>idle()</code> methods of <code>ArchCpu</code> are used to start and idle the CPU, respectively. When starting, it activates the zone's GPM (Guest Page Management), resets to the specified entry point and device tree binary (DTB) address, and then jumps to the EL2 entry point through the <code>vmreturn</code> macro. In idle mode, the CPU is reset to a wait state (WFI) and prepares a <code>parking</code> instruction page for use during idle periods.</p>
+<h2 id="switching-between-el1-and-el2"><a class="header" href="#switching-between-el1-and-el2">Switching between EL1 and EL2</a></h2>
+<p>hvisor uses EL2 as the hypervisor mode and EL1 for the guest OS in the AArch64 architecture. The <code>handle_vmexit</code> macro handles the context switch from EL1 to EL2 (VMEXIT event), saves the user mode register context, calls an external function to handle the exit reason, and then returns to continue executing hypervisor code. The <code>vmreturn</code> function is used to return from EL2 mode to EL1 mode (VMENTRY event), restores the user mode register context, and returns to the guest OS's code segment through the <code>eret</code> instruction.</p>
+<h2 id="mmu-configuration-and-enablement"><a class="header" href="#mmu-configuration-and-enablement">MMU Configuration and Enablement</a></h2>
+<p>To support virtualization, the <code>enable_mmu()</code> function configures MMU mapping in EL2 mode, including setting the MAIR_EL2, TCR_EL2, and SCTLR_EL2 registers, enabling instruction and data caching capabilities, and ensuring the virtual range covers the entire 48-bit address space.</p>
+<p>Through these mechanisms, hvisor achieves efficient CPU virtualization on the AArch64 architecture, allowing multiple independent zones to operate under statically allocated resources while maintaining system stability and performance.</p>
 
                     </main>
 

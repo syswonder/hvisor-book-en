@@ -155,38 +155,38 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="命令行工具"><a class="header" href="#命令行工具">命令行工具</a></h1>
-<p>命令行工具是附属于hvisor的管理工具，用于在管理虚拟机Root Linux上创建和关闭其他虚拟机，并负责启动Virtio守护进程，提供Virtio设备模拟。仓库地址位于<a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>。</p>
-<h2 id="如何编译"><a class="header" href="#如何编译">如何编译</a></h2>
-<p>命令行工具目前支持两种体系结构：arm64和riscv，且需要配合一个内核模块才能使用。在x86主机上通过交叉编译可针对不同体系结构进行编译</p>
+                        <h1 id="command-line-tools"><a class="header" href="#command-line-tools">Command Line Tools</a></h1>
+<p>Command line tools are management tools affiliated with hvisor, used to create and close other virtual machines on the management virtual machine Root Linux, and are responsible for starting the Virtio daemon, providing Virtio device emulation. The repository address is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
+<h2 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h2>
+<p>The command line tool currently supports two architectures: arm64 and riscv, and requires a kernel module to be used. Cross-compilation on an x86 host can be used to compile for different architectures.</p>
 <ul>
-<li>arm64编译</li>
+<li>arm64 compilation</li>
 </ul>
-<p>在hvisor-tool目录下执行以下命令，即可得到面向arm64体系结构的命令行工具hvisor以及内核模块hvisorl.ko。</p>
+<p>Execute the following command in the hvisor-tool directory to obtain the command line tool hvisor and kernel module hvisorl.ko for the arm64 architecture.</p>
 <pre><code>make all ARCH=arm64 KDIR=xxx
 </code></pre>
-<p>其中KDIR为Root Linux源码路径，用于内核模块的编译。</p>
+<p>Where KDIR is the source path of Root Linux, used for the compilation of the kernel module.</p>
 <ul>
-<li>riscv编译</li>
+<li>riscv compilation</li>
 </ul>
-<p>编译面向riscv体系结构的命令行工具和内核模块：</p>
+<p>Compile the command line tool and kernel module for the riscv architecture:</p>
 <pre><code>make all ARCH=riscv KDIR=xxx
 </code></pre>
-<h2 id="对虚拟机进行管理"><a class="header" href="#对虚拟机进行管理">对虚拟机进行管理</a></h2>
-<h3 id="加载内核模块"><a class="header" href="#加载内核模块">加载内核模块</a></h3>
-<p>使用命令行工具前，需要加载内核模块，便于用户态程序与Hyperviosr进行交互：</p>
+<h2 id="managing-virtual-machines"><a class="header" href="#managing-virtual-machines">Managing Virtual Machines</a></h2>
+<h3 id="loading-the-kernel-module"><a class="header" href="#loading-the-kernel-module">Loading the Kernel Module</a></h3>
+<p>Before using the command line tool, you need to load the kernel module to facilitate interaction between the user-mode program and Hypervisor:</p>
 <pre><code>insmod hvisor.ko
 </code></pre>
-<p>卸载内核模块的操作为：</p>
+<p>The operation to unload the kernel module is:</p>
 <pre><code>rmmod hvisor.ko
 </code></pre>
-<p>其中hvisor.ko位于hvisor-tool/driver目录下。</p>
-<h3 id="启动一个虚拟机"><a class="header" href="#启动一个虚拟机">启动一个虚拟机</a></h3>
-<p>在Root Linux上可通过以下命令，创建一个id为1的虚拟机。该命令会将虚拟机的操作系统镜像文件<code>Image</code>加载到真实物理地址<code>xxxa</code>处，将虚拟机的设备树文件<code>linux2.dtb</code>加载到真实物理地址<code>xxxb</code>处，并进行启动。</p>
+<p>Where hvisor.ko is located in the hvisor-tool/driver directory.</p>
+<h3 id="starting-a-virtual-machine"><a class="header" href="#starting-a-virtual-machine">Starting a Virtual Machine</a></h3>
+<p>On Root Linux, you can create a virtual machine with id 1 using the following command. This command will load the virtual machine's operating system image file <code>Image</code> into the real physical address <code>xxxa</code>, load the virtual machine's device tree file <code>linux2.dtb</code> into the real physical address <code>xxxb</code>, and start it.</p>
 <pre><code>./hvisor zone start --kernel Image,addr=xxxa --dtb linux2.dtb,addr=xxxb --id 1
 </code></pre>
-<h3 id="关闭一个虚拟机"><a class="header" href="#关闭一个虚拟机">关闭一个虚拟机</a></h3>
-<p>关闭id为1的虚拟机：</p>
+<h3 id="shutting-down-a-virtual-machine"><a class="header" href="#shutting-down-a-virtual-machine">Shutting Down a Virtual Machine</a></h3>
+<p>Shut down the virtual machine with id 1:</p>
 <pre><code>./hvisor zone shutdown -id 1
 </code></pre>
 

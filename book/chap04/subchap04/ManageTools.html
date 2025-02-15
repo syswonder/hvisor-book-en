@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Hvisor Management Tools - hvisor Manual</title>
+        <title>hvisor Management Tools - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -155,32 +155,32 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="hvisor管理工具"><a class="header" href="#hvisor管理工具">hvisor管理工具</a></h1>
-<p>hvisor通过一个管理虚拟机Root Linux来管理整个系统。Root Linux通过一套管理工具为用户提供启动和关闭虚拟机、启动和关闭Virtio守护进程的服务。管理工具中，包含一个命令行工具和内核模块。其中命令行工具用于解析并执行用户输入的命令，内核模块用于命令行工具、Virtio守护进程与Hypervisor之间的通信。管理工具的仓库地址为：<a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>。</p>
-<h2 id="启动虚拟机"><a class="header" href="#启动虚拟机">启动虚拟机</a></h2>
-<p>用户输入以下命令，可以在Root Linux上为hvisor创建一个新的虚拟机。</p>
+                        <h1 id="hvisor-management-tool"><a class="header" href="#hvisor-management-tool">hvisor Management Tool</a></h1>
+<p>hvisor manages the entire system through a Root Linux managing virtual machines. Root Linux provides services for users to start and shut down virtual machines, and to start and shut down Virtio daemons through a set of management tools. The management tools include a command-line tool and a kernel module. The command-line tool is used to parse and execute commands entered by the user, while the kernel module is used for communication between the command-line tool, Virtio daemon, and Hypervisor. The repository for the management tool is: <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
+<h2 id="starting-a-virtual-machine"><a class="header" href="#starting-a-virtual-machine">Starting a Virtual Machine</a></h2>
+<p>Users can create a new virtual machine on Root Linux for hvisor by entering the following command:</p>
 <pre><code>./hvisor zone start [vm_name].json
 </code></pre>
-<p>命令行工具首先会解析<code>[vm_name].json</code>文件内容，将虚拟机配置写入<code>zone_config</code>结构体。并根据文件中指定的镜像和dtb文件，将其内容通过<code>read</code>函数读入临时内存。为了将镜像和dtb文件加载到指定的物理内存地址，<code>hvisor.ko</code>内核模块提供<code>hvisor_map</code>函数，可以将一片物理内存区域映射到用户态虚拟地址空间。</p>
-<p>当命令行工具对<code>/dev/hvisor</code>执行<code>mmap</code>函数时，内核会调用<code>hvisor_map</code>函数，以实现用户虚拟内存到指定物理内存的映射。之后通过内存拷贝函数，即可将镜像和dtb文件的内容从临时内存移动到用户指定的物理内存区域。</p>
-<p>加载好镜像后，命令行工具对<code>/dev/hvisor</code>调用<code>ioctl</code>，指定操作码为<code>HVISOR_ZONE_START</code>，之后内核模块会通过Hypercall通知Hypervisor，并传入<code>zone_config</code>结构体对象的地址，通知Hypervisor启动虚拟机。</p>
-<h2 id="关闭虚拟机"><a class="header" href="#关闭虚拟机">关闭虚拟机</a></h2>
-<p>用户输入命令：</p>
+<p>The command-line tool first parses the contents of the <code>[vm_name].json</code> file, writes the virtual machine configuration into the <code>zone_config</code> structure, and reads the contents of the image and dtb files specified in the file into temporary memory through the <code>read</code> function. To load the image and dtb files into the specified physical memory address, the <code>hvisor.ko</code> kernel module provides the <code>hvisor_map</code> function, which can map a physical memory region to the user-space virtual address space.</p>
+<p>When the command-line tool executes the <code>mmap</code> function on <code>/dev/hvisor</code>, the kernel calls the <code>hvisor_map</code> function to map the user virtual memory to the specified physical memory. Afterwards, the image and dtb file contents can be moved from temporary memory to the user-specified physical memory area through the memory copy function.</p>
+<p>After the image is loaded, the command-line tool calls <code>ioctl</code> on <code>/dev/hvisor</code>, specifying the operation code as <code>HVISOR_ZONE_START</code>. The kernel module then notifies the Hypervisor through a Hypercall and passes the address of the <code>zone_config</code> structure object, informing the Hypervisor to start the virtual machine.</p>
+<h2 id="shutting-down-a-virtual-machine"><a class="header" href="#shutting-down-a-virtual-machine">Shutting Down a Virtual Machine</a></h2>
+<p>Users can shut down a virtual machine with the ID <code>vm_id</code> by entering the command:</p>
 <pre><code>./hvisor shutdown -id [vm_id]
 </code></pre>
-<p>即可关闭ID为<code>vm_id</code>的虚拟机。该命令会对<code>/dev/hvisor</code>调用<code>ioctl</code>，指定操作码为<code>HVISOR_ZONE_SHUTDOWN</code>，之后内核模块会通过Hypercall通知Hypervisor，传入<code>vm_id</code>，通知Hypervisor关闭虚拟机。</p>
-<h2 id="启动virtio守护进程"><a class="header" href="#启动virtio守护进程">启动Virtio守护进程</a></h2>
-<p>用户输入命令：</p>
+<p>This command calls <code>ioctl</code> on <code>/dev/hvisor</code>, specifying the operation code as <code>HVISOR_ZONE_SHUTDOWN</code>. The kernel module then notifies the Hypervisor through a Hypercall, passing <code>vm_id</code>, informing the Hypervisor to shut down the virtual machine.</p>
+<h2 id="starting-virtio-daemon"><a class="header" href="#starting-virtio-daemon">Starting Virtio Daemon</a></h2>
+<p>Users can start a Virtio device according to the Virtio device information specified in <code>virtio_cfg.json</code> by entering the command:</p>
 <pre><code>nohup ./hvisor virtio start [virtio_cfg.json] &amp;
 </code></pre>
-<p>即可根据<code>virtio_cfg.json</code>中规定的Virtio设备信息，创建Virtio设备，并初始化相关的数据结构。目前支持三种Virtio设备的创建，包括Virtio-net、Virtio-block、Virtio-console设备。</p>
-<p>由于命令行参数中包含<code>nohup</code>和<code>&amp;</code>，该命令会以守护进程的形式存在，守护进程的所有输出被重定向到<code>nohup.out</code>。守护进程的输出包含六个等级，从低到高分别是<code>LOG_TRACE</code>, <code>LOG_DEBUG</code>, <code>LOG_INFO</code>,<code>LOG_WARN</code>,<code>LOG_ERROR</code>,<code>LOG_FATAL</code>。编译命令行工具时可指定LOG级别，例如LOG为<code>LOG_INFO</code>时，等于或高于<code>LOG_INFO</code>的输出将被记录到日志文件，而<code>log_trace</code>和<code>log_debug</code>将不会输出。</p>
-<p>Virtio设备创建后，Virtio守护进程会轮询请求提交队列，获取其他虚拟机的Virtio请求。长时间没有请求时，会自动进入休眠状态。</p>
-<h2 id="关闭virtio守护进程"><a class="header" href="#关闭virtio守护进程">关闭Virtio守护进程</a></h2>
-<p>用户输入命令：</p>
+<p>This command will create Virtio devices and initialize related data structures based on the specified Virtio device information. Currently, three types of Virtio devices can be created, including Virtio-net, Virtio-block, and Virtio-console devices.</p>
+<p>Since the command-line parameters include <code>nohup</code> and <code>&amp;</code>, the command will exist in the form of a daemon, with all outputs of the daemon redirected to <code>nohup.out</code>. The daemon's output includes six levels, from low to high: <code>LOG_TRACE</code>, <code>LOG_DEBUG</code>, <code>LOG_INFO</code>, <code>LOG_WARN</code>, <code>LOG_ERROR</code>, <code>LOG_FATAL</code>. When compiling the command-line tool, the LOG level can be specified, for example, when LOG is <code>LOG_INFO</code>, outputs equal to or higher than <code>LOG_INFO</code> will be recorded in the log file, while <code>log_trace</code> and <code>log_debug</code> will not be output.</p>
+<p>After the Virtio device is created, the Virtio daemon will poll the request submission queue to fetch Virtio requests from other virtual machines. When there are no requests for a long time, it will automatically enter sleep mode.</p>
+<h2 id="shutting-down-virtio-daemon"><a class="header" href="#shutting-down-virtio-daemon">Shutting Down Virtio Daemon</a></h2>
+<p>Users can shut down the Virtio daemon by entering the command:</p>
 <pre><code>pkill hvisor
 </code></pre>
-<p>即可关闭Virtio守护进程。Virtio守护进程在启动时，会注册<code>SIGTERM</code>信号的信号处理函数<code>virtio_close</code>。当执行<code>pkill hvisor</code>时，会向名为<code>hvisor</code>的进程发送信号<code>SIGTERM</code>，此时守护进程会执行<code>virtio_close</code>，回收资源，关闭各个子线程，最后推出</p>
+<p>The Virtio daemon registers the signal handling function <code>virtio_close</code> for the <code>SIGTERM</code> signal at startup. When executing <code>pkill hvisor</code>, a <code>SIGTERM</code> signal is sent to the process named <code>hvisor</code>, at which point the daemon will execute <code>virtio_close</code>, reclaim resources, shut down various sub-threads, and finally exit.</p>
 
                     </main>
 

@@ -155,31 +155,31 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="如何编译"><a class="header" href="#如何编译">如何编译</a></h1>
-<h2 id="使用-docker-编译"><a class="header" href="#使用-docker-编译">使用 Docker 编译</a></h2>
-<h3 id="1-安装-docker"><a class="header" href="#1-安装-docker">1. 安装 Docker</a></h3>
+                        <h1 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h1>
+<h2 id="compiling-with-docker"><a class="header" href="#compiling-with-docker">Compiling with Docker</a></h2>
+<h3 id="1-install-docker"><a class="header" href="#1-install-docker">1. Install Docker</a></h3>
 <pre><code class="language-bash">sudo snap install docker
 </code></pre>
-<p>也可参考 <a href="https://docs.docker.com/install/">Docker 官方文档</a> 安装 Docker。</p>
-<h3 id="2-构建镜像"><a class="header" href="#2-构建镜像">2. 构建镜像</a></h3>
+<p>You can also refer to the <a href="https://docs.docker.com/install/">Docker official documentation</a> to install Docker.</p>
+<h3 id="2-build-the-image"><a class="header" href="#2-build-the-image">2. Build the image</a></h3>
 <pre><code class="language-bash">make build_docker
 </code></pre>
-<p>此步骤构建一个 Docker 镜像，自动构建编译所需的全部依赖。</p>
-<h3 id="3-运行容器"><a class="header" href="#3-运行容器">3. 运行容器</a></h3>
+<p>This step builds a Docker image, automatically creating all the dependencies required for compilation.</p>
+<h3 id="3-run-the-container"><a class="header" href="#3-run-the-container">3. Run the container</a></h3>
 <pre><code class="language-bash">make docker
 </code></pre>
-<p>此步骤会启动一个容器，将当前目录挂载到容器中，并进入容器的 shell。</p>
-<h3 id="4-编译"><a class="header" href="#4-编译">4. 编译</a></h3>
-<p>在容器中执行以下命令编译即可编译。</p>
+<p>This step starts a container, mounts the current directory into the container, and enters the container's shell.</p>
+<h3 id="4-compile"><a class="header" href="#4-compile">4. Compile</a></h3>
+<p>Execute the following command in the container to compile.</p>
 <pre><code class="language-bash">make all
 </code></pre>
-<h2 id="使用本地环境编译"><a class="header" href="#使用本地环境编译">使用本地环境编译</a></h2>
-<h3 id="1-安装-rustup-与-cargo"><a class="header" href="#1-安装-rustup-与-cargo">1. 安装 RustUp 与 Cargo</a></h3>
+<h2 id="compiling-with-local-environment"><a class="header" href="#compiling-with-local-environment">Compiling with Local Environment</a></h2>
+<h3 id="1-install-rustup-and-cargo"><a class="header" href="#1-install-rustup-and-cargo">1. Install RustUp and Cargo</a></h3>
 <pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
 </code></pre>
-<h3 id="2-安装工具链"><a class="header" href="#2-安装工具链">2. 安装工具链</a></h3>
-<p>目前项目使用的工具链如下：</p>
+<h3 id="2-install-the-toolchain"><a class="header" href="#2-install-the-toolchain">2. Install the toolchain</a></h3>
+<p>The toolchain currently used by the project is as follows:</p>
 <ul>
 <li>Rust nightly 2023-07-12</li>
 <li><a href="https://crates.io/crates/rustfmt">rustfmt</a></li>
@@ -187,22 +187,22 @@
 <li><a href="https://crates.io/crates/cargo-binutils/0.3.6">cargo-binutils</a></li>
 <li>rust-src</li>
 <li>llvm-tools-preview</li>
-<li>taget: aarch64-unknown-none</li>
+<li>target: aarch64-unknown-none</li>
 </ul>
-<p>可以自行检查是否安装了这些工具，也可以使用以下命令安装：</p>
-<h4 id="1-安装-toml-cli-和-cargo-binutils"><a class="header" href="#1-安装-toml-cli-和-cargo-binutils">(1) 安装 toml-cli 和 cargo-binutils</a></h4>
+<p>You can check if these tools are installed on your own, or use the following commands to install:</p>
+<h4 id="1-install-toml-cli-and-cargo-binutils"><a class="header" href="#1-install-toml-cli-and-cargo-binutils">(1) Install toml-cli and cargo-binutils</a></h4>
 <pre><code class="language-bash">cargo install toml-cli cargo-binutils
 </code></pre>
-<h4 id="2-安装目标平台交叉编译工具链"><a class="header" href="#2-安装目标平台交叉编译工具链">(2) 安装目标平台交叉编译工具链</a></h4>
+<h4 id="2-install-the-target-platform-cross-compilation-toolchain"><a class="header" href="#2-install-the-target-platform-cross-compilation-toolchain">(2) Install the target platform cross-compilation toolchain</a></h4>
 <pre><code class="language-bash">rustup target add aarch64-unknown-none
 </code></pre>
-<h4 id="3-解析-rust-toolchaintoml-安装-rust-工具链"><a class="header" href="#3-解析-rust-toolchaintoml-安装-rust-工具链">(3) 解析 rust-toolchain.toml 安装 Rust 工具链</a></h4>
+<h4 id="3-parse-rust-toolchaintoml-to-install-the-rust-toolchain"><a class="header" href="#3-parse-rust-toolchaintoml-to-install-the-rust-toolchain">(3) Parse rust-toolchain.toml to install the Rust toolchain</a></h4>
 <pre><code class="language-bash">RUST_VERSION=$(toml get -r rust-toolchain.toml toolchain.channel) &amp;&amp; \
 Components=$(toml get -r rust-toolchain.toml toolchain.components | jq -r 'join(" ")') &amp;&amp; \
 rustup install $RUST_VERSION &amp;&amp; \
 rustup component add --toolchain $RUST_VERSION $Components
 </code></pre>
-<h4 id="4-编译-1"><a class="header" href="#4-编译-1">(4) 编译</a></h4>
+<h4 id="4-compile-1"><a class="header" href="#4-compile-1">(4) Compile</a></h4>
 <pre><code class="language-bash">make all
 </code></pre>
 

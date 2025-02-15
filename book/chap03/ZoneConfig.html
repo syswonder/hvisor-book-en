@@ -155,14 +155,14 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="zone的配置和管理"><a class="header" href="#zone的配置和管理">Zone的配置和管理</a></h1>
-<p>hvisor项目作为一款轻量级的hypervisor，它使用了Type-1架构，允许在硬件之上直接运行多个虚拟机（zones）。下面是对zone配置和管理的关键点的详细说明：</p>
-<h2 id="资源分配"><a class="header" href="#资源分配">资源分配</a></h2>
-<p>资源如CPU、内存、设备和中断对每个zone都是静态分配的，这意味着一旦分配，这些资源就不会在zones之间动态调度。</p>
-<h2 id="root-zone配置"><a class="header" href="#root-zone配置">Root Zone配置</a></h2>
-<p>根zone的配置是硬编码在hvisor内部的，以Rust语言编写，并表现为一个C风格的结构体HvZoneConfig。这个结构体包含了zone ID、CPU数量、内存区域、中断信息、内核和设备树二进制（DTB）的物理地址与大小等关键信息。</p>
-<h2 id="non-root-zones配置"><a class="header" href="#non-root-zones配置">Non-root Zones配置</a></h2>
-<p>非root zones的配置则存储在root linux的文件系统中，通常以JSON格式表示。例如：</p>
+                        <h1 id="configuration-and-management-of-zones"><a class="header" href="#configuration-and-management-of-zones">Configuration and Management of Zones</a></h1>
+<p>The hvisor project, as a lightweight hypervisor, uses a Type-1 architecture that allows multiple virtual machines (zones) to run directly on top of hardware. Below is a detailed explanation of the key points of zone configuration and management:</p>
+<h2 id="resource-allocation"><a class="header" href="#resource-allocation">Resource Allocation</a></h2>
+<p>Resources such as CPU, memory, devices, and interrupts are statically allocated to each zone, meaning that once allocated, these resources will not be dynamically scheduled between zones.</p>
+<h2 id="root-zone-configuration"><a class="header" href="#root-zone-configuration">Root Zone Configuration</a></h2>
+<p>The configuration of the root zone is hardcoded inside hvisor, written in Rust language, and presented as a C-style structure HvZoneConfig. This structure contains key information such as zone ID, number of CPUs, memory regions, interrupt information, physical addresses and sizes of the kernel and device tree binaries (DTB).</p>
+<h2 id="non-root-zones-configuration"><a class="header" href="#non-root-zones-configuration">Non-root Zones Configuration</a></h2>
+<p>The configuration of non-root zones is stored in the file system of root Linux, usually represented in JSON format. For example:</p>
 <pre><code class="language-json">    {
         "arch": "arm64",
         "zone_id": 1,
@@ -196,15 +196,15 @@
     }
 </code></pre>
 <ul>
-<li><code>arch</code>字段指定了目标架构（例如arm64）。</li>
-<li><code>cpus</code>是一个列表，指明了分配给该zone的CPU核心ID。</li>
-<li><code>memory_regions</code>描述了不同类型的内存区域及其物理和虚拟起始地址与大小。</li>
-<li><code>interrupts</code>列出了分配给zone的中断号。</li>
-<li><code>kernel_filepath</code>和<code>dtb_filepath</code>分别指明了内核和设备树二进制文件的路径。</li>
-<li><code>kernel_load_paddr</code>和<code>dtb_load_paddr</code>则是内核和设备树二进制在物理内存中的加载地址。</li>
-<li><code>entry_point</code>指定了内核的入口点地址。</li>
+<li>The <code>arch</code> field specifies the target architecture (e.g., arm64).</li>
+<li><code>cpus</code> is a list indicating the CPU core IDs allocated to the zone.</li>
+<li><code>memory_regions</code> describes different types of memory regions along with their physical and virtual start addresses and sizes.</li>
+<li><code>interrupts</code> lists the interrupt numbers allocated to the zone.</li>
+<li><code>kernel_filepath</code> and <code>dtb_filepath</code> indicate the paths of the kernel and device tree binary files.</li>
+<li><code>kernel_load_paddr</code> and <code>dtb_load_paddr</code> are the physical memory load addresses for the kernel and device tree binaries.</li>
+<li><code>entry_point</code> specifies the entry point address of the kernel.</li>
 </ul>
-<p>root linux的管理工具负责读取JSON配置文件并将其转换为C风格的结构体，随后传递给hvisor以启动非root zones。</p>
+<p>The management tool of root Linux is responsible for reading the JSON configuration file and converting it into a C-style structure, which is then passed to hvisor to start non-root zones.</p>
 
                     </main>
 

@@ -155,34 +155,34 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="hvisor总体架构"><a class="header" href="#hvisor总体架构">hvisor总体架构</a></h1>
+                        <h1 id="hvisor-overall-architecture"><a class="header" href="#hvisor-overall-architecture">hvisor Overall Architecture</a></h1>
 <ul>
 <li>
-<p>CPU虚拟化</p>
+<p>CPU Virtualization</p>
 <ul>
-<li>架构兼容性：支持aarch64, riscv64, 和loongarch等架构，每种架构有专门的CPU虚拟化组件。</li>
-<li>CPU分配：采用静态分配方式，预先决定每个虚拟机的CPU资源。</li>
+<li>Architectural Compatibility: Supports aarch64, riscv64, and loongarch architectures, each with a dedicated CPU virtualization component.</li>
+<li>CPU Allocation: Uses static allocation, pre-determining the CPU resources for each virtual machine.</li>
 </ul>
 </li>
 <li>
-<p>内存虚拟化</p>
+<p>Memory Virtualization</p>
 <ul>
-<li>二阶段页表：利用二阶段页表技术，优化内存虚拟化过程。</li>
+<li>Two-Level Page Table: Utilizes two-level page table technology to optimize the memory virtualization process.</li>
 </ul>
 </li>
 <li>
-<p>中断虚拟化</p>
+<p>Interrupt Virtualization</p>
 <ul>
-<li>中断控制器虚拟化：支持ARM GIC、RISC-V PLIC等不同架构的中断控制器虚拟化。</li>
-<li>中断处理：管理中断信号的传递和处理流程。</li>
+<li>Interrupt Controller Virtualization: Supports ARM GIC, RISC-V PLIC, and other architecture-specific interrupt controller virtualizations.</li>
+<li>Interrupt Handling: Manages the transmission and processing of interrupt signals.</li>
 </ul>
 </li>
 <li>
-<p>I/O虚拟化</p>
+<p>I/O Virtualization</p>
 <ul>
-<li>IOMMU集成：支持IOMMU，增强DMA虚拟化的效率和安全性。</li>
-<li>VirtIO标准：遵循VirtIO规范，提供高性能的虚拟设备。</li>
-<li>PCI虚拟化：实现PCI虚拟化，确保虚拟机可以访问物理或虚拟I/O设备。</li>
+<li>IOMMU Integration: Supports IOMMU, enhancing the efficiency and security of DMA virtualization.</li>
+<li>VirtIO Standard: Adheres to the VirtIO specification, providing high-performance virtual devices.</li>
+<li>PCI Virtualization: Implements PCI virtualization, ensuring virtual machines can access physical or virtual I/O devices.</li>
 </ul>
 </li>
 </ul>
