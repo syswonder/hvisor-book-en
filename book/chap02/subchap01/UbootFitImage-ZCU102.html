@@ -1,14 +1,14 @@
 <!DOCTYPE HTML>
-<html lang="en" class="light" dir="ltr">
+<html lang="en" class="light sidebar-visible" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>UBOOT FIT 镜像制作、加载与启动 - hvisor manual</title>
+        <title>UBOOT FIT Image Creation, Loading, and Booting - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
-        
-        <meta name="description" content="hvisor manual">
+
+        <meta name="description" content="hvisor Manual">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
@@ -30,15 +30,17 @@
 
         <!-- Custom theme stylesheets -->
 
-    </head>
-    <body class="sidebar-visible no-js">
-    <div id="body-container">
+
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
-
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
@@ -60,19 +62,16 @@
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
-            var html = document.querySelector('html');
+            const html = document.documentElement;
             html.classList.remove('light')
             html.classList.add(theme);
-            var body = document.querySelector('body');
-            body.classList.remove('no-js')
-            body.classList.add('js');
+            html.classList.add("js");
         </script>
 
         <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var body = document.querySelector('body');
             var sidebar = null;
             var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
@@ -82,45 +81,25 @@
                 sidebar = 'hidden';
             }
             sidebar_toggle.checked = sidebar === 'visible';
-            body.classList.remove('sidebar-visible');
-            body.classList.add("sidebar-" + sidebar);
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../Introduction.html">简介</a></li><li class="chapter-item expanded affix "><li class="part-title">关于 hvisor</li><li class="chapter-item expanded "><a href="../../chap01/Overview.html"><strong aria-hidden="true">1.</strong> hvisor 概述</a></li><li class="chapter-item expanded "><a href="../../chap01/ISA.html"><strong aria-hidden="true">2.</strong> hvisor 支持的指令集和处理器</a></li><li class="chapter-item expanded "><a href="../../chap01/Board.html"><strong aria-hidden="true">3.</strong> hvisor 支持的硬件平台</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 快速上手指南</li><li class="chapter-item expanded "><a href="../../chap02/QemuAArch64.html"><strong aria-hidden="true">4.</strong> Qemu AArch64 快速上手</a></li><li class="chapter-item expanded "><a href="../../chap02/QemuRISC-V.html"><strong aria-hidden="true">5.</strong> Qemu RISC-V 快速上手</a></li><li class="chapter-item expanded "><a href="../../chap02/NXPIMX8.html"><strong aria-hidden="true">6.</strong> NXP i.MX 8 快速上手</a></li><li class="chapter-item expanded "><a href="../../chap02/FPGA-Rockechip.html"><strong aria-hidden="true">7.</strong> FPGA-Rockechip 快速上手</a></li><li class="chapter-item expanded "><a href="../../chap02/Loongson-3A5000.html"><strong aria-hidden="true">8.</strong> 龙芯3A5000 hvisor 快速上手</a></li><li class="chapter-item expanded "><a href="../../chap02/subchap01/Xilinx-ZCU102.html"><strong aria-hidden="true">9.</strong> Xilinx ZCU102 hvisor 快速上手</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../chap02/subchap01/Qemu-ZCU102.html"><strong aria-hidden="true">9.1.</strong> Qemu ZCU102 hvisor 启动</a></li><li class="chapter-item expanded "><a href="../../chap02/subchap01/Board-ZCU102.html"><strong aria-hidden="true">9.2.</strong> Board ZCU102 hvisor 多模式启动</a></li><li class="chapter-item expanded "><a href="../../chap02/subchap01/Nonroot-ZCU102.html"><strong aria-hidden="true">9.3.</strong> ZCU102 Nonroot 启动</a></li><li class="chapter-item expanded "><a href="../../chap02/subchap01/UbootFitImage-ZCU102.html" class="active"><strong aria-hidden="true">9.4.</strong> UBOOT FIT 镜像制作、加载与启动</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> FPGA 香山昆明湖快速上手</div></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 使用手册</li><li class="chapter-item expanded "><a href="../../chap03/Compile.html"><strong aria-hidden="true">11.</strong> 如何编译</a></li><li class="chapter-item expanded "><a href="../../chap03/BootRootLinux.html"><strong aria-hidden="true">12.</strong> 启动管理 Linux VM</a></li><li class="chapter-item expanded "><a href="../../chap03/BootNonRootLinux.html"><strong aria-hidden="true">13.</strong> 启动两个VM：Linux1 和 Linux2</a></li><li class="chapter-item expanded "><a href="../../chap03/BootNonRootRTOS.html"><strong aria-hidden="true">14.</strong> 启动两个VM：Linux 和 RTOS</a></li><li class="chapter-item expanded "><a href="../../chap03/ZoneConfig.html"><strong aria-hidden="true">15.</strong> ZONE的配置与管理</a></li><li class="chapter-item expanded "><a href="../../chap03/CMDTools.html"><strong aria-hidden="true">16.</strong> 命令行工具</a></li><li class="chapter-item expanded "><a href="../../chap03/VirtIOUseage.html"><strong aria-hidden="true">17.</strong> VirtIO 的使用</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor架构与实现</li><li class="chapter-item expanded "><a href="../../chap04/Structure.html"><strong aria-hidden="true">18.</strong> hvisor 架构</a></li><li class="chapter-item expanded "><a href="../../chap04/BootAndRun.html"><strong aria-hidden="true">19.</strong> hvisor 启动与运行</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap01/CPUVirtualization.html"><strong aria-hidden="true">20.</strong> CPU 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../chap04/subchap01/PerCPU.html"><strong aria-hidden="true">20.1.</strong> PerCPU 定义</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap01/ARMVirtualization.html"><strong aria-hidden="true">20.2.</strong> ARM 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap01/RISCVirtualization.html"><strong aria-hidden="true">20.3.</strong> RISC-V 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap01/LoongArchVirtualization.html"><strong aria-hidden="true">20.4.</strong> LoongArch 处理器虚拟化</a></li></ol></li><li class="chapter-item expanded "><a href="../../chap04/MemVirtualization.html"><strong aria-hidden="true">21.</strong> 内存虚拟化</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap02/InterruptVirtualization.html"><strong aria-hidden="true">22.</strong> 中断虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../chap04/subchap02/ARM-GIC.html"><strong aria-hidden="true">22.1.</strong> ARM 中断控制 GIC</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap02/RISC-PLIC.html"><strong aria-hidden="true">22.2.</strong> RISC-V 中断控制 PLIC</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap02/RISC-AIA.html"><strong aria-hidden="true">22.3.</strong> RISC-V 中断控制 AIA</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap02/LoongArch-Controller.html"><strong aria-hidden="true">22.4.</strong> LoongArch 中断控制</a></li></ol></li><li class="chapter-item expanded "><a href="../../chap04/subchap03/IO-Virtualization.html"><strong aria-hidden="true">23.</strong> I/O 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../chap04/subchap03/IOMMU/IOMMU-Define.html"><strong aria-hidden="true">23.1.</strong> IOMMU</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../chap04/subchap03/IOMMU/ARM-SMMU.html"><strong aria-hidden="true">23.1.1.</strong> ARM SMMU 的实现</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap03/IOMMU/RISC-IOMMU.html"><strong aria-hidden="true">23.1.2.</strong> RISC-V IOMMU 标准的实现</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../../chap04/subchap03/VirtIO/VirtIO-Define.html"><strong aria-hidden="true">24.</strong> VirtIO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../chap04/subchap03/VirtIO/BlockDevice.html"><strong aria-hidden="true">24.1.</strong> Block</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap03/VirtIO/NetDevice.html"><strong aria-hidden="true">24.2.</strong> Net</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap03/VirtIO/ConsoleDevice.html"><strong aria-hidden="true">24.3.</strong> Console</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">24.4.</strong> GPU</div></li></ol></li><li class="chapter-item expanded "><a href="../../chap04/subchap03/PCI-Virtualization.html"><strong aria-hidden="true">25.</strong> PCI 虚拟化</a></li><li class="chapter-item expanded "><a href="../../chap04/subchap04/ManageTools.html"><strong aria-hidden="true">26.</strong> Hvisor 管理工具</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../chap04/subchap04/HyperCall.html"><strong aria-hidden="true">26.1.</strong> Hypercall</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">hvisor 的规划</li><li class="chapter-item expanded "><div><strong aria-hidden="true">27.</strong> TODO</div></li></ol>
-            </div>
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
             </div>
         </nav>
 
-        <!-- Track and set sidebar scroll position -->
-        <script>
-            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
-            sidebarScrollbox.addEventListener('click', function(e) {
-                if (e.target.tagName === 'A') {
-                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
-                }
-            }, { passive: true });
-            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
-            sessionStorage.removeItem('sidebar-scroll');
-            if (sidebarScrollTop) {
-                // preserve sidebar scroll position when navigating via links within sidebar
-                sidebarScrollbox.scrollTop = sidebarScrollTop;
-            } else {
-                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
-                var activeSection = document.querySelector('#sidebar .active');
-                if (activeSection) {
-                    activeSection.scrollIntoView({ block: 'center' });
-                }
-            }
-        </script>
-
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
                         <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -141,7 +120,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">hvisor manual</h1>
+                    <h1 class="menu-title">hvisor Manual</h1>
 
                     <div class="right-buttons">
                         <a href="../../print.html" title="Print this book" aria-label="Print this book">
@@ -283,22 +262,6 @@ imxtract ${fit_addr} root_linux ${root_linux_load}; bootm ${fit_addr};
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
