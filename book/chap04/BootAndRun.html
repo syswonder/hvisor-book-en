@@ -1,0 +1,549 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>hvisor 启动与运行 - hvisor manual</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="hvisor manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../Introduction.html">简介</a></li><li class="chapter-item expanded affix "><li class="part-title">关于 hvisor</li><li class="chapter-item expanded "><a href="../chap01/Overview.html"><strong aria-hidden="true">1.</strong> hvisor 概述</a></li><li class="chapter-item expanded "><a href="../chap01/ISA.html"><strong aria-hidden="true">2.</strong> hvisor 支持的指令集和处理器</a></li><li class="chapter-item expanded "><a href="../chap01/Board.html"><strong aria-hidden="true">3.</strong> hvisor 支持的硬件平台</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 快速上手指南</li><li class="chapter-item expanded "><a href="../chap02/QemuAArch64.html"><strong aria-hidden="true">4.</strong> Qemu AArch64 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/QemuRISC-V.html"><strong aria-hidden="true">5.</strong> Qemu RISC-V 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/NXPIMX8.html"><strong aria-hidden="true">6.</strong> NXP i.MX 8 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/FPGA-Rockechip.html"><strong aria-hidden="true">7.</strong> FPGA-Rockechip 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/Loongson-3A5000.html"><strong aria-hidden="true">8.</strong> 龙芯3A5000 hvisor 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/Xilinx-ZCU102.html"><strong aria-hidden="true">9.</strong> Xilinx ZCU102 hvisor 快速上手</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap02/subchap01/Qemu-ZCU102.html"><strong aria-hidden="true">9.1.</strong> Qemu ZCU102 hvisor 启动</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/Board-ZCU102.html"><strong aria-hidden="true">9.2.</strong> Board ZCU102 hvisor 多模式启动</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/Nonroot-ZCU102.html"><strong aria-hidden="true">9.3.</strong> ZCU102 Nonroot 启动</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/UbootFitImage-ZCU102.html"><strong aria-hidden="true">9.4.</strong> UBOOT FIT 镜像制作、加载与启动</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> FPGA 香山昆明湖快速上手</div></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 使用手册</li><li class="chapter-item expanded "><a href="../chap03/Compile.html"><strong aria-hidden="true">11.</strong> 如何编译</a></li><li class="chapter-item expanded "><a href="../chap03/BootRootLinux.html"><strong aria-hidden="true">12.</strong> 启动管理 Linux VM</a></li><li class="chapter-item expanded "><a href="../chap03/BootNonRootLinux.html"><strong aria-hidden="true">13.</strong> 启动两个VM：Linux1 和 Linux2</a></li><li class="chapter-item expanded "><a href="../chap03/BootNonRootRTOS.html"><strong aria-hidden="true">14.</strong> 启动两个VM：Linux 和 RTOS</a></li><li class="chapter-item expanded "><a href="../chap03/ZoneConfig.html"><strong aria-hidden="true">15.</strong> ZONE的配置与管理</a></li><li class="chapter-item expanded "><a href="../chap03/CMDTools.html"><strong aria-hidden="true">16.</strong> 命令行工具</a></li><li class="chapter-item expanded "><a href="../chap03/VirtIOUseage.html"><strong aria-hidden="true">17.</strong> VirtIO 的使用</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor架构与实现</li><li class="chapter-item expanded "><a href="../chap04/Structure.html"><strong aria-hidden="true">18.</strong> hvisor 架构</a></li><li class="chapter-item expanded "><a href="../chap04/BootAndRun.html" class="active"><strong aria-hidden="true">19.</strong> hvisor 启动与运行</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/CPUVirtualization.html"><strong aria-hidden="true">20.</strong> CPU 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap01/PerCPU.html"><strong aria-hidden="true">20.1.</strong> PerCPU 定义</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/ARMVirtualization.html"><strong aria-hidden="true">20.2.</strong> ARM 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/RISCVirtualization.html"><strong aria-hidden="true">20.3.</strong> RISC-V 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/LoongArchVirtualization.html"><strong aria-hidden="true">20.4.</strong> LoongArch 处理器虚拟化</a></li></ol></li><li class="chapter-item expanded "><a href="../chap04/MemVirtualization.html"><strong aria-hidden="true">21.</strong> 内存虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/InterruptVirtualization.html"><strong aria-hidden="true">22.</strong> 中断虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap02/ARM-GIC.html"><strong aria-hidden="true">22.1.</strong> ARM 中断控制 GIC</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/RISC-PLIC.html"><strong aria-hidden="true">22.2.</strong> RISC-V 中断控制 PLIC</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/RISC-AIA.html"><strong aria-hidden="true">22.3.</strong> RISC-V 中断控制 AIA</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/LoongArch-Controller.html"><strong aria-hidden="true">22.4.</strong> LoongArch 中断控制</a></li></ol></li><li class="chapter-item expanded "><a href="../chap04/subchap03/IO-Virtualization.html"><strong aria-hidden="true">23.</strong> I/O 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap03/IOMMU/IOMMU-Define.html"><strong aria-hidden="true">23.1.</strong> IOMMU</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap03/IOMMU/ARM-SMMU.html"><strong aria-hidden="true">23.1.1.</strong> ARM SMMU 的实现</a></li><li class="chapter-item expanded "><a href="../chap04/subchap03/IOMMU/RISC-IOMMU.html"><strong aria-hidden="true">23.1.2.</strong> RISC-V IOMMU 标准的实现</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/VirtIO-Define.html"><strong aria-hidden="true">24.</strong> VirtIO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/BlockDevice.html"><strong aria-hidden="true">24.1.</strong> Block</a></li><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/NetDevice.html"><strong aria-hidden="true">24.2.</strong> Net</a></li><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/ConsoleDevice.html"><strong aria-hidden="true">24.3.</strong> Console</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">24.4.</strong> GPU</div></li></ol></li><li class="chapter-item expanded "><a href="../chap04/subchap03/PCI-Virtualization.html"><strong aria-hidden="true">25.</strong> PCI 虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap04/ManageTools.html"><strong aria-hidden="true">26.</strong> Hvisor 管理工具</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap04/HyperCall.html"><strong aria-hidden="true">26.1.</strong> Hypercall</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">hvisor 的规划</li><li class="chapter-item expanded "><div><strong aria-hidden="true">27.</strong> TODO</div></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="hvisor的初始化过程"><a class="header" href="#hvisor的初始化过程">hvisor的初始化过程</a></h1>
+<p>摘要：介绍在qemu上运行hvisor和hvisor初始化过程涉及的相关知识。从qemu启动后开始跟踪整个流程，阅读完本文将对hvisor的初始化过程有一个大概的认识。</p>
+<h2 id="qemu启动流程"><a class="header" href="#qemu启动流程">qemu启动流程</a></h2>
+<p>qemu模拟的计算机的启动过程：将必要文件加载到内存之后，PC寄存器被初始化为0x1000，从这里开始执行几条指令后就跳转到0x80000000开始执行bootloader（hvsior arm部分使用的是Uboot），执行几条指令后再跳转到uboot可以识别的内核的起始地址执行。</p>
+<h3 id="生成hvisor的可执行文件"><a class="header" href="#生成hvisor的可执行文件">生成hvisor的可执行文件</a></h3>
+<pre><code>rust-objcopy --binary-architecture=aarch64 target/aarch64-unknown-none/debug/hvisor --strip-all -O binary target/aarch64-unknown-none/debug/hvisor.bin.tmp
+</code></pre>
+<p>将hvisor的可执行文件转为逻辑二进制，保存为 <code>hvisor.bin.tmp</code>。</p>
+<h3 id="生成uboot可以识别的镜像文件"><a class="header" href="#生成uboot可以识别的镜像文件">生成uboot可以识别的镜像文件</a></h3>
+<p>uboot是一种bootloader，它的主要任务是跳转到hvisor镜像的第一条指令开始执行，所以要保证生成的hvisor镜像是uboot可以识别的，这里需要使用 <code>mkimage</code>工具。</p>
+<pre><code>mkimage -n hvisor_img -A arm64 -O linux -C none -T kernel -a 0x40400000 -e 0x40400000 -d target/aarch64-unknown-none/debug/hvisor.bin.tmp target/aarch64-unknown-none/debug/hvisor.bin
+</code></pre>
+<ul>
+<li><code>-n hvisor_img</code>：指定内核镜像的名称。</li>
+<li><code>-A arm64</code>：指定架构为 ARM64。</li>
+<li><code>-O linux</code>：指定操作系统为 Linux。</li>
+<li><code>-C none</code>：不使用压缩算法。</li>
+<li><code>-T kernel</code>：指定类型为内核。</li>
+<li><code>-a 0x40400000</code>：指定加载地址为 <code>0x40400000</code>。</li>
+<li><code>-e 0x40400000</code>：指定入口地址为 <code>0x40400000</code>。</li>
+<li><code>-d target/aarch64-unknown-none/debug/hvisor.bin.tmp</code>：指定输入文件为之前生成的临时二进制文件。</li>
+<li>最后一个参数是生成的输出文件名，即最终的内核镜像文件 <code>hvisor.bin</code>。</li>
+</ul>
+<h2 id="初始化过程"><a class="header" href="#初始化过程">初始化过程</a></h2>
+<h3 id="aarch64ld链接脚本"><a class="header" href="#aarch64ld链接脚本">aarch64.ld链接脚本</a></h3>
+<p>要知道hvisor是如何执行的，我们首先查看链接脚本 <code>aarch64.ld</code>，这样能对hvisor的执行流程有一个大体认识。</p>
+<pre><code>ENTRY(arch_entry)
+BASE_ADDRESS = 0x40400000;
+</code></pre>
+<p>第一行设置了程序入口 <code>arch_entry</code> ，这个入口可以在 <code>arch/aarch64/entry.rs</code> 中找到，稍后介绍。</p>
+<pre><code>.text : {
+        *(.text.entry)
+        *(.text .text.*)
+    }
+</code></pre>
+<p>我们将 <code>.text</code> 段作为最开头的段，且把包含了入口第一条指令的 <code>.text.entry</code> 放在 <code>.text</code> 段的开头，这样就保证了hvisor确实会从和qemu约定的0x40400000处开始执行。</p>
+<p>这里我们还需要记住一个东西叫 <code>__core_end</code> , 它是链接脚本的结束位置的地址，等一下启动过程中可以知道它的作用。</p>
+<h3 id="arch_entry"><a class="header" href="#arch_entry">arch_entry</a></h3>
+<p>有了上面这些前提，我们可以走进hvisor的第一条指令了，也就是 <code>arch_entry()</code> 。</p>
+<pre><code>// src/arch/aarch64/entry.rs
+
+pub unsafe extern "C" fn arch_entry() -&gt; i32 {
+    unsafe {
+        core::arch::asm!(
+            "
+            // x0 = dtbaddr
+            mov x1, x0
+            mrs x0, mpidr_el1
+            and x0, x0, #0xff
+            ldr x2, =__core_end          // x2 = &amp;__core_end
+            mov x3, {per_cpu_size}      // x3 = per_cpu_size
+            madd x4, x0, x3, x3       // x4 = cpuid * per_cpu_size + per_cpu_size
+            add x5, x2, x4
+            mov sp, x5           // sp = &amp;__core_end + (cpuid + 1) * per_cpu_size
+            b {rust_main}             // x0 = cpuid, x1 = dtbaddr
+            ",
+            options(noreturn),
+            per_cpu_size=const PER_CPU_SIZE,
+            rust_main = sym crate::rust_main,
+        );
+    }
+}
+</code></pre>
+<p>先看内嵌汇编部分。第一句指令 <code>mov x1,x0</code> ，将 <code>x0</code> 寄存器的值传入 <code>x1</code> 寄存器，这里x0中存的是设备树的地址。qemu模拟一台arm架构的计算机，这个计算机中同样有着各种各样的设备，比如鼠标显示屏这种输入输出设备，以及各种存储设备，当我们想要从键盘获取输入、往显示屏输出，都要从某个地方获取输入，或者把输出的数据放到某个地方，在计算机中我们用特定地址来访问。设备树中就保存了这些设备的访问地址，hypervisor作为所有软件的总管，自然要知道设备树的信息，那么Uboot在进入内核之前就会把这些信息放在 <code>x0</code>中，这是一种约定。</p>
+<p><code>mrs x0, mpidr_el1</code>中，mrs是一个访问系统级别寄存器的指令，也就是把系统寄存器 <code>mpidr_el1</code> 的内容送到  <code>x0</code> 中，<code>mpidr_el1</code> 中存的信息是我们目前在和哪个CPU打交道（计算机支持多核CPU），后续有很多和CPU的配合工作，所以要知道现在在用哪个CPU。这个寄存器包含了很多关于CPU的信息，我们目前要用的是低8位，取出CPU对应的id，也就是 <code>and x0, x0, #0xff</code> 这一句在干的事。</p>
+<p><code>ldr x2, = __core_end</code> ，在链接脚本的末尾处我们设置了一个符号 <code>__core_end</code> ，作为hvisor整个程序空间的结束地址，把这个地址放到 <code>x2</code> 中。</p>
+<p><code>mov x3,{per_cpu_size}</code> 将每个cpu的栈的大小放进 <code>x3</code> 中，这个 <code>{xxx}</code> 就是把 <code>xxx</code> 这个外部定义的值替换到汇编代码里，可以看到下面的 <code>per_cpu_size=const PER_CPU_SIZE</code> 把外部的变量换了个名字作为参数传了进来。而另一个参数中的 <code>sym</code> 表示后面跟着的是一个符号，在其他地方被定义。</p>
+<p><code>per_cpu_size</code> 在这个大小的空间内，可以进行相关寄存器的保存和恢复，还包含了cpu的栈空间。</p>
+<p><code>madd x4, x0, x3, x3</code> 是一个乘加指令，cpu_id * per_cpu_size + per_cpu_size，结果放入 <code>x4</code> ，此时 <code>x4</code> 存着的是目前的cpu数量需要的空间是多大。（序号从0开始，所以多加一次per_cpu_size）。</p>
+<p><code>add x5,x2,x4</code> 的意思是把hvisor的结束地址加上CPU需要的全部空间放到 <code>x5</code> 中。</p>
+<p><code>mov sp,x5</code> 是找到目前cpu的栈顶。</p>
+<p><code>b {rust_main}</code> 代表着跳到 <code>rust_main</code> 开始执行，这也说明了这段汇编代码不会返回，与 <code>option(noreturn)</code>相对应。</p>
+<h2 id="进入rust_main"><a class="header" href="#进入rust_main">进入rust_main()</a></h2>
+<h3 id="fn-rust_maincpuidusize-host_dtbusize"><a class="header" href="#fn-rust_maincpuidusize-host_dtbusize">fn rust_main(cpuid:usize, host_dtb:usize)</a></h3>
+<p>进入 <code>rust_main</code>需要两个参数，这两个参数是通过 <code>x0</code> 和 <code>x1</code> 传递的，还记得前面的entry中，我们的 <code>x0</code> 存放的是cpu_id，<code>x1</code> 存放的是设备树的相关信息。</p>
+<h3 id="install_trap_vector"><a class="header" href="#install_trap_vector">install_trap_vector()</a></h3>
+<p>当处理器遇到异常或者中断的时候，就要跳转去相应的位置进行处理，这里就是在设置这些相应的跳转地址（可以视为在设置一张表），用于处理在Hypervisor级别的异常。每个特权级都有自己对应的一张异常向量表，除了EL0，应用程序的特权级，它必须跳转到其他特权级处理异常。<code>VBAR_ELn</code> 寄存器用于存储ELn这个特权级下的异常向量表的基地址。</p>
+<pre><code>extern "C" {
+    fn _hyp_trap_vector();
+}
+
+pub fn install_trap_vector() {
+    // Set the trap vector.
+    VBAR_EL2.set(_hyp_trap_vector as _)
+}
+
+</code></pre>
+<p><code>VBAR_EL2.set()</code> 将 <code>_hyp_trap_vector()</code> 的地址设置为EL2特权级的异常向量表的基地址。</p>
+<p><code>_hyp_trap_vector()</code> 这段汇编代码就是在构建异常向量表。</p>
+<p><strong>异常向量表格式的简单介绍</strong></p>
+<p>根据发生异常的等级和处理异常的等级是否相同分为两类，如果等级不变，则按照是否使用当前等级的SP分为两组，如果异常等级改变，则按照执行模式是64位/32位分为两组，至此异常向量表被划分为4组。在每一组中，每个表项代表一种异常处理情况的入口。</p>
+<h3 id="主cpu"><a class="header" href="#主cpu">主CPU</a></h3>
+<pre><code>static MASTER_CPU: AtomicI32 = AtomicI32::new(-1);
+
+let mut is_primary = false;
+    if MASTER_CPU.load(Ordering::Acquire) == -1 {
+        MASTER_CPU.store(cpuid as i32, Ordering::Release);
+        is_primary = true;
+        println!("Hello, HVISOR!");
+        #[cfg(target_arch = "riscv64")]
+        clear_bss();
+    }
+</code></pre>
+<p><code>static MASTER_CPU: AtomicI32</code> 中，<code>AtomicI32</code> 表示这是一种原子类型，表示对他的操作要么成功要么失败，不会出现中间状态，可以保证多线程环境下的安全访问，总之它就是一个很安全的 <code>i32</code> 类型。</p>
+<p><code>MASSTER_CPU.load()</code> 是进行读操作的一个方法，参数 <code>Ordering::Acquire</code> 表示，如果在我进行读之前有一些写操作，那么需要等这些写操作按顺序进行完了，我再读。<strong>总之，这个参数保证了数据被正确更改后再进行读取。</strong></p>
+<p>如果读出来是-1，和定义时候的一样，代表主CPU还没有被设置，就把 <code>cpu_id</code> 设为主CPU。同样的，<code>Ordering::Release</code> 的作用肯定也是指修改之前要保证所有其他的修改都完成了。</p>
+<h3 id="cpu的通用数据结构percpu"><a class="header" href="#cpu的通用数据结构percpu">CPU的通用数据结构：PerCpu</a></h3>
+<p>hvisor支持不同的架构，合理的系统设计应该让不同的架构使用统一的接口，便于描述各部分的工作。<code>PerCpu</code> 就是这样一个通用的CPU描述。</p>
+<pre><code>pub struct PerCpu {
+    pub id: usize,
+    pub cpu_on_entry: usize,
+    pub arch_cpu: ArchCpu,
+    pub zone: Option&lt;Arc&lt;RwLock&lt;Zone&gt;&gt;&gt;,
+    pub ctrl_lock: Mutex&lt;()&gt;,
+    pub boot_cpu: bool,
+    // percpu stack
+}
+</code></pre>
+<p>对于 <code>PerCpu</code> 的各个字段：</p>
+<ul>
+<li><code>id</code> : CPU的序号</li>
+<li><code>cpu_on_entry</code> ：CPU进入EL1也就是guest的时候第一条指令的地址，只有当这个CPU是boot CPU时，才会被置为有效值，初始化的时候我们设置为一个访问不到的地址。</li>
+<li><code>arch_cpu</code> ：与架构相关的CPU描述，行为是由 <code>PerCpu</code> 发起，具体的执行者是 <code>arch_cpu</code> 。
+<ul>
+<li><code>cpu_id</code></li>
+<li><code>psci_on</code> : cpu是否启动</li>
+</ul>
+</li>
+<li><code>zone</code> ：zone其实就代表一个guestOS，对于同一个guestOS可能有多个cpu在为他服务</li>
+<li><code>ctrl_lock</code> ：为并发安全性而设置。</li>
+<li><code>boot_cpu</code> ：对于一个guestOS，区分为他服务的CPU的主核/次核，<code>boot_cpu</code> 即表示当前CPU是否是某个guest的主核。</li>
+</ul>
+<h3 id="主核唤醒其他核"><a class="header" href="#主核唤醒其他核">主核唤醒其他核</a></h3>
+<pre><code>if is_primary {
+        wakeup_secondary_cpus(cpu.id, host_dtb);
+}
+
+fn wakeup_secondary_cpus(this_id: usize, host_dtb: usize) {
+    for cpu_id in 0..MAX_CPU_NUM {
+        if cpu_id == this_id {
+            continue;
+        }
+        cpu_start(cpu_id, arch_entry as _, host_dtb);
+    }
+}
+
+pub fn cpu_start(cpuid: usize, start_addr: usize, opaque: usize) {
+    psci::cpu_on(cpuid as u64 | 0x80000000, start_addr as _, opaque as _).unwrap_or_else(|err| {
+        if let psci::error::Error::AlreadyOn = err {
+        } else {
+            panic!("can't wake up cpu {}", cpuid);
+        }
+    });
+}
+</code></pre>
+<p>如果当前CPU是主CPU，就由当前CPU来唤醒其他的次核，次核执行 <code>cpu_start</code> ，在 <code>cpu_start</code> 中，<code>cpu_on</code> 实际上调用了 <code>call64</code>中的SMC指令，陷入EL3来执行唤醒CPU的动作。</p>
+<p>那么从 <code>cpu_on</code> 的声明中我们大概可以猜测它的功能，唤醒一个CPU，这个CPU将要从 <code>arch_entry</code> 这个地方开始执行。这是因为多核处理器之间会进行通信协作，那么就必须保证CPU的一致性，所以以相同的入口开始执行，为保持同步，应该保证每个CPU都运行到某个状态，那么可以由接下来的几句代码来验证。</p>
+<pre><code>    ENTERED_CPUS.fetch_add(1, Ordering::SeqCst);
+    wait_for(|| PerCpu::entered_cpus() &lt; MAX_CPU_NUM as _);
+    assert_eq!(PerCpu::entered_cpus(), MAX_CPU_NUM as _);
+</code></pre>
+<p>其中 <code>ENTERED_CPUS.fetch_add(1, Ordering::SeqCst)</code> 代表按照顺序一致性增加 <code>ENTERED_CPUS</code> 的值，那么每个CPU执行一次后，这个 <code>assert_eq</code> 宏应该可以顺利通过。</p>
+<h3 id="主核还需要干的事primary_init_early"><a class="header" href="#主核还需要干的事primary_init_early">主核还需要干的事primary_init_early（）</a></h3>
+<p><strong>初始化日志</strong></p>
+<ol>
+<li>全局的日志记录器的创建</li>
+<li>日志级别过滤器的设置，设置日志级别过滤器的主要作用是决定哪些日志消息应该被记录和输出。</li>
+</ol>
+<p><strong>初始化堆空间和页表</strong></p>
+<ol>
+<li>在.bss段申请了一段空间作为堆空间，设置好分配器</li>
+<li>设置页帧分配器</li>
+</ol>
+<p><strong>解析设备树的信息</strong></p>
+<p>根据 <code>rust_main</code> 参数中的设备树地址堆设备树的信息进行解析。</p>
+<p><strong>创建GIC实例</strong></p>
+<p>实例化一个全局的静态变量GIC，是通用中断控制器的一个实例。</p>
+<p><strong>初始化hvisor的页表</strong></p>
+<p>这个页表只是针对hypervisor自身VA转为PA的实现。（以内核和应用的关系来理解）</p>
+<p><strong>为每个VM创建zone</strong></p>
+<pre><code>zone_create(zone_id, TENANTS[zone_id] as _, DTB_IPA);
+
+zone_create(vmid: usize, dtb_ptr: *const u8, dtb_ipa: usize) -&gt; Arc&lt;RwLock&lt;Zone&gt;&gt;
+</code></pre>
+<p>zone其实就代表一个guestVM，里面包含了某个guestVM可能会用到的各种信息。观察函数的参数，<code>dtb_ptr</code>，是hypervisor想让这个guest看到的设备的信息的地址，可以在 <code>images/aarch64/devicetree</code> 中看到。而 <code>dtb_ipa</code> 的作用是，每个guest都会从cpu的 <code>x0</code> 寄存器获取这个地址去寻找设备树的信息，所以需要在构建stage2页表的过程中保证这个ipa会映射到这个guest的dtb地址。以这样的方式告诉guest，它运行在一个什么样的机器上，物理内存起始地址是多少，cpu有几个等等。</p>
+<pre><code>let guest_fdt = unsafe { fdt::Fdt::from_ptr(dtb_ptr) }.unwrap();
+    let guest_entry = guest_fdt
+        .memory()
+        .regions()
+        .next()
+        .unwrap()
+        .starting_address as usize;
+</code></pre>
+<p>上面这段内容，通过解析设备树信息，得到了 <code>guest_entry</code>，它的含义是这个guest可以看到的物理地址的起始地址，在qemu的启动参数中，我们也可以看到某个guest镜像被加载到内存的哪个地方，这两个值是相等的。</p>
+<p>接下来会根据 <code>dtb</code> 的信息，构建该guest的stage-2页表、MMIO映射、IRQ位图。</p>
+<pre><code>guest_fdt.cpus().for_each(|cpu| {
+        let cpu_id = cpu.ids().all().next().unwrap();
+        zone.cpu_set.set_bit(cpu_id as usize);
+});
+
+pub fn set_bit(&amp;mut self, id: usize) {
+    assert!(id &lt;= self.max_cpu_id);
+    self.bitmap |= 1 &lt;&lt; id;
+}
+</code></pre>
+<p>上面这段代码是根据dtb中给出的CPU信息，将分配给这个zone的cpu的id记录在位图中。</p>
+<pre><code>let new_zone_pointer = Arc::new(RwLock::new(zone));
+    {
+        cpu_set.iter().for_each(|cpuid| {
+            let cpu_data = get_cpu_data(cpuid);
+            cpu_data.zone = Some(new_zone_pointer.clone());
+            //chose boot cpu
+            if cpuid == cpu_set.first_cpu().unwrap() {
+                cpu_data.boot_cpu = true;
+            }
+            cpu_data.cpu_on_entry = guest_entry;
+        });
+    }
+  
+</code></pre>
+<p>上面这段代码完成的任务是：遍历给这个zone分配的cpu，获取该cpu的 <code>PerCpu</code> 可变引用，修改其中的zone成员变量，并且将第一个分配给这个zone的cpu标记为 <code>boot_cpu</code>。并且，设置这个zone的主cpu进入guest以后的第一条指令的地址 <code>guest_entry</code>。</p>
+<p>上面主核CPU要做的事情告一段落，以  <code>INIT_EARLY_OK.store(1, Ordering::Release)</code> 作为标记，而其他CPU在主核完成之前，只能进行等待 <code>wait_for_counter(&amp;INIT_EARLY_OK, 1)</code>。</p>
+<h3 id="地址空间初始化"><a class="header" href="#地址空间初始化">地址空间初始化</a></h3>
+<p>上个部分提到的IPA和PA其实是地址空间的内容，具体的内容将在内存管理的文档中给出，这里做一个简要介绍。</p>
+<p>如果不考虑Hypervisor，guestVM作为一个内核，会进行内存管理的工作，也就是应用程序的虚拟地址VA到内核的PA的过程，那么这里的PA，就是真正的内存物理地址。</p>
+<p>在考虑Hypervisor的情况下，Hypervisor作为一个内核的角色也同样会做内存管理的工作，只是这时候的应用程序就变成了guestVM，而guestVM是不会意识到Hypervisor的存在的（否则需要更改guestVM的设计，这不符合我们提高性能的初衷）。我们将guestVM中的PA叫做IPA或者GPA，因为它不是最终的物理地址，而是Hypervisor让guestVM看到的中间物理地址，所以整个系统中存在着两套内存管理机制，guestVM管理的VA到IPA的转换，以及Hypervisor管理的从IPA到PA的转换。</p>
+<h3 id="run_vm"><a class="header" href="#run_vm">run_vm()</a></h3>
+<p>终于到了即将启动guestVM的时刻了。</p>
+<p><strong>将非boot_cpu设置为空闲状态</strong></p>
+<p>对于非boot_cpu，将其设置为空闲状态并等待唤醒。在 <code>idle</code> 函数中实现。</p>
+<pre><code>// arch/aarch64/cpu.rs
+// impl ArchCpu &gt; idle
+
+while !self.psci_on {
+            _lock = None;
+            while !self.psci_on {}
+            _lock = Some(cpu_data.ctrl_lock.lock());
+        }
+</code></pre>
+<p><strong>启用stage2页表机制</strong></p>
+<pre><code>VTTBR_EL2.set_baddr(root_paddr as _);
+</code></pre>
+<p>将VTTBR_EL2寄存器的值设置为guestVM对应的satge2页表的根页表起始地址。</p>
+<p><strong>cpu_reset()</strong></p>
+<p>把CPU的状态设置为即将进入guestVM的状态。</p>
+<pre><code>pub fn reset(&amp;mut self, entry: usize, _cpu_id: usize, dtb: usize) {
+        ELR_EL2.set(entry as _);
+        SPSR_EL2.set(0x3c5);
+        let regs = self.guest_reg();
+        regs.clear();
+        regs.usr[0] = dtb as _; // dtb addr
+        self.reset_vm_regs();
+        self.activate_vmm();
+    }
+</code></pre>
+<p>当cpu从EL1陷入EL2处理结束后，就会返回到 <code>ELR_EL2</code> 保存的地址处执行，所以我们将 <code>ELR_EL2</code> 的地址设置为对应的guest的第一条指令的地址。</p>
+<p>当异常被捕获到EL2中进行处理的时候，原来的进程的状态会被保存在 <code>SPSR_EL2</code> 中，这里我们设置为0x3c5。<code>SPSR_EL2</code>的低4位记录了返回哪个异常等级，设置为0101，代表要返回EL1h。</p>
+<p>还记得之前我们设置了在 <code>__core_end</code> 之后设置了各个cpu的空间，在 <code>guest_reg()</code> 中，将这段空间用起来了，分配了32个通用寄存器的空间。</p>
+<p>并且在 <code>usr[0]</code>中保存了 <code>dtb_ipa</code> 的值，当eret返回EL1的时候，处理器会将这部分上下文恢复到相应的寄存器中，当guest初启的时候就能够通过 <code>x0</code> 获取这个ipa，从而得到设备树的信息，这部分内容与上面初始化stage2页表相对应。</p>
+<p><strong>reset_vm_regs() activate_vmm()</strong></p>
+<p>进行一些寄存器的配置。</p>
+<p><strong>将psci_on设置为true</strong></p>
+<p>标记该cpu已启动进入工作状态。</p>
+<p><strong>vm_return()</strong></p>
+<pre><code>vmreturn(self.guest_reg() as *mut _ as usize);
+
+pub unsafe extern "C" fn vmreturn(_gu_regs: usize) -&gt; ! {
+    core::arch::asm!(
+        "
+        /* x0: guest registers */
+        mov	sp, x0
+        ldp	x1, x0, [sp], #16	/* x1 is the exit_reason */
+        ldp	x1, x2, [sp], #16
+        ldp	x3, x4, [sp], #16
+        ldp	x5, x6, [sp], #16
+        ldp	x7, x8, [sp], #16
+        ldp	x9, x10, [sp], #16
+        ldp	x11, x12, [sp], #16
+        ldp	x13, x14, [sp], #16
+        ldp	x15, x16, [sp], #16
+        ldp	x17, x18, [sp], #16
+        ldp	x19, x20, [sp], #16
+        ldp	x21, x22, [sp], #16
+        ldp	x23, x24, [sp], #16
+        ldp	x25, x26, [sp], #16
+        ldp	x27, x28, [sp], #16
+        ldp	x29, x30, [sp], #16
+        /*now el2 sp point to per cpu stack top*/
+        eret                            //ret to el2_entry hvc #0 now,depend on ELR_EL2
+  
+    ",
+        options(noreturn),
+    );
+}
+</code></pre>
+<p>可以看到这部分的内容主要是对我们刚才保存的上下文进行恢复，并且返回到虚拟机执行。</p>
+<p>将栈顶设置为 <code>x0</code>，在调用这个函数的时候通过 <code>x0</code> 传入一个参数 <code>_gu_regs</code> ，这个参数其实就是寄存器上下文的起始地址。这样我们就可以通过 <code>sp</code> 对各个寄存器进行恢复。</p>
+<p><code>ldp</code> 是arm架构下的一个加载指令，<code>ldp x1,x0,[sp]</code> 代表从 <code>sp</code> 这个地址处，加载两个64位的值到 <code>x1</code> 和 <code>x0</code> 中。并且会自动将 <code>sp</code> 的值+16，也就是两个寄存器的大小。这里没有按照 <code>x0,x1</code> 的原因是，我们将 <code>exit</code> 相关的信息，放在了寄存器上下文的开头，而它的下一个才是 <code>x0</code> 。</p>
+<p>完成上下文的恢复以后，<code>sp</code> 的值就增加了32*8的大小，指向了percpu区域的末尾。</p>
+<p>最后我们执行 <code>eret</code> 语句，此时cpu从当前特权级EL2的 <code>ELR_EL2</code> 中取出返回地址，并且通过 <code>SPSR_EL2</code> 知道了他要返回到EL1特权级。还记得我们在设计 <code>percpu</code> 的时候，对于boot-cpu，我们将我们在qemu启动参数中写好的内存被放置的地址，设置为cpu返回后执行的第一条指令的地址，所以返回EL1后，cpu就会从内核的第一条指令开始执行。</p>
+<p><em>至此，读者应该对hvisor的大致启动过程以及设计模块有了大致理解。</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap04/Structure.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap04/subchap01/CPUVirtualization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap04/Structure.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap04/subchap01/CPUVirtualization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

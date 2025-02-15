@@ -1,0 +1,310 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Block - hvisor manual</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="hvisor manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../../favicon.svg">
+        <link rel="shortcut icon" href="../../../favicon.png">
+        <link rel="stylesheet" href="../../../css/variables.css">
+        <link rel="stylesheet" href="../../../css/general.css">
+        <link rel="stylesheet" href="../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../../highlight.css">
+        <link rel="stylesheet" href="../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../../Introduction.html">简介</a></li><li class="chapter-item expanded affix "><li class="part-title">关于 hvisor</li><li class="chapter-item expanded "><a href="../../../chap01/Overview.html"><strong aria-hidden="true">1.</strong> hvisor 概述</a></li><li class="chapter-item expanded "><a href="../../../chap01/ISA.html"><strong aria-hidden="true">2.</strong> hvisor 支持的指令集和处理器</a></li><li class="chapter-item expanded "><a href="../../../chap01/Board.html"><strong aria-hidden="true">3.</strong> hvisor 支持的硬件平台</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 快速上手指南</li><li class="chapter-item expanded "><a href="../../../chap02/QemuAArch64.html"><strong aria-hidden="true">4.</strong> Qemu AArch64 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/QemuRISC-V.html"><strong aria-hidden="true">5.</strong> Qemu RISC-V 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/NXPIMX8.html"><strong aria-hidden="true">6.</strong> NXP i.MX 8 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/FPGA-Rockechip.html"><strong aria-hidden="true">7.</strong> FPGA-Rockechip 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/Loongson-3A5000.html"><strong aria-hidden="true">8.</strong> 龙芯3A5000 hvisor 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Xilinx-ZCU102.html"><strong aria-hidden="true">9.</strong> Xilinx ZCU102 hvisor 快速上手</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Qemu-ZCU102.html"><strong aria-hidden="true">9.1.</strong> Qemu ZCU102 hvisor 启动</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Board-ZCU102.html"><strong aria-hidden="true">9.2.</strong> Board ZCU102 hvisor 多模式启动</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Nonroot-ZCU102.html"><strong aria-hidden="true">9.3.</strong> ZCU102 Nonroot 启动</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/UbootFitImage-ZCU102.html"><strong aria-hidden="true">9.4.</strong> UBOOT FIT 镜像制作、加载与启动</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> FPGA 香山昆明湖快速上手</div></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 使用手册</li><li class="chapter-item expanded "><a href="../../../chap03/Compile.html"><strong aria-hidden="true">11.</strong> 如何编译</a></li><li class="chapter-item expanded "><a href="../../../chap03/BootRootLinux.html"><strong aria-hidden="true">12.</strong> 启动管理 Linux VM</a></li><li class="chapter-item expanded "><a href="../../../chap03/BootNonRootLinux.html"><strong aria-hidden="true">13.</strong> 启动两个VM：Linux1 和 Linux2</a></li><li class="chapter-item expanded "><a href="../../../chap03/BootNonRootRTOS.html"><strong aria-hidden="true">14.</strong> 启动两个VM：Linux 和 RTOS</a></li><li class="chapter-item expanded "><a href="../../../chap03/ZoneConfig.html"><strong aria-hidden="true">15.</strong> ZONE的配置与管理</a></li><li class="chapter-item expanded "><a href="../../../chap03/CMDTools.html"><strong aria-hidden="true">16.</strong> 命令行工具</a></li><li class="chapter-item expanded "><a href="../../../chap03/VirtIOUseage.html"><strong aria-hidden="true">17.</strong> VirtIO 的使用</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor架构与实现</li><li class="chapter-item expanded "><a href="../../../chap04/Structure.html"><strong aria-hidden="true">18.</strong> hvisor 架构</a></li><li class="chapter-item expanded "><a href="../../../chap04/BootAndRun.html"><strong aria-hidden="true">19.</strong> hvisor 启动与运行</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/CPUVirtualization.html"><strong aria-hidden="true">20.</strong> CPU 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap01/PerCPU.html"><strong aria-hidden="true">20.1.</strong> PerCPU 定义</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/ARMVirtualization.html"><strong aria-hidden="true">20.2.</strong> ARM 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/RISCVirtualization.html"><strong aria-hidden="true">20.3.</strong> RISC-V 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/LoongArchVirtualization.html"><strong aria-hidden="true">20.4.</strong> LoongArch 处理器虚拟化</a></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/MemVirtualization.html"><strong aria-hidden="true">21.</strong> 内存虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/InterruptVirtualization.html"><strong aria-hidden="true">22.</strong> 中断虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap02/ARM-GIC.html"><strong aria-hidden="true">22.1.</strong> ARM 中断控制 GIC</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/RISC-PLIC.html"><strong aria-hidden="true">22.2.</strong> RISC-V 中断控制 PLIC</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/RISC-AIA.html"><strong aria-hidden="true">22.3.</strong> RISC-V 中断控制 AIA</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/LoongArch-Controller.html"><strong aria-hidden="true">22.4.</strong> LoongArch 中断控制</a></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IO-Virtualization.html"><strong aria-hidden="true">23.</strong> I/O 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IOMMU/IOMMU-Define.html"><strong aria-hidden="true">23.1.</strong> IOMMU</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IOMMU/ARM-SMMU.html"><strong aria-hidden="true">23.1.1.</strong> ARM SMMU 的实现</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IOMMU/RISC-IOMMU.html"><strong aria-hidden="true">23.1.2.</strong> RISC-V IOMMU 标准的实现</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html"><strong aria-hidden="true">24.</strong> VirtIO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/BlockDevice.html" class="active"><strong aria-hidden="true">24.1.</strong> Block</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/NetDevice.html"><strong aria-hidden="true">24.2.</strong> Net</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/ConsoleDevice.html"><strong aria-hidden="true">24.3.</strong> Console</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">24.4.</strong> GPU</div></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/PCI-Virtualization.html"><strong aria-hidden="true">25.</strong> PCI 虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap04/ManageTools.html"><strong aria-hidden="true">26.</strong> Hvisor 管理工具</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap04/HyperCall.html"><strong aria-hidden="true">26.1.</strong> Hypercall</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">hvisor 的规划</li><li class="chapter-item expanded "><div><strong aria-hidden="true">27.</strong> TODO</div></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="virtio-block"><a class="header" href="#virtio-block">Virtio Block</a></h1>
+<p>Virtio磁盘设备的实现遵循Virtio规范约定，采用MMIO的设备访问方式供其他虚拟机发现和使用。目前支持<code>VIRTIO_BLK_F_SEG_MAX</code>、<code>VIRTIO_BLK_F_SIZE_MAX</code>、<code>VIRTIO_F_VERSION_1</code>、<code>VIRTIO_RING_F_INDIRECT_DESC</code>和<code>VIRTIO_RING_F_EVENT_IDX</code>五种特性。</p>
+<h2 id="virtio设备的顶层描述virtiodevice"><a class="header" href="#virtio设备的顶层描述virtiodevice">Virtio设备的顶层描述——VirtIODevice</a></h2>
+<p>一个Virtio设备由VirtIODevice结构体表示，该结构体包含设备ID、Virtqueue的个数vqs_len、所属的虚拟机ID、设备中断号irq_id、MMIO区域的起始地址base_addr、MMIO区域长度len、设备类型type、部分由设备保存的MMIO寄存器regs、Virtqueue数组vqs、指向描述特定设备信息的指针dev。通过这些信息，可以完整描述一个Virtio设备。</p>
+<pre><code class="language-c">// The highest representations of virtio device
+struct VirtIODevice
+{
+    uint32_t id;
+    uint32_t vqs_len;
+    uint32_t zone_id;
+    uint32_t irq_id;
+    uint64_t base_addr; // the virtio device's base addr in non root zone's memory
+    uint64_t len;       // mmio region's length
+    VirtioDeviceType type;
+    VirtMmioRegs regs;
+    VirtQueue *vqs;
+    // according to device type, blk is BlkDev, net is NetDev, console is ConsoleDev.
+    void *dev;          
+    bool activated;
+};
+
+typedef struct VirtMmioRegs {
+    uint32_t device_id;
+    uint32_t dev_feature_sel;
+    uint32_t drv_feature_sel;
+    uint32_t queue_sel;
+    uint32_t interrupt_status;
+    uint32_t interrupt_ack;
+    uint32_t status;
+    uint32_t generation;
+    uint64_t dev_feature;
+    uint64_t drv_feature;
+} VirtMmioRegs;
+</code></pre>
+<h2 id="virtio-block设备的描述信息"><a class="header" href="#virtio-block设备的描述信息">Virtio Block设备的描述信息</a></h2>
+<p>对于Virtio磁盘设备，VirtIODevice中type字段为VirtioTBlock，vqs_len为1，表示只有一个Virtqueue，dev指针指向描述磁盘设备具体信息的virtio_blk_dev结构体。virtio_blk_dev中config用来表示设备的数据容量和一次数据传输中最大的数据量，img_fd为该设备打开的磁盘镜像的文件描述符，tid、mtx、cond用于工作线程，procq为工作队列，closing用来指示工作线程何时关闭。virtio_blk_dev和blkp_req结构体的定义见图4.6。</p>
+<pre><code class="language-c">typedef struct virtio_blk_dev {
+    BlkConfig config;
+    int img_fd;
+	// describe the worker thread that executes read, write and ioctl.
+	pthread_t tid;
+	pthread_mutex_t mtx;
+	pthread_cond_t cond;
+	TAILQ_HEAD(, blkp_req) procq;
+	int close;
+} BlkDev;
+
+// A request needed to process by blk thread.
+struct blkp_req {
+	TAILQ_ENTRY(blkp_req) link;
+    struct iovec *iov;
+	int iovcnt;
+	uint64_t offset;
+	uint32_t type;
+	uint16_t idx;
+};
+</code></pre>
+<h2 id="virtio-block设备工作线程"><a class="header" href="#virtio-block设备工作线程">Virtio Block设备工作线程</a></h2>
+<p>每个Virtio磁盘设备，都拥有一个工作线程和工作队列。工作线程的线程ID保存在virtio_blk_dev中的tid字段，工作队列则是procq。工作线程负责进行数据IO操作及调用中断注入系统接口。它在Virtio磁盘设备启动后被创建，并不断查询工作队列中是否有新的任务，如果队列为空则等待条件变量cond，否则处理任务。</p>
+<p>当驱动写磁盘设备MMIO区域的QueueNotify寄存器时，表示可用环中有新的IO请求。Virtio磁盘设备（位于主线程的执行流）收到该请求后，首先会读取可用环得到描述符链的第一个描述符，第一个描述符指向的内存缓冲区包含了IO请求的类型（读/写）、要读写的扇区编号，之后的描述符指向的内存缓冲区均为数据缓冲区，对于读操作会将读到的数据存入这些数据缓冲区，对于写操作则会从数据缓冲区获取要写入的数据，最后一个描述符对应的内存缓冲区（结果缓冲区）用于设备描述IO请求的完成结果，可选项有成功（OK）、失败（IOERR）、不支持的操作（UNSUPP）。 据此解析整个描述符链即可获得有关该IO请求的所有信息，并将其保存在blkp_req结构体中，该结构体中的字段iov表示所有数据缓冲区，offset表示IO操作的数据偏移量，type表示IO操作的类型（读/写），idx为描述符链的首描述符索引，用于更新已用环。随后设备会将blkp_req加入到工作队列procq中，并通过signal函数唤醒阻塞在条件变量cond上的工作线程。工作线程即可对任务进行处理。</p>
+<p>工作线程获取到任务后，会根据blkp_req指示的IO操作信息通过preadv和pwritev函数读写img_fd所对应的磁盘镜像。完成读写操作后，会首先更新描述符链的最后一个描述符，该描述符用于描述IO请求的完成结果，例如成功、失败、不支持该操作等。然后更新已用环，将该描述符链的首描述符写到新的表项中。随后进行中断注入，通知其他虚拟机。</p>
+<p>工作线程的设立，可以有效地将耗时操作分散到其他CPU核上，提高主线程分发请求的效率和吞吐量，提升设备性能。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../../chap04/subchap03/VirtIO/NetDevice.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../../chap04/subchap03/VirtIO/NetDevice.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../../elasticlunr.min.js"></script>
+        <script src="../../../mark.min.js"></script>
+        <script src="../../../searcher.js"></script>
+
+        <script src="../../../clipboard.min.js"></script>
+        <script src="../../../highlight.js"></script>
+        <script src="../../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../../assets/fzf.umd.js"></script>
+        <script src="../../../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

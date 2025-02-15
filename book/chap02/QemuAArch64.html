@@ -1,0 +1,404 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Qemu AArch64 快速上手 - hvisor manual</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="hvisor manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../Introduction.html">简介</a></li><li class="chapter-item expanded affix "><li class="part-title">关于 hvisor</li><li class="chapter-item expanded "><a href="../chap01/Overview.html"><strong aria-hidden="true">1.</strong> hvisor 概述</a></li><li class="chapter-item expanded "><a href="../chap01/ISA.html"><strong aria-hidden="true">2.</strong> hvisor 支持的指令集和处理器</a></li><li class="chapter-item expanded "><a href="../chap01/Board.html"><strong aria-hidden="true">3.</strong> hvisor 支持的硬件平台</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 快速上手指南</li><li class="chapter-item expanded "><a href="../chap02/QemuAArch64.html" class="active"><strong aria-hidden="true">4.</strong> Qemu AArch64 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/QemuRISC-V.html"><strong aria-hidden="true">5.</strong> Qemu RISC-V 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/NXPIMX8.html"><strong aria-hidden="true">6.</strong> NXP i.MX 8 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/FPGA-Rockechip.html"><strong aria-hidden="true">7.</strong> FPGA-Rockechip 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/Loongson-3A5000.html"><strong aria-hidden="true">8.</strong> 龙芯3A5000 hvisor 快速上手</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/Xilinx-ZCU102.html"><strong aria-hidden="true">9.</strong> Xilinx ZCU102 hvisor 快速上手</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap02/subchap01/Qemu-ZCU102.html"><strong aria-hidden="true">9.1.</strong> Qemu ZCU102 hvisor 启动</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/Board-ZCU102.html"><strong aria-hidden="true">9.2.</strong> Board ZCU102 hvisor 多模式启动</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/Nonroot-ZCU102.html"><strong aria-hidden="true">9.3.</strong> ZCU102 Nonroot 启动</a></li><li class="chapter-item expanded "><a href="../chap02/subchap01/UbootFitImage-ZCU102.html"><strong aria-hidden="true">9.4.</strong> UBOOT FIT 镜像制作、加载与启动</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> FPGA 香山昆明湖快速上手</div></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 使用手册</li><li class="chapter-item expanded "><a href="../chap03/Compile.html"><strong aria-hidden="true">11.</strong> 如何编译</a></li><li class="chapter-item expanded "><a href="../chap03/BootRootLinux.html"><strong aria-hidden="true">12.</strong> 启动管理 Linux VM</a></li><li class="chapter-item expanded "><a href="../chap03/BootNonRootLinux.html"><strong aria-hidden="true">13.</strong> 启动两个VM：Linux1 和 Linux2</a></li><li class="chapter-item expanded "><a href="../chap03/BootNonRootRTOS.html"><strong aria-hidden="true">14.</strong> 启动两个VM：Linux 和 RTOS</a></li><li class="chapter-item expanded "><a href="../chap03/ZoneConfig.html"><strong aria-hidden="true">15.</strong> ZONE的配置与管理</a></li><li class="chapter-item expanded "><a href="../chap03/CMDTools.html"><strong aria-hidden="true">16.</strong> 命令行工具</a></li><li class="chapter-item expanded "><a href="../chap03/VirtIOUseage.html"><strong aria-hidden="true">17.</strong> VirtIO 的使用</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor架构与实现</li><li class="chapter-item expanded "><a href="../chap04/Structure.html"><strong aria-hidden="true">18.</strong> hvisor 架构</a></li><li class="chapter-item expanded "><a href="../chap04/BootAndRun.html"><strong aria-hidden="true">19.</strong> hvisor 启动与运行</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/CPUVirtualization.html"><strong aria-hidden="true">20.</strong> CPU 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap01/PerCPU.html"><strong aria-hidden="true">20.1.</strong> PerCPU 定义</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/ARMVirtualization.html"><strong aria-hidden="true">20.2.</strong> ARM 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/RISCVirtualization.html"><strong aria-hidden="true">20.3.</strong> RISC-V 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap01/LoongArchVirtualization.html"><strong aria-hidden="true">20.4.</strong> LoongArch 处理器虚拟化</a></li></ol></li><li class="chapter-item expanded "><a href="../chap04/MemVirtualization.html"><strong aria-hidden="true">21.</strong> 内存虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/InterruptVirtualization.html"><strong aria-hidden="true">22.</strong> 中断虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap02/ARM-GIC.html"><strong aria-hidden="true">22.1.</strong> ARM 中断控制 GIC</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/RISC-PLIC.html"><strong aria-hidden="true">22.2.</strong> RISC-V 中断控制 PLIC</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/RISC-AIA.html"><strong aria-hidden="true">22.3.</strong> RISC-V 中断控制 AIA</a></li><li class="chapter-item expanded "><a href="../chap04/subchap02/LoongArch-Controller.html"><strong aria-hidden="true">22.4.</strong> LoongArch 中断控制</a></li></ol></li><li class="chapter-item expanded "><a href="../chap04/subchap03/IO-Virtualization.html"><strong aria-hidden="true">23.</strong> I/O 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap03/IOMMU/IOMMU-Define.html"><strong aria-hidden="true">23.1.</strong> IOMMU</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap03/IOMMU/ARM-SMMU.html"><strong aria-hidden="true">23.1.1.</strong> ARM SMMU 的实现</a></li><li class="chapter-item expanded "><a href="../chap04/subchap03/IOMMU/RISC-IOMMU.html"><strong aria-hidden="true">23.1.2.</strong> RISC-V IOMMU 标准的实现</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/VirtIO-Define.html"><strong aria-hidden="true">24.</strong> VirtIO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/BlockDevice.html"><strong aria-hidden="true">24.1.</strong> Block</a></li><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/NetDevice.html"><strong aria-hidden="true">24.2.</strong> Net</a></li><li class="chapter-item expanded "><a href="../chap04/subchap03/VirtIO/ConsoleDevice.html"><strong aria-hidden="true">24.3.</strong> Console</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">24.4.</strong> GPU</div></li></ol></li><li class="chapter-item expanded "><a href="../chap04/subchap03/PCI-Virtualization.html"><strong aria-hidden="true">25.</strong> PCI 虚拟化</a></li><li class="chapter-item expanded "><a href="../chap04/subchap04/ManageTools.html"><strong aria-hidden="true">26.</strong> Hvisor 管理工具</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chap04/subchap04/HyperCall.html"><strong aria-hidden="true">26.1.</strong> Hypercall</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">hvisor 的规划</li><li class="chapter-item expanded "><div><strong aria-hidden="true">27.</strong> TODO</div></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="在-qemu-上运行-hvisor"><a class="header" href="#在-qemu-上运行-hvisor">在 QEMU 上运行 hvisor</a></h1>
+<h2 id="一安装交叉编译器-aarch64-none-linux-gnu--103"><a class="header" href="#一安装交叉编译器-aarch64-none-linux-gnu--103">一、安装交叉编译器 aarch64-none-linux-gnu- 10.3</a></h2>
+<p>网址：<a href="https://developer.arm.com/downloads/-/gnu-a">https://developer.arm.com/downloads/-/gnu-a</a></p>
+<p>工具选择：AArch64 GNU/Linux target (aarch64-none-linux-gnu)</p>
+<p>下载链接：<a href="https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC">https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC</a></p>
+<pre><code class="language-bash">wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
+tar xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
+ls gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/
+</code></pre>
+<p>安装完成，记住路径，例如在：/home/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-，之后都会使用这个路径。</p>
+<h2 id="二编译安装-qemu-7212"><a class="header" href="#二编译安装-qemu-7212">二、编译安装 QEMU 7.2.12</a></h2>
+<pre><code># 安装编译所需的依赖包
+sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \
+              gawk build-essential bison flex texinfo gperf libtool patchutils bc \
+              zlib1g-dev libexpat-dev pkg-config  libglib2.0-dev libpixman-1-dev libsdl2-dev \
+              git tmux python3 python3-pip ninja-build
+# 下载源码
+wget https://download.qemu.org/qemu-7.2.12.tar.xz
+# 解压
+tar xvJf qemu-7.2.12.tar.xz
+cd qemu-7.2.12
+#生成设置文件
+./configure --enable-kvm --enable-slirp --enable-debug --target-list=aarch64-softmmu,x86_64-softmmu
+#编译
+make -j$(nproc)
+</code></pre>
+<p>之后编辑 <code>~/.bashrc</code> 文件，在文件的末尾加入几行：</p>
+<pre><code># 请注意，qemu-7.2.12 的父目录可以随着你的实际安装位置灵活调整
+export PATH=$PATH:/path/to/qemu-7.2.12/build
+</code></pre>
+<p>随后即可在当前终端 <code>source ~/.bashrc</code> 更新系统路径，或者直接重启一个新的终端。此时可以确认 qemu 版本：</p>
+<pre><code>qemu-system-aarch64 --version   #查看版本
+</code></pre>
+<blockquote>
+<p>注意，上述依赖包可能不全，例如：</p>
+<ul>
+<li>出现 <code>ERROR: pkg-config binary 'pkg-config' not found</code> 时，可以安装 <code>pkg-config</code> 包；</li>
+<li>出现 <code>ERROR: glib-2.48 gthread-2.0 is required to compile QEMU</code> 时，可以安装 <code>libglib2.0-dev</code> 包；</li>
+<li>出现 <code>ERROR: pixman &gt;= 0.21.8 not present</code> 时，可以安装 <code>libpixman-1-dev</code> 包。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>若生成设置文件时遇到报错 ERROR: Dependency "slirp" not found, tried pkgconfig：</p>
+<p>下载 <a href="https://gitlab.freedesktop.org/slirp/libslirp">https://gitlab.freedesktop.org/slirp/libslirp</a>包，并按 readme 安装即可。</p>
+</blockquote>
+<h2 id="三编译-linux-kernel-54"><a class="header" href="#三编译-linux-kernel-54">三、编译 Linux Kernel 5.4</a></h2>
+<p>在编译 root linux 的镜像前, 在.config 文件中把 CONFIG_IPV6 和 CONFIG_BRIDGE 的 config 都改成 y, 以支持在 root linux 中创建网桥和 tap 设备。具体操作如下：</p>
+<pre><code>git clone https://github.com/torvalds/linux -b v5.4 --depth=1
+cd linux
+git checkout v5.4
+# CROSS_COMPILE路径根据第一步安装交叉编译器的路径适当修改
+make ARCH=arm64 CROSS_COMPILE=/root/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- defconfig
+# 在.config中增加一行
+CONFIG_BLK_DEV_RAM=y
+# 修改.config的两个CONFIG参数
+CONFIG_IPV6=y
+CONFIG_BRIDGE=y
+# 编译，CROSS_COMPILE路径根据第一步安装交叉编译器的路径适当修改
+make ARCH=arm64 CROSS_COMPILE=/root/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- Image -j$(nproc)
+</code></pre>
+<blockquote>
+<p>如果编译 linux 时报错：</p>
+<pre><code>/usr/bin/ld: scripts/dtc/dtc-parser.tab.o:(.bss+0x20): multiple definition of `yylloc'; scripts/dtc/dtc-lexer.lex.o:(.bss+0x0): first defined here
+</code></pre>
+<p>则修改 linux 文件夹下<code>scripts/dtc/dtc-lexer.lex.c</code>，在<code>YYLTYPE yylloc;</code>前增加<code>extern</code>。再次编译，发现会报错：openssl/bio.h: No such file or directory ，此时执行<code>sudo apt install libssl-dev</code></p>
+</blockquote>
+<p>编译完毕，内核文件位于：arch/arm64/boot/Image。记住整个 linux 文件夹所在的路径，例如：home/korwylee/lgw/hypervisor/linux, 在第 7 步我们还会用到这个路径。</p>
+<h2 id="四基于-ubuntu-2004-arm64-base-构建文件系统"><a class="header" href="#四基于-ubuntu-2004-arm64-base-构建文件系统">四、基于 ubuntu 20.04 arm64 base 构建文件系统</a></h2>
+<blockquote>
+<p>本部分的内容可以省略，直接下载该现成的磁盘镜像使用即可。https://blog.syswonder.org/#/2024/20240415_Virtio_devices_tutorial</p>
+</blockquote>
+<p>我们使用 ubuntu 20.04（22.04 也可以）来构建根文件系统。</p>
+<p>下载：<a href="http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz">ubuntu-base-20.04.5-base-arm64.tar.gz</a></p>
+<p>链接：<a href="http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz">http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz</a></p>
+<pre><code class="language-bash">wget http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz
+
+mkdir rootfs
+# 创建一个1G大小的ubuntu.img，可以修改count修改img大小
+dd if=/dev/zero of=ubuntu-20.04-rootfs_ext4.img bs=1M count=1024 oflag=direct
+mkfs.ext4 ubuntu-20.04-rootfs_ext4.img
+# 将ubuntu.tar.gz放入已经挂载到rootfs上的ubuntu.img中
+sudo mount -t ext4 ubuntu-20.04-rootfs_ext4.img rootfs/
+sudo tar -xzf ubuntu-base-20.04.5-base-arm64.tar.gz -C rootfs/
+
+# 让rootfs绑定和获取物理机的一些信息和硬件
+# qemu-path为你的qemu路径
+sudo cp qemu-path/build/qemu-system-aarch64 rootfs/usr/bin/
+sudo cp /etc/resolv.conf rootfs/etc/resolv.conf
+sudo mount -t proc /proc rootfs/proc
+sudo mount -t sysfs /sys rootfs/sys
+sudo mount -o bind /dev rootfs/dev
+sudo mount -o bind /dev/pts rootfs/dev/pts
+
+# 执行该指令可能会报错，请参考下面的解决办法
+sudo chroot rootfs
+sudo apt-get install git sudo vim bash-completion \
+		kmod net-tools iputils-ping resolvconf ntpdate
+
+# 以下由#圈住的内容可做可不做
+###################
+adduser arm64
+adduser arm64 sudo
+echo "kernel-5_4" &gt;/etc/hostname
+echo "127.0.0.1 localhost" &gt;/etc/hosts
+echo "127.0.0.1 kernel-5_4"&gt;&gt;/etc/hosts
+dpkg-reconfigure resolvconf
+dpkg-reconfigure tzdata
+###################
+exit
+
+sudo umount rootfs/proc
+sudo umount rootfs/sys
+sudo umount rootfs/dev/pts
+sudo umount rootfs/dev
+sudo umount rootfs
+</code></pre>
+<p>最后卸载挂载，完成根文件系统的制作。</p>
+<blockquote>
+<p>执行<code>sudo chroot .</code>时，如果报错<code>chroot: failed to run command ‘/bin/bash’: Exec format error</code>，可以执行指令：</p>
+<pre><code>sudo apt-get install qemu-user-static
+sudo update-binfmts --enable qemu-aarch64
+</code></pre>
+</blockquote>
+<h2 id="五rust-环境配置"><a class="header" href="#五rust-环境配置">五、Rust 环境配置</a></h2>
+<p>请参考：<a href="https://course.rs/first-try/intro.html">Rust 语言圣经</a></p>
+<h2 id="六编译和运行-hvisor"><a class="header" href="#六编译和运行-hvisor">六、编译和运行 hvisor</a></h2>
+<p>首先将<a href="https://github.com/KouweiLee/hvisor">hvisor 代码仓库</a>拉到本地，之后切换到 dev 分支，并在 hvisor/images/aarch64 文件夹下，将之前编译好的根文件系统、Linux 内核镜像分别放在 virtdisk、kernel 目录下，并分别重命名为 rootfs1.ext4、Image。并在 devicetree 目录下，执行<code>make all</code>。</p>
+<p>之后，在 hvisor 目录下，执行：</p>
+<pre><code>make ARCH=aarch64 LOG=info FEATURES=platform_qemu run
+</code></pre>
+<p>之后会进入 uboot 启动界面，该界面下执行：</p>
+<pre><code>bootm 0x40400000 - 0x40000000
+</code></pre>
+<p>该启动命令会从物理地址<code>0x40400000</code>启动 hvisor，设备树的地址为<code>0x40000000</code>。hvisor 启动时，会自动启动 root linux（用于管理的 Linux），并进入 root linux 的 shell 界面，root linux 即为 zone0，承担管理工作。</p>
+<blockquote>
+<p>提示缺少<code>dtc</code>时，，可以执行指令：</p>
+<pre><code>sudo apt install device-tree-compiler
+</code></pre>
+</blockquote>
+<h2 id="七使用-hvisor-tool-启动-zone1-linux"><a class="header" href="#七使用-hvisor-tool-启动-zone1-linux">七、使用 hvisor-tool 启动 zone1-linux</a></h2>
+<p>首先完成最新版本的 hvisor-tool 的编译。具体请参考<a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>的 README（中文版本是最新版本，英文 README 可能更新不及时）。例如，若要编译面向 arm64 的命令行工具，且 Hvisor 环境中的 Linux 镜像编译来源的源码位于 <code>~/linux</code>，则可执行</p>
+<pre><code>make all ARCH=arm64 LOG=LOG_WARN KDIR=~/linux
+</code></pre>
+<blockquote>
+<p>请务必保证 Hvisor 中的 Linux 镜像是由编译 hvisor-tool 时参数选项中的 Linux 源码目录编译产生。</p>
+</blockquote>
+<p>编译完成后，将 driver/hvisor.ko、tools/hvisor、driver/ivc.ko（若有该文件）复制到 image/virtdisk/rootfs1.ext4 根文件系统中启动 zone1 linux 的目录（目前是/home/arm64）；再将 zone1 的内核镜像（如果是与 zone0 相同的 Linux，复制一份 image/aarch64/kernel/Image 即可）、设备树（image/aarch64/linux2.dtb）放在 rootfs1.ext4 的相同目录（/home/arm64），并重命名为 Image、linux2.dtb。</p>
+<p>最后将 image/aarch64/virtdisk 中的 rootfs1.ext4 原地复制一份，改名为 rootfs2.etx4。</p>
+<p>之后在 QEMU 上即可通过 root linux-zone0 启动 zone1-linux。</p>
+<blockquote>
+<p>启动 zone1-linux 的详细步骤参看 hvisor-tool 的 README。以下给出一个参考（以 hvisor-tool 为准），其中的 linux2.json 即为 zone1-linux 的配置文件：</p>
+</blockquote>
+<pre><code>#在/home/arm64目录下执行：
+insmod hvisor.ko
+./hvisor zone start linux2.json
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap01/Board.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap02/QemuRISC-V.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap01/Board.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap02/QemuRISC-V.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

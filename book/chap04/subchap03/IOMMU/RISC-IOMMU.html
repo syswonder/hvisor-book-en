@@ -1,0 +1,432 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>RISC-V IOMMU 标准的实现 - hvisor manual</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="hvisor manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../../favicon.svg">
+        <link rel="shortcut icon" href="../../../favicon.png">
+        <link rel="stylesheet" href="../../../css/variables.css">
+        <link rel="stylesheet" href="../../../css/general.css">
+        <link rel="stylesheet" href="../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../../highlight.css">
+        <link rel="stylesheet" href="../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../../Introduction.html">简介</a></li><li class="chapter-item expanded affix "><li class="part-title">关于 hvisor</li><li class="chapter-item expanded "><a href="../../../chap01/Overview.html"><strong aria-hidden="true">1.</strong> hvisor 概述</a></li><li class="chapter-item expanded "><a href="../../../chap01/ISA.html"><strong aria-hidden="true">2.</strong> hvisor 支持的指令集和处理器</a></li><li class="chapter-item expanded "><a href="../../../chap01/Board.html"><strong aria-hidden="true">3.</strong> hvisor 支持的硬件平台</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 快速上手指南</li><li class="chapter-item expanded "><a href="../../../chap02/QemuAArch64.html"><strong aria-hidden="true">4.</strong> Qemu AArch64 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/QemuRISC-V.html"><strong aria-hidden="true">5.</strong> Qemu RISC-V 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/NXPIMX8.html"><strong aria-hidden="true">6.</strong> NXP i.MX 8 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/FPGA-Rockechip.html"><strong aria-hidden="true">7.</strong> FPGA-Rockechip 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/Loongson-3A5000.html"><strong aria-hidden="true">8.</strong> 龙芯3A5000 hvisor 快速上手</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Xilinx-ZCU102.html"><strong aria-hidden="true">9.</strong> Xilinx ZCU102 hvisor 快速上手</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Qemu-ZCU102.html"><strong aria-hidden="true">9.1.</strong> Qemu ZCU102 hvisor 启动</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Board-ZCU102.html"><strong aria-hidden="true">9.2.</strong> Board ZCU102 hvisor 多模式启动</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/Nonroot-ZCU102.html"><strong aria-hidden="true">9.3.</strong> ZCU102 Nonroot 启动</a></li><li class="chapter-item expanded "><a href="../../../chap02/subchap01/UbootFitImage-ZCU102.html"><strong aria-hidden="true">9.4.</strong> UBOOT FIT 镜像制作、加载与启动</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">10.</strong> FPGA 香山昆明湖快速上手</div></li><li class="chapter-item expanded affix "><li class="part-title">hvisor 使用手册</li><li class="chapter-item expanded "><a href="../../../chap03/Compile.html"><strong aria-hidden="true">11.</strong> 如何编译</a></li><li class="chapter-item expanded "><a href="../../../chap03/BootRootLinux.html"><strong aria-hidden="true">12.</strong> 启动管理 Linux VM</a></li><li class="chapter-item expanded "><a href="../../../chap03/BootNonRootLinux.html"><strong aria-hidden="true">13.</strong> 启动两个VM：Linux1 和 Linux2</a></li><li class="chapter-item expanded "><a href="../../../chap03/BootNonRootRTOS.html"><strong aria-hidden="true">14.</strong> 启动两个VM：Linux 和 RTOS</a></li><li class="chapter-item expanded "><a href="../../../chap03/ZoneConfig.html"><strong aria-hidden="true">15.</strong> ZONE的配置与管理</a></li><li class="chapter-item expanded "><a href="../../../chap03/CMDTools.html"><strong aria-hidden="true">16.</strong> 命令行工具</a></li><li class="chapter-item expanded "><a href="../../../chap03/VirtIOUseage.html"><strong aria-hidden="true">17.</strong> VirtIO 的使用</a></li><li class="chapter-item expanded affix "><li class="part-title">hvisor架构与实现</li><li class="chapter-item expanded "><a href="../../../chap04/Structure.html"><strong aria-hidden="true">18.</strong> hvisor 架构</a></li><li class="chapter-item expanded "><a href="../../../chap04/BootAndRun.html"><strong aria-hidden="true">19.</strong> hvisor 启动与运行</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/CPUVirtualization.html"><strong aria-hidden="true">20.</strong> CPU 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap01/PerCPU.html"><strong aria-hidden="true">20.1.</strong> PerCPU 定义</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/ARMVirtualization.html"><strong aria-hidden="true">20.2.</strong> ARM 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/RISCVirtualization.html"><strong aria-hidden="true">20.3.</strong> RISC-V 处理器虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap01/LoongArchVirtualization.html"><strong aria-hidden="true">20.4.</strong> LoongArch 处理器虚拟化</a></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/MemVirtualization.html"><strong aria-hidden="true">21.</strong> 内存虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/InterruptVirtualization.html"><strong aria-hidden="true">22.</strong> 中断虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap02/ARM-GIC.html"><strong aria-hidden="true">22.1.</strong> ARM 中断控制 GIC</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/RISC-PLIC.html"><strong aria-hidden="true">22.2.</strong> RISC-V 中断控制 PLIC</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/RISC-AIA.html"><strong aria-hidden="true">22.3.</strong> RISC-V 中断控制 AIA</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap02/LoongArch-Controller.html"><strong aria-hidden="true">22.4.</strong> LoongArch 中断控制</a></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IO-Virtualization.html"><strong aria-hidden="true">23.</strong> I/O 虚拟化</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IOMMU/IOMMU-Define.html"><strong aria-hidden="true">23.1.</strong> IOMMU</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IOMMU/ARM-SMMU.html"><strong aria-hidden="true">23.1.1.</strong> ARM SMMU 的实现</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/IOMMU/RISC-IOMMU.html" class="active"><strong aria-hidden="true">23.1.2.</strong> RISC-V IOMMU 标准的实现</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html"><strong aria-hidden="true">24.</strong> VirtIO</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/BlockDevice.html"><strong aria-hidden="true">24.1.</strong> Block</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/NetDevice.html"><strong aria-hidden="true">24.2.</strong> Net</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/VirtIO/ConsoleDevice.html"><strong aria-hidden="true">24.3.</strong> Console</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">24.4.</strong> GPU</div></li></ol></li><li class="chapter-item expanded "><a href="../../../chap04/subchap03/PCI-Virtualization.html"><strong aria-hidden="true">25.</strong> PCI 虚拟化</a></li><li class="chapter-item expanded "><a href="../../../chap04/subchap04/ManageTools.html"><strong aria-hidden="true">26.</strong> Hvisor 管理工具</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../chap04/subchap04/HyperCall.html"><strong aria-hidden="true">26.1.</strong> Hypercall</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">hvisor 的规划</li><li class="chapter-item expanded "><div><strong aria-hidden="true">27.</strong> TODO</div></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h3 id="4612-risc-v-iommu-标准的实现"><a class="header" href="#4612-risc-v-iommu-标准的实现">4.6.1.2 RISC-V IOMMU 标准的实现</a></h3>
+<h4 id="risc-v-iommu-工作流程"><a class="header" href="#risc-v-iommu-工作流程">RISC-V IOMMU 工作流程</a></h4>
+<p>对于具有 DMA 设备的虚拟化系统来说，该系统有可能因为虚拟机配置 DMA 设备进行恶意的 DMA 从而破坏整个系统的稳定性，而 IOMMU 的引入可以进一步提高 Zone 间的隔离性，以保证系统的安全性。</p>
+<p>IOMMU 支持两阶段地址翻译，提供了 DMA 重映射的功能，一方面可以对 DMA 操作进行内存保护，限制设备能够访问的物理内存区域，使得 DMA 操作更加安全，另一方面，设备的 DMA 操作只需要连续的 IOVA 即可，而无需连续的 PA，这样可以充分利用物理内存中分散的页。</p>
+<p>为了执行地址转换和内存保护，RISC-V IOMMU 在第一阶段和第二阶段使用与 CPU 的 MMU 相同的页表格式。使用与 CPU MMU 相同的页表格式，可以消除 DMA 在内存管理方面的一些复杂性，并且使用相同的格式还允许 CPU MMU 和 IOMMU 使用相同的页表。</p>
+<p>在 hvisor 中支持了 IOMMU 的第二阶段地址翻译过程，即设备端 IOVA（GPA）到 HPA 的翻译，并且在 CPU MMU 和 IOMMU 之间共享了第二阶段页表，功能示意如下所示：</p>
+<img src="../../img/riscv_iommu_struct.png" alt="riscv_iommu_struct.png" style="zoom: 67%;" />
+<p>IOMMU 在翻译前需要先根据设备标识符（device_id）在设备目录表中找到设备上下文（DC）。每个设备有唯一的 device_id，对于平台设备，device_id 在硬件实现时指定，对于 PCI/PCIe 设备，则将 PCI/PCIe 设备的 BDF 编号作为 device_id。DC 中包含了两阶段地址翻译的页表基地址等信息，以及一些翻译的控制信息。以两阶段地址翻译为例，I/O 设备的 IOVA 首先在 fsc 字段指向的 Stage-1 页表中翻译成 GPA，然后再在 iohgatp 字段指向的Stage-2 页表中翻译成 HPA，并以此访问内存。在 hvisor 中支持第二阶段翻译，即仅使用 iohgatp 字段进行地址翻译，如下图所示：</p>
+<img src="../../img/riscv_iommu_translate.png" alt="riscv_iommu_translate.png" style="zoom: 67%;" />
+<p>RISC-V IOMMU 作为一个物理硬件，可以使用 MMIO 方式进行访问，并且在 IOMMU 规范手册中指定了其各个字段的字节偏移，实现时需要能够按照规范指定的偏移和大小进行访问，才能正确获取各个字段的值。定义 IommuHw 结构体，其和物理 RISC-V IOMMU 对应，用以简化访问物理 IOMMU，定义如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[repr(C)]
+#[repr(align(0x1000))]
+pub struct IommuHw {
+    caps: u64,
+    fctl: u32,
+    __custom1: [u8; 4],
+    ddtp: u64,
+    cqb: u64,
+    cqh: u32,
+    cqt: u32,
+    fqb: u64,
+    fqh: u32,
+    fqt: u32,
+    pqb: u64,
+    pqh: u32,
+    pqt: u32,
+    cqcsr: u32,
+    fqcsr: u32,
+    pqcsr: u32,
+    ipsr: u32,
+    iocntovf: u32,
+    iocntinh: u32,
+    iohpmcycles: u64,
+    iohpmctr: [u64; 31],
+    iohpmevt: [u64; 31],
+    tr_req_iova: u64,
+    tr_req_ctl: u64,
+    tr_response: u64,
+    __rsv1: [u8; 64],
+    __custom2: [u8; 72],
+    icvec: u64,
+    msi_cfg_tbl: [MsiCfgTbl; 16],
+    __rsv2: [u8;3072],
+}
+<span class="boring">}</span></code></pre></pre>
+<p>IOMMU 的 Capabilities 是一个只读寄存器，其报告了 IOMMU 支持的功能，在初始化 IOMMU 时，需要首先查看该寄存器，以确定硬件能够支持 IOMMU 功能。</p>
+<p>IOMMU 在初始化时要先检查当前 IOMMU 是否和驱动匹配，实现时定义了 rv_iommu_check_features，检查对 Sv39x4、WSI 等的硬件支持情况，实现如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl IommuHw {
+    pub fn rv_iommu_check_features(&amp;self){
+        let caps = self.caps as usize;
+        let version = caps &amp; RV_IOMMU_CAPS_VERSION_MASK;
+        // get version, version 1.0 -&gt; 0x10
+        if version != RV_IOMMU_SUPPORTED_VERSION{
+            error!("RISC-V IOMMU unsupported version: {}", version);
+        }
+        // support SV39x4
+        if caps &amp; RV_IOMMU_CAPS_SV39X4_BIT == 0 {
+            error!("RISC-V IOMMU HW does not support Sv39x4");
+        }
+        if caps &amp; RV_IOMMU_CAPS_MSI_FLAT_BIT == 0 {
+            error!("RISC-V IOMMU HW does not support MSI Address Translation (basic-translate mode)");
+        }
+        if caps &amp; RV_IOMMU_CAPS_IGS_MASK == 0 {
+            error!("RISC-V IOMMU HW does not support WSI generation");
+        }
+        if caps &amp; RV_IOMMU_CAPS_AMO_HWAD_BIT == 0 {
+            error!("RISC-V IOMMU HW AMO HWAD unsupport");
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>IOMMU 的 fctl 为功能控制寄存器，它提供了 IOMMU 的一些功能控制，包括 IOMMU 对内存数据访问是大端还是小端，IOMMU 产生的中断为 WSI 中断还是 MSI 中断以及对 Guest 地址转换方案的控制。</p>
+<p>IOMMU 的 ddtp 为设备目录表指针寄存器，该寄存器包含了设备目录表的根页面的 PPN，以及 IOMMU Mode，其可以配置为 Off、Bare、1LVL、2LVL 或 3LVL，其中 Off 表示 IOMMU 不允许设备访问内存，Bare 表示 IOMMU 允许设备所有的内存访问，不进行翻译与保护，1LVL、2LVL、3LVL 表示了 IOMMU 采用的设备目录表的级数。</p>
+<p>实现时定义了 rv_iommu_init 函数，用于对物理 IOMMU 的功能检查和控制，例如配置中断为 WSI、配置设备目录表等，具体实现如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl IommuHw {
+	pub fn rv_iommu_init(&amp;mut self, ddt_addr: usize){
+        // Read and check caps
+        self.rv_iommu_check_features();
+        // Set fctl.WSI We will be first using WSI as IOMMU interrupt mechanism
+        self.fctl = RV_IOMMU_FCTL_DEFAULT;
+        // Clear all IP flags (ipsr)
+        self.ipsr = RV_IOMMU_IPSR_CLEAR;
+        // Configure ddtp with DDT base address and IOMMU mode
+        self.ddtp = IOMMU_MODE as u64 | ((ddt_addr &gt;&gt; 2) &amp; RV_IOMMU_DDTP_PPN_MASK) as u64;    
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>设备目录表中的表项格式在规范手册中给出，为了能够让硬件工作，需要结合规范进行实现，在实现时定义了 DdtEntry 结构体，表示设备目录表中的一个表项，代表一个DMA设备。其中 iohgatp 保存了第二阶段页表的 PPN、Guest 软件上下文 ID（GSCID）以及用于选择第二阶段地址转换方案的 Mode 字段，tc 包含了很多转换控制相关的位，其中大部分控制在 hvisor 中未使用到，其中有效位需要设置为 1，以便后续进行更高级的功能扩展。设备目录表项结构如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[repr(C)]
+struct DdtEntry{
+    tc: u64,
+    iohgatp: u64,
+    ta: u64,
+    fsc: u64,
+    msiptp: u64,
+    msi_addr_mask: u64,
+    msi_addr_pattern: u64,
+    __rsv: u64,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>当前 hvisor 仅支持单级设备目录表，实现时定义了 Lvl1DdtHw 结构体，以方便访问设备目录表表项，单级设备目录表可以支持 64 个 DMA 设备，占据一个物理页，结构如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Lvl1DdtHw{
+    dc: [DdtEntry; 64],
+}
+<span class="boring">}</span></code></pre></pre>
+<p>实现时定义了 Iommu 结构体，作为 IOMMU 更高级的抽象，其中 base 为 IommuHw 的基地址，即 IOMMU 的物理地址，可以借助其访问物理 IOMMU，ddt 为设备目录表，需要在 IOMMU 初始化时分配物理页，实现为支持单级设备目录表，故仅需一个物理页即可，定义如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Iommu{
+    pub base: usize,
+    pub ddt: Frame,		// Lvl1 DDT -&gt; 1 phys page
+}
+<span class="boring">}</span></code></pre></pre>
+<p>IOMMU 的设备目录表和翻译的页表是存储在内存中的，需要根据实际所需进行分配，即要在 new 时分配设备目录表的内存。除此之外，在设备目录表中添加设备表项是一项非常重要的内容，因为 DMA 设备进行 DMA 操作，第一步即是从设备目录表中查找翻译需要的页表等信息，然后 IOMMU 根据页表相关的信息进行翻译，需要填充 tc、iohgatp 等内容，实现如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Iommu {
+    pub fn new(base: usize) -&gt; Self{
+        Self { 
+            base: base,
+            ddt: Frame::new_zero().unwrap(),
+        }
+    }
+
+    pub fn iommu(&amp;self) -&gt; &amp;mut IommuHw{
+        unsafe { &amp;mut *(self.base as *mut _) }
+    }
+
+    pub fn dc(&amp;self) -&gt; &amp;mut Lvl1DdtHw{
+        unsafe { &amp;mut *(self.ddt.start_paddr() as *mut _)}
+    }
+
+    pub fn rv_iommu_init(&amp;mut self){
+        self.iommu().rv_iommu_init(self.ddt.start_paddr());
+    }
+
+    pub fn rv_iommu_add_device(&amp;self, device_id: usize, vm_id: usize, root_pt: usize){
+        // only support 64 devices
+        if device_id &gt; 0 &amp;&amp; device_id &lt; 64{
+            // configure DC
+            let tc: u64 = 0 | RV_IOMMU_DC_VALID_BIT as u64 | 1 &lt;&lt; 4;
+            self.dc().dc[device_id].tc = tc;
+            let mut iohgatp: u64 = 0;
+            iohgatp |= (root_pt as u64 &gt;&gt; 12) &amp; RV_IOMMU_DC_IOHGATP_PPN_MASK as u64;
+            iohgatp |= (vm_id as u64) &amp; RV_IOMMU_DC_IOHGATP_GSCID_MASK as u64;
+            iohgatp |= RV_IOMMU_IOHGATP_SV39X4 as u64;
+            self.dc().dc[device_id].iohgatp = iohgatp;
+            self.dc().dc[device_id].fsc = 0;
+            info!("{:#x}", &amp;mut self.dc().dc[device_id] as *mut _ as usize);
+            info!("RV IOMMU: Write DDT, add decive context, iohgatp {:#x}", iohgatp);
+        }
+        else{
+            info!("RV IOMMU: Invalid device ID: {}", device_id);
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>由于 hvisor 支持 RISC-V 的 IOMMU 与 Arm 的 SMMUv3，实现时封装了两个供外部调用的接口，分别为 iommu_init 与 iommu_add_device，这两个函数与 Arm 架构下的公共调用接口的函数名与参数均一致，实现如下：</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// alloc the Fram for DDT &amp; Init
+pub fn iommu_init() {
+    let iommu = Iommu::new(0x10010000);
+    IOMMU.call_once(|| RwLock::new(iommu));
+    rv_iommu_init();
+}
+
+// every DMA device do!
+pub fn iommu_add_device(vm_id: usize, device_id: usize, root_pt: usize){
+    info!("RV_IOMMU_ADD_DEVICE: root_pt {:#x}, vm_id {}", root_pt, vm_id);
+    let iommu = iommu();
+    iommu.write().rv_iommu_add_device(device_id, vm_id, root_pt);
+}
+<span class="boring">}</span></code></pre></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../../chap04/subchap03/IOMMU/ARM-SMMU.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../../chap04/subchap03/IOMMU/ARM-SMMU.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../../elasticlunr.min.js"></script>
+        <script src="../../../mark.min.js"></script>
+        <script src="../../../searcher.js"></script>
+
+        <script src="../../../clipboard.min.js"></script>
+        <script src="../../../highlight.js"></script>
+        <script src="../../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../../assets/fzf.umd.js"></script>
+        <script src="../../../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>
