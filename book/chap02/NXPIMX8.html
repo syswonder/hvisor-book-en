@@ -1,0 +1,951 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Quick Start with NXP i.MX 8 - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="nxp启动jailhouse"><a class="header" href="#nxp启动jailhouse">NXP启动Jailhouse</a></h1>
+<p>时间：2024/2/25
+更新时间：2024/3/13</p>
+<p>作者：杨竣轶，陈星宇</p>
+<p>整体思路：</p>
+<ol>
+<li>使用SD卡启动第一个Linux，这个Linux最好使用ubuntu的rootfs，并且配通网络【方便安装包】。</li>
+<li>启动root Linux，并且编译一遍Linux 内核以及Jailhouse。</li>
+<li>重启，修改root dtb，启动root Linux。</li>
+<li>jailhouse 启动nonroot Linux，该Linux是emmc上的Linux（原厂商的Linux），指定rootfs为emmc。</li>
+</ol>
+<h2 id="一制作ubuntu-sd卡镜像"><a class="header" href="#一制作ubuntu-sd卡镜像">一、制作ubuntu SD卡镜像</a></h2>
+<pre><code class="language-shell">wget https://cdimage.ubuntu.com/ubuntu-base/releases/18.04/release/ubuntu-base-18.04.5-base-arm64.tar.gz
+tar zxvf ubuntu-base-18.04.5-base-arm64.tar.gz
+
+cd ubuntu-base-18.04.5-base-arm64
+
+# chroot in x86
+sudo apt-get install qemu
+sudo cp /usr/bin/qemu-aarch64-static usr/bin/
+
+sudo mount /sys ./sys -o bind
+sudo mount /proc ./proc -o bind
+sudo mount /dev ./dev -o bind
+
+sudo mv etc/resolv.conf etc/resolv.conf.saved
+sudo cp /etc/resolv.conf etc
+
+sudo LC_ALL=C chroot . /bin/bash
+
+# chroot in arm
+sudo arch-chroot .
+
+sudo apt-get update 
+# 安装需要的包，如vim, build-essential, python3, python3-dev, gcc, g++, git, make, kmod.
+sudo apt-get install &lt;PKG_NAME&gt; 
+
+exit
+
+# 如果用arch-chroot不需要手动umount
+sudo umount ./sys
+sudo umount ./proc
+sudo umount ./dev
+
+mv etc/resolv.conf.saved etc/resolv.conf
+
+## 另外，将Linux和jailhouse复制到SD卡中，这里改成本机路径。
+sudo cp -r LINUX_DEMO ubuntu-base-18.04.5-base-arm64/home #源码路径见linux内核编译部分
+sudo cp -r Jailhouse_DEMO ubuntu-base-18.04.5-base-arm64/home
+# 然后将ubuntu-base-18.04.5-base-arm64目录拷进SD卡中作为rootfs。
+# 建议先完成“二、编译”后再进行拷贝，也可进入系统后再进行编译
+sudo fdisk -l # 确定sd卡设备名称
+sudo mount /dev/sdb1 /mnt 
+sudo cp -r ubuntu-base-18.04.5-base-arm64 /mnt
+</code></pre>
+<h2 id="二编译nxp-linux-内核"><a class="header" href="#二编译nxp-linux-内核">二、编译NXP Linux 内核</a></h2>
+<p>源码可以从厂商提供的资料中获取（源码位置：/OKMX8MP-C_Linux5.4.70+Qt5.15.0_用户资料_R5（更新日期：20231012）/Linux/源码/OK8MP-linux-sdk/OK8MP-linux-kernel）</p>
+<p>该步骤编译可以在chroot环境中进行，也可以先采用现成的Image和dtb先启动板子后再进行编译(官方文件里提供了一份Image和OK8MP-C.dtb)</p>
+<h3 id="添加root设备树"><a class="header" href="#添加root设备树">添加root设备树</a></h3>
+<p>设备树存储位置为arch/arm64/boot/dts/freescale，添加新设备树OK8MP-C-root.dts，主要修改为禁用usdhc3（emmc）和uart4，并将usdhc3和usdhc2进行引脚共享，以便于启动non-root-linux</p>
+<p>内容：</p>
+<pre><code class="language-C">// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2019 NXP
+ */
+
+/dts-v1/;
+
+#include "OK8MP-C.dts"
+
+/ {
+        interrupt-parent = &lt;&amp;gic&gt;;
+
+        resmem: reserved-memory {
+                #address-cells = &lt;2&gt;;
+                #size-cells = &lt;2&gt;;
+                ranges;
+        };
+};
+
+&amp;cpu_pd_wait {
+        /delete-property/ compatible;
+};
+
+&amp;clk {
+        init-on-array = &lt;IMX8MP_CLK_USDHC3_ROOT
+                         IMX8MP_CLK_NAND_USDHC_BUS
+                         IMX8MP_CLK_HSIO_ROOT
+                         IMX8MP_CLK_UART4_ROOT
+                         IMX8MP_CLK_OCOTP_ROOT&gt;;
+};
+
+&amp;{/busfreq} {
+        status = "disabled";
+};
+
+&amp;{/reserved-memory} { // 预留的jailhouse内存区域
+        jh_reserved: jh@fdc00000 {
+                no-map;
+                reg = &lt;0 0xfdc00000 0x0 0x400000&gt;;
+        };
+
+        loader_reserved: loader@fdb00000 {
+                no-map;
+                reg = &lt;0 0xfdb00000 0x0 0x00100000&gt;;
+        };
+
+        ivshmem_reserved: ivshmem@fda00000 {
+                no-map;
+                reg = &lt;0 0xfda00000 0x0 0x00100000&gt;;
+        };
+
+        ivshmem2_reserved: ivshmem2@fd900000 {
+                no-map;
+                reg = &lt;0 0xfd900000 0x0 0x00100000&gt;;
+        };
+
+        pci_reserved: pci@fd700000 {
+                no-map;
+                reg = &lt;0 0xfd700000 0x0 0x00200000&gt;;
+        };
+
+        inmate_reserved: inmate@60000000 {
+                no-map;
+                reg = &lt;0 0x60000000 0x0 0x10000000&gt;;
+        };
+};
+
+&amp;iomuxc {
+        pinctrl_uart4: uart4grp {
+                fsl,pins = &lt;
+                        MX8MP_IOMUXC_UART4_RXD__UART4_DCE_RX    0x49
+                        MX8MP_IOMUXC_UART4_TXD__UART4_DCE_TX    0x49
+                &gt;;
+        };
+};
+
+&amp;usdhc3 { // emmc: mmc2，即从emmc启动的Linux，因为这个emmc是nonroot，所以root不要占用，因此要禁用掉
+        status = "disabled";
+};
+
+&amp;uart4 { // 这个也禁用掉，用于nonroot启动。
+        /delete-property/ dmas;
+        /delete-property/ dma-names;
+        pinctrl-names = "default";
+        pinctrl-0 = &lt;&amp;pinctrl_uart4&gt;;
+        status = "disabled";
+};
+
+&amp;uart2 { // uart1=ttymxc0 uart4=ttymxc3 default for ttymxc1。
+        /* uart4 is used by the 2nd OS, so configure pin and clk */
+        pinctrl-0 = &lt;&amp;pinctrl_uart2&gt;, &lt;&amp;pinctrl_uart4&gt;;
+        assigned-clocks = &lt;&amp;clk IMX8MP_CLK_UART4&gt;;
+        assigned-clock-parents = &lt;&amp;clk IMX8MP_CLK_24M&gt;;
+};
+
+&amp;usdhc2 {
+        pinctrl-0 = &lt;&amp;pinctrl_usdhc3&gt;, &lt;&amp;pinctrl_usdhc2&gt;, &lt;&amp;pinctrl_usdhc2_gpio&gt;;
+        pinctrl-1 = &lt;&amp;pinctrl_usdhc3&gt;, &lt;&amp;pinctrl_usdhc2_100mhz&gt;, &lt;&amp;pinctrl_usdhc2_gpio&gt;;
+        pinctrl-2 = &lt;&amp;pinctrl_usdhc3&gt;, &lt;&amp;pinctrl_usdhc2_200mhz&gt;, &lt;&amp;pinctrl_usdhc2_gpio&gt;;
+};
+</code></pre>
+<h3 id="内核编译"><a class="header" href="#内核编译">内核编译</a></h3>
+<pre><code class="language-shell"># 首先参考前面chroot并进入源码目录
+make OK8MP-C_defconfig # 配置默认config
+make -j$(nproc) ARCH=arm64 #编译大约15分钟左右
+</code></pre>
+<p>如果gcc版本较高可能会出现yylloc的问题，可以降低版本也可以在scripts/dtc下面将dtc-lexer.lex.c_shipped里的yylloc前加上extern</p>
+<p>jailhouse如果和内核存在定义冲突的问题以内核为准，修改jailhouse即可</p>
+<h3 id="编译jailhouse"><a class="header" href="#编译jailhouse">编译jailhouse</a></h3>
+<p>jailhouse版本采用v0.12然后手动添加dts和配置文件</p>
+<pre><code class="language-shell">git checkout v0.12
+</code></pre>
+<p>.c 文件添加位置 configs/arm64</p>
+<p>.dts 文件添加位置 configs/arm64/dts</p>
+<p>imx8mp.c</p>
+<pre><code class="language-C">/*
+ * i.MX8MM Target
+ *
+ * Copyright 2018 NXP
+ *
+ * Authors:
+ *  Peng Fan &lt;peng.fan@nxp.com&gt;
+ *
+ * This work is licensed under the terms of the GNU GPL, version 2.  See
+ * the COPYING file in the top-level directory.
+ *
+ * Reservation via device tree: reg = &lt;0x0 0xffaf0000 0x0 0x510000&gt;
+ */
+
+#include &lt;jailhouse/types.h&gt;
+#include &lt;jailhouse/cell-config.h&gt;
+
+struct {
+        struct jailhouse_system header;
+        __u64 cpus[1];
+        struct jailhouse_memory mem_regions[15];
+        struct jailhouse_irqchip irqchips[3];
+        struct jailhouse_pci_device pci_devices[2];
+} __attribute__((packed)) config = {
+        .header = {
+                .signature = JAILHOUSE_SYSTEM_SIGNATURE,
+                .revision = JAILHOUSE_CONFIG_REVISION,
+                .flags = JAILHOUSE_SYS_VIRTUAL_DEBUG_CONSOLE,
+                .hypervisor_memory = {
+                        .phys_start = 0xfdc00000,
+                        .size =       0x00400000,
+                },
+                .debug_console = {
+                        .address = 0x30890000,
+                        .size = 0x1000,
+                        .flags = JAILHOUSE_CON_TYPE_IMX |
+                                 JAILHOUSE_CON_ACCESS_MMIO |
+                                 JAILHOUSE_CON_REGDIST_4,
+                        .type = JAILHOUSE_CON_TYPE_IMX,
+                },
+                .platform_info = {
+                        .pci_mmconfig_base = 0xfd700000,
+                        .pci_mmconfig_end_bus = 0,
+                        .pci_is_virtual = 1,
+                        .pci_domain = 0,
+
+                        .arm = {
+                                .gic_version = 3,
+                                .gicd_base = 0x38800000,
+                                .gicr_base = 0x38880000,
+                                .maintenance_irq = 25,
+                        },
+                },
+                .root_cell = {
+                        .name = "imx8mp",
+
+                        .num_pci_devices = ARRAY_SIZE(config.pci_devices),
+                        .cpu_set_size = sizeof(config.cpus),
+                        .num_memory_regions = ARRAY_SIZE(config.mem_regions),
+                        .num_irqchips = ARRAY_SIZE(config.irqchips),
+                        /* gpt5/4/3/2 not used by root cell */
+                        .vpci_irq_base = 51, /* Not include 32 base */
+                },
+        },
+
+        .cpus = {
+                0xf,
+        },
+
+        .mem_regions = {
+                /* IVHSMEM shared memory region for 00:00.0 (demo )*/ {
+                        .phys_start = 0xfd900000,
+                        .virt_start = 0xfd900000,
+                        .size = 0x1000,
+                        .flags = JAILHOUSE_MEM_READ,
+                },
+                {
+                        .phys_start = 0xfd901000,
+                        .virt_start = 0xfd901000,
+                        .size = 0x9000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE ,
+                },
+                {
+                        .phys_start = 0xfd90a000,
+                        .virt_start = 0xfd90a000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE ,
+                },
+                {
+                        .phys_start = 0xfd90c000,
+                        .virt_start = 0xfd90c000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ,
+                },
+                {
+                        .phys_start = 0xfd90e000,
+                        .virt_start = 0xfd90e000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ,
+                },
+                /* IVSHMEM shared memory regions for 00:01.0 (networking) */
+                JAILHOUSE_SHMEM_NET_REGIONS(0xfda00000, 0),
+                /* IO */ {
+                        .phys_start = 0x00000000,
+                        .virt_start = 0x00000000,
+                        .size =       0x40000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_IO,
+                },
+                /* RAM 00*/ {
+                        .phys_start = 0x40000000,
+                        .virt_start = 0x40000000,
+                        .size = 0x80000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE,
+                },
+                /* Inmate memory */{
+                        .phys_start = 0x60000000,
+                        .virt_start = 0x60000000,
+                        .size = 0x10000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE | JAILHOUSE_MEM_DMA,
+                },
+                /* Loader */{
+                        .phys_start = 0xfdb00000,
+                        .virt_start = 0xfdb00000,
+                        .size = 0x100000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE,
+                },
+                /* OP-TEE reserved memory?? */{
+                        .phys_start = 0xfe000000,
+                        .virt_start = 0xfe000000,
+                        .size = 0x2000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE,
+                },
+                /* RAM04 */{
+                        .phys_start = 0x100000000,
+                        .virt_start = 0x100000000,
+                        .size = 0xC0000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE,
+                },
+        },
+
+        .irqchips = {
+                /* GIC */ {
+                        .address = 0x38800000,
+                        .pin_base = 32,
+                        .pin_bitmap = {
+                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+                        },
+                },
+                /* GIC */ {
+                        .address = 0x38800000,
+                        .pin_base = 160,
+                        .pin_bitmap = {
+                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+                        },
+                },
+                /* GIC */ {
+                        .address = 0x38800000,
+                        .pin_base = 288,
+                        .pin_bitmap = {
+                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+                        },
+                },
+        },
+
+        .pci_devices = {
+                { /* IVSHMEM 0000:00:00.0 (demo) */
+                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
+                        .domain = 0,
+                        .bdf = 0 &lt;&lt; 3,
+                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
+                        .shmem_regions_start = 0,
+                        .shmem_dev_id = 0,
+                        .shmem_peers = 3,
+                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_UNDEFINED,
+                },
+                { /* IVSHMEM 0000:00:01.0 (networking) */
+                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
+                        .domain = 0,
+                        .bdf = 1 &lt;&lt; 3,
+                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
+                        .shmem_regions_start = 5,
+                        .shmem_dev_id = 0,
+                        .shmem_peers = 2,
+                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_VETH,
+                },
+        },
+};
+</code></pre>
+<p>imx8mp-linux-demo.c</p>
+<pre><code class="language-C">/*
+ * iMX8MM target - linux-demo
+ *
+ * Copyright 2019 NXP
+ *
+ * Authors:
+ *  Peng Fan &lt;peng.fan@nxp.com&gt;
+ *
+ * This work is licensed under the terms of the GNU GPL, version 2.  See
+ * the COPYING file in the top-level directory.
+ */
+
+/*
+ * Boot 2nd Linux cmdline:
+ * export PATH=$PATH:/usr/share/jailhouse/tools/
+ * jailhouse cell linux imx8mp-linux-demo.cell Image -d imx8mp-evk-inmate.dtb -c "clk_ignore_unused console=ttymxc3,115200 earlycon=ec_imx6q,0x30890000,115200  root=/dev/mmcblk2p2 rootwait rw"
+ */
+#include &lt;jailhouse/types.h&gt;
+#include &lt;jailhouse/cell-config.h&gt;
+
+struct {
+        struct jailhouse_cell_desc cell;
+        __u64 cpus[1];
+        struct jailhouse_memory mem_regions[15];
+        struct jailhouse_irqchip irqchips[2];
+        struct jailhouse_pci_device pci_devices[2];
+} __attribute__((packed)) config = {
+        .cell = {
+                .signature = JAILHOUSE_CELL_DESC_SIGNATURE,
+                .revision = JAILHOUSE_CONFIG_REVISION,
+                .name = "linux-inmate-demo",
+                .flags = JAILHOUSE_CELL_PASSIVE_COMMREG,
+
+                .cpu_set_size = sizeof(config.cpus),
+                .num_memory_regions = ARRAY_SIZE(config.mem_regions),
+                .num_irqchips = ARRAY_SIZE(config.irqchips),
+                .num_pci_devices = ARRAY_SIZE(config.pci_devices),
+                .vpci_irq_base = 154, /* Not include 32 base */
+        },
+
+        .cpus = {
+                0xc,
+        },
+
+        .mem_regions = {
+                /* IVHSMEM shared memory region for 00:00.0 (demo )*/ {
+                        .phys_start = 0xfd900000,
+                        .virt_start = 0xfd900000,
+                        .size = 0x1000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd901000,
+                        .virt_start = 0xfd901000,
+                        .size = 0x9000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd90a000,
+                        .virt_start = 0xfd90a000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd90c000,
+                        .virt_start = 0xfd90c000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd90e000,
+                        .virt_start = 0xfd90e000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_ROOTSHARED,
+                },
+                /* IVSHMEM shared memory regions for 00:01.0 (networking) */
+                JAILHOUSE_SHMEM_NET_REGIONS(0xfda00000, 1),
+                /* UART2 earlycon */ {
+                        .phys_start = 0x30890000,
+                        .virt_start = 0x30890000,
+                        .size = 0x1000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_IO | JAILHOUSE_MEM_ROOTSHARED,
+                },
+                /* UART4 */ {
+                        .phys_start = 0x30a60000,
+                        .virt_start = 0x30a60000,
+                        .size = 0x1000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_IO,
+                },
+                /* SHDC3 */ {
+                        .phys_start = 0x30b60000,
+                        .virt_start = 0x30b60000,
+                        .size = 0x10000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_IO,
+                },
+                /* RAM: Top at 4GB Space */ {
+                        .phys_start = 0xfdb00000,
+                        .virt_start = 0,
+                        .size = 0x10000, /* 64KB */
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE | JAILHOUSE_MEM_LOADABLE,
+                },
+                /* RAM */ {
+                        /*
+                         * We could not use 0x80000000 which conflicts with
+                         * COMM_REGION_BASE
+                         */
+                        .phys_start = 0x60000000,
+                        .virt_start = 0x60000000,
+                        .size = 0x10000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE | JAILHOUSE_MEM_DMA |
+                                JAILHOUSE_MEM_LOADABLE,
+                },
+                /* communication region */ {
+                        .virt_start = 0x80000000,
+                        .size = 0x00001000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_COMM_REGION,
+                },
+        },
+
+        .irqchips = {
+                /* uart2/sdhc1 */ {
+                        .address = 0x38800000,
+                        .pin_base = 32,
+                        .pin_bitmap = {
+                                (1 &lt;&lt; (24 + 32 - 32)) | (1 &lt;&lt; (29 + 32 - 32))
+                        },
+                },
+                /* IVSHMEM */ {
+                        .address = 0x38800000,
+                        .pin_base = 160,
+                        .pin_bitmap = {
+                                0xf &lt;&lt; (154 + 32 - 160) /* SPI 154-157 */
+                        },
+                },
+        },
+
+        .pci_devices = {
+                { /* IVSHMEM 00:00.0 (demo) */
+                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
+                        .domain = 0,
+                        .bdf = 0 &lt;&lt; 3,
+                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
+                        .shmem_regions_start = 0,
+                        .shmem_dev_id = 2,
+                        .shmem_peers = 3,
+                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_UNDEFINED,
+                },
+                { /* IVSHMEM 00:01.0 (networking) */
+                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
+                        .domain = 0,
+                        .bdf = 1 &lt;&lt; 3,
+                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
+                        .shmem_regions_start = 5,
+                        .shmem_dev_id = 1,
+                        .shmem_peers = 2,
+                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_VETH,
+                },
+        },
+};
+</code></pre>
+<p>non-root imx8mp-evk-inmate.dts</p>
+<pre><code class="language-C">// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2019 NXP
+ */
+
+/dts-v1/;
+
+#include &lt;dt-bindings/interrupt-controller/arm-gic.h&gt;
+
+/ {
+        model = "Freescale i.MX8MP EVK";
+        compatible = "fsl,imx8mp-evk", "fsl,imx8mp";
+        interrupt-parent = &lt;&amp;gic&gt;;
+        #address-cells = &lt;2&gt;;
+        #size-cells = &lt;2&gt;;
+
+        aliases {
+                serial3 = &amp;uart4;
+                mmc2 = &amp;usdhc3;
+        };
+
+        cpus {
+                #address-cells = &lt;1&gt;;
+                #size-cells = &lt;0&gt;;
+
+                A53_2: cpu@2 {
+                        device_type = "cpu";
+                        compatible = "arm,cortex-a53";
+                        reg = &lt;0x2&gt;;
+                        clock-latency = &lt;61036&gt;; /* two CLK32 periods */
+                        next-level-cache = &lt;&amp;A53_L2&gt;;
+                        enable-method = "psci";
+                        #cooling-cells = &lt;2&gt;;
+                };
+
+                A53_3: cpu@3 {
+                        device_type = "cpu";
+                        compatible = "arm,cortex-a53";
+                        reg = &lt;0x3&gt;;
+                        clock-latency = &lt;61036&gt;; /* two CLK32 periods */
+                        next-level-cache = &lt;&amp;A53_L2&gt;;
+                        enable-method = "psci";
+                        #cooling-cells = &lt;2&gt;;
+                };
+
+                A53_L2: l2-cache0 {
+                        compatible = "cache";
+                };
+        };
+
+        psci {
+                compatible = "arm,psci-1.0";
+                method = "smc";
+        };
+
+        gic: interrupt-controller@38800000 {
+                compatible = "arm,gic-v3";
+                reg = &lt;0x0 0x38800000 0 0x10000&gt;, /* GIC Dist */
+                      &lt;0x0 0x38880000 0 0xC0000&gt;; /* GICR (RD_base + SGI_base) */
+                #interrupt-cells = &lt;3&gt;;
+                interrupt-controller;
+                interrupts = &lt;GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH&gt;;
+                interrupt-parent = &lt;&amp;gic&gt;;
+        };
+
+        timer {
+                compatible = "arm,armv8-timer";
+                interrupts = &lt;GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)&gt;, /* Physical Secure */
+                             &lt;GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)&gt;, /* Physical Non-Secure */
+                             &lt;GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)&gt;, /* Virtual */
+                             &lt;GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(6) | IRQ_TYPE_LEVEL_LOW)&gt;; /* Hypervisor */
+                clock-frequency = &lt;8333333&gt;;
+        };
+
+        clk_dummy: clock@7 {
+                compatible = "fixed-clock";
+                #clock-cells = &lt;0&gt;;
+                clock-frequency = &lt;0&gt;;
+                clock-output-names = "clk_dummy";
+        };
+
+        /* The clocks are configured by 1st OS */
+        clk_400m: clock@8 {
+                compatible = "fixed-clock";
+                #clock-cells = &lt;0&gt;;
+                clock-frequency = &lt;200000000&gt;;
+                clock-output-names = "200m";
+        };
+
+        clk_266m: clock@9 {
+                compatible = "fixed-clock";
+                #clock-cells = &lt;0&gt;;
+                clock-frequency = &lt;266000000&gt;;
+                clock-output-names = "266m";
+        };
+
+        osc_24m: clock@1 {
+                compatible = "fixed-clock";
+                #clock-cells = &lt;0&gt;;
+                clock-frequency = &lt;24000000&gt;;
+                clock-output-names = "osc_24m";
+        };
+
+        pci@fd700000 {
+                compatible = "pci-host-ecam-generic";
+                device_type = "pci";
+                bus-range = &lt;0 0&gt;;
+                #address-cells = &lt;3&gt;;
+                #size-cells = &lt;2&gt;;
+                #interrupt-cells = &lt;1&gt;;
+                interrupt-map-mask = &lt;0 0 0 7&gt;;
+                interrupt-map = &lt;0 0 0 1 &amp;gic GIC_SPI 154 IRQ_TYPE_EDGE_RISING&gt;,
+                                &lt;0 0 0 2 &amp;gic GIC_SPI 155 IRQ_TYPE_EDGE_RISING&gt;,
+                                &lt;0 0 0 3 &amp;gic GIC_SPI 156 IRQ_TYPE_EDGE_RISING&gt;,
+                                &lt;0 0 0 4 &amp;gic GIC_SPI 157 IRQ_TYPE_EDGE_RISING&gt;;
+                reg = &lt;0x0 0xfd700000 0x0 0x100000&gt;;
+                ranges = &lt;0x02000000 0x00 0x10000000 0x0 0x10000000 0x00 0x10000&gt;;
+        };
+
+        soc@0 {
+                compatible = "simple-bus";
+                #address-cells = &lt;1&gt;;
+                #size-cells = &lt;1&gt;;
+                ranges = &lt;0x0 0x0 0x0 0x3e000000&gt;;
+
+                aips3: bus@30800000 {
+                        compatible = "simple-bus";
+                        reg = &lt;0x30800000 0x400000&gt;;
+                        #address-cells = &lt;1&gt;;
+                        #size-cells = &lt;1&gt;;
+                        ranges;
+
+                        uart4: serial@30a60000 {
+                                compatible = "fsl,imx8mp-uart", "fsl,imx6q-uart";
+                                reg = &lt;0x30a60000 0x10000&gt;;
+                                interrupts = &lt;GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH&gt;;
+                                status = "disabled";
+                        };
+
+                        usdhc3: mmc@30b60000 {
+                                compatible = "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
+                                reg = &lt;0x30b60000 0x10000&gt;;
+                                interrupts = &lt;GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH&gt;;
+                                fsl,tuning-start-tap = &lt;20&gt;;
+                                fsl,tuning-step= &lt;2&gt;;
+                                status = "disabled";
+                        };
+                };
+        };
+};
+
+&amp;uart4 {
+        clocks = &lt;&amp;osc_24m&gt;,
+                &lt;&amp;osc_24m&gt;;
+        clock-names = "ipg", "per";
+        status = "okay";
+};
+
+&amp;usdhc3 {
+        clocks = &lt;&amp;clk_dummy&gt;,
+                &lt;&amp;clk_266m&gt;,
+                &lt;&amp;clk_400m&gt;;
+        clock-names = "ipg", "ahb", "per";
+        bus-width = &lt;8&gt;;
+        non-removable;
+        status = "okay";
+};
+</code></pre>
+<p>编译jailhouse命令如下，KDIR是指定jailhouse运行环境内核，因为部分dts文件需要配合内核中的文件进行，如果将所有dts挪到内核编译可以不指定KDIR</p>
+<pre><code class="language-shell">make -j($nproc) ARCH=arm64 KDIR=/home/ubuntu-base-18.04.5-base-arm64
+</code></pre>
+<h2 id="三启动linux"><a class="header" href="#三启动linux">三、启动Linux</a></h2>
+<p>实际上启动只需要一个Image和一个dtb即可，也可以使用已经编译好的文件直接启动</p>
+<p>把sd卡插入，拨码开关选择TF模式，连接串口后在启动时按住空格进入uboot模式，选择1进入uboot shell</p>
+<p>uboot指令如下:</p>
+<p><code>setenv mmcroot /dev/mmcblk1p1 rootwait rw; setenv fdt_file OK8MP-C-root.dtb; run mmcargs; ext4load mmc 1:1 ${loadaddr} home/OK8MP-linux-kernel/arch/arm64/boot/Image; ext4load mmc 1:1 ${fdt_addr} home/OK8MP-linux-kernel/arch/arm64/boot/dts/freescale/OK8MP-C-root.dtb; booti ${loadaddr} - ${fdt_addr}</code></p>
+<p>解释：</p>
+<p>指令中的以下部分均按照本机实际修改地址，如果不确定文件位置可以用ext4ls mmc 1:1 /等指令查看具体位置。出现问题最好把指令拆开一句句试验。</p>
+<p>mmcblk1p1: SD卡ext4文件系统分区</p>
+<p>OK8MP-C-root.dtb：所采用的dtb</p>
+<p>home/OK8MP_linux_kernel/arch/arm64/boot/Image：Image路径</p>
+<p>home/OK8MP_linux_kernel/arch/arm64/boot/dts/freescale/OK8MP-C-root.dtb：dtb路径</p>
+<p>成功启动后进入命令行，此时插入网线即可联网，可配置环境，安装软件，编译代码等，如果没有网络，因为我们提前编译好了内容也可以正常进行后续操作。</p>
+<h2 id="四根据需要安装内核与jailhouse可跳过"><a class="header" href="#四根据需要安装内核与jailhouse可跳过">四、根据需要安装内核与jailhouse（可跳过）</a></h2>
+<pre><code class="language-shell">su #进入系统后会发现环境有问题，因为之前到软件都是安装到root用户下的，需要先切到root
+cd /home/ubuntu-base-18.04.5-base-arm64
+make &amp;&amp; make install 
+cd /home/jailhouse &amp;&amp; make &amp;&amp; make install 
+# 因为jailhouse安装需要重新编译，如果编译环境有问题可以只复制bin文件到firmware即可，如下
+sudo cp /home/jailhouse/hypervisor/jailhouse.bin /lib/firmware
+</code></pre>
+<h2 id="五启动nonroot"><a class="header" href="#五启动nonroot">五、启动nonroot</a></h2>
+<p>连接硬件：打开两个串口窗口。
+<code>cat non.sh</code></p>
+<pre><code class="language-C">#!/bin/bash
+insmod /home/jailhouse/driver/jailhouse.ko
+jailhouse disabled
+jailhouse enable /home/jailhouse/configs/arm64/imx8mp.cell
+export PATH=$PATH:/home/jailhouse/tools/
+jailhouse cell linux /home/jailhouse/configs/arm64/imx8mp-linux-demo.cell /home/OK8MP_linux_kernel/arch/arm64/boot/Image -d /home/OK8MP_linux_kernel/arch/arm64/boot/dts/freescale/imx8mp-evk-inmate.dtb -c "clk_ignore_unused console=ttymxc3,115200 earlycon=ec_imx6q,0x30890000,115200  root=/dev/mmcblk2p2 rootwait rw"
+```% 
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap02/QemuRISC-V.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap02/FPGA-Rockechip.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap02/QemuRISC-V.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap02/FPGA-Rockechip.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

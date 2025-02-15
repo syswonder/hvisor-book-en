@@ -1,0 +1,424 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Implementation of ARM SMMU - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../../favicon.svg">
+        <link rel="shortcut icon" href="../../../favicon.png">
+        <link rel="stylesheet" href="../../../css/variables.css">
+        <link rel="stylesheet" href="../../../css/general.css">
+        <link rel="stylesheet" href="../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../../highlight.css">
+        <link rel="stylesheet" href="../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="arm-smmu技术文档"><a class="header" href="#arm-smmu技术文档">ARM-SMMU技术文档</a></h1>
+<p>摘要：介绍ARM-SMMU的开发过程。</p>
+<h2 id="背景知识"><a class="header" href="#背景知识">背景知识</a></h2>
+<p>简单介绍SMMMU的原理与作用。</p>
+<h3 id="dma是什么为什么需要iommu"><a class="header" href="#dma是什么为什么需要iommu">DMA是什么？为什么需要IOMMU？</a></h3>
+<p>运行在hvisor之上的虚拟机，需要和设备进行交互，但如果每次都等待CPU来主持这类工作，会使处理效率降低，那么就出现了DMA机制。<strong>DMA 是一种允许设备直接与内存交换数据而不需要 CPU 参与的机制。</strong></p>
+<p>那么我们可以大致得出虚拟机通过DMA和设备交互的过程，首先虚拟机发出DMA请求，告诉目标设备把数据写到哪个地方，然后设备根据地址写入内存。</p>
+<p>但上述过程需要考虑一些问题：</p>
+<ul>
+<li>hvisor对每个虚拟机都做了内存虚拟化，所以虚拟机发出的DMA请求的目标内存地址是GPA，在这里也叫IOVA，需要将这个地址转为真正的PA，才能写入到物理内存的正确位置。</li>
+<li>再者，如果不对IOVA的范围加以限制，那么代表着可以通过DMA机制访问任何一个内存地址，从而造成无法预见的严重后果。</li>
+</ul>
+<p>所以我们需要一个既能帮我们做地址转换，又能保证操作地址的合法性的机构，就像MMU内存管理单元一样，这个机构就叫<strong>IOMMU</strong>，在Arm架构中它有另一个名字叫<strong>SMMU</strong>（后续都称SMMU）<strong>。</strong></p>
+<p>现在你知道了，SMMU可以将虚拟地址转为物理地址，从而保证设备直接访问内存的合法性。</p>
+<h3 id="smmu具体要做的工作"><a class="header" href="#smmu具体要做的工作">SMMU具体要做的工作</a></h3>
+<p>上面说到SMMU的功能类似MMU，MMU的作用对象是虚拟机或者应用程序，而SMMU的作用对象是每个设备，每个设备以sid作为标识，对应的表叫做<strong>stream table</strong>。该表以设备的sid作为索引，PCI设备的sid可以从BDF号获取：sid = (B &lt;&lt; 5) | (D &lt;&lt; 3) | F。</p>
+<h2 id="开发工作"><a class="header" href="#开发工作">开发工作</a></h2>
+<p>目前我们在Qemu中实现了对SMMUv3的stage-2地址转换支持，创建简单的线性表，并且使用PCI设备进行了简单的验证。</p>
+<p>IOMMU的工作还未并入主线，可以切换到IOMMU分支查看。</p>
+<h3 id="整体思路"><a class="header" href="#整体思路">整体思路</a></h3>
+<p>我们将PCI HOST直通给zone0，即在提供给zone0的设备树中加上PCI节点，将对应的内存地址在zone0的第二阶段页表中做好映射，并确保中断注入正常。那么zone0就会自己去探测PCI设备并进行配置，而我们在hvisor中只需要做好SMMU的配置工作就好。</p>
+<h3 id="qemu参数"><a class="header" href="#qemu参数">Qemu参数</a></h3>
+<p>在 <code>machine</code> 中添加 <code>iommu=smmuv3</code> 以开启SMMUv3支持，并在 <code>global</code> 中添加 <code>arm-smmuv3.stage=2</code> 开启第二阶段地址翻译。</p>
+<p>注意在Qemu中尚不支持嵌套翻译，如果不指出 <code>stage=2</code> ，则默认只支持第一阶段地址翻译，请使用Qemu-8.1以上版本，低版本中不支持开启第二阶段地址翻译。</p>
+<p>添加PCI设备时请注意开启 <code>iommu_platform=on</code> 。</p>
+<p>addr可以指定该设备的bdf号。</p>
+<p><strong>在Qemu模拟的PCI总线中，除了PCI HOST，还有一个默认的网卡设备，所以其余添加的设备的addr参数必须从2.0开始。</strong></p>
+<pre><code>// scripts/qemu-aarch64.mk
+
+QEMU_ARGS := -machine virt,secure=on,gic-version=3,virtualization=on,iommu=smmuv3
+QEMU_ARGS += -global arm-smmuv3.stage=2
+
+QEMU_ARGS += -device virtio-blk-pci,drive=Xa003e000,disable-legacy=on,disable-modern=off,iommu_platform=on,addr=2.0
+</code></pre>
+<h3 id="在hvisor的页表中映射smmu相关的内存"><a class="header" href="#在hvisor的页表中映射smmu相关的内存">在hvisor的页表中映射SMMU相关的内存</a></h3>
+<p>查阅Qemu的源码可知VIRT_SMMU对应的内存区域起始地址为0x09050000，大小为0x20000，我们需要访问这个区域，所以在hvisor的页表中必须进行映射。</p>
+<pre><code>// src/arch/aarch64/mm.rs
+
+pub fn init_hv_page_table(fdt: &amp;fdt::Fdt) -&gt; HvResult {
+    hv_pt.insert(MemoryRegion::new_with_offset_mapper(
+        smmuv3_base(),
+        smmuv3_base(),
+        smmuv3_size(),
+        MemFlags::READ | MemFlags::WRITE,
+    ))?;
+}
+</code></pre>
+<h3 id="smmuv3数据结构"><a class="header" href="#smmuv3数据结构">SMMUv3数据结构</a></h3>
+<p>该结构包含了将会访问的SMMUv3的内存区域的引用，是否支持二级表，sid的最大位数，以及stream table的基地址和分配的页帧。</p>
+<p>其中的rp是所定义的 <code>RegisterPage</code> 的引用，<code>RegisterPage</code> 根据SMMUv3手册中第六章的偏移量进行设置，读者可自行查阅。</p>
+<pre><code>// src/arch/aarch64/iommu.rs
+
+pub struct Smmuv3{
+    rp:&amp;'static RegisterPage,
+
+    strtab_2lvl:bool,
+    sid_max_bits:usize,
+
+    frames:Vec&lt;Frame&gt;,
+
+    // strtab
+    strtab_base:usize,
+
+    // about queues...
+}
+</code></pre>
+<h3 id="new"><a class="header" href="#new">new()</a></h3>
+<p>在完成映射工作后，我们便可以引用对应的这段寄存器区域。</p>
+<pre><code>impl Smmuv3{
+    fn new() -&gt; Self{
+        let rp = unsafe {
+            &amp;*(SMMU_BASE_ADDR as *const RegisterPage)
+        };
+
+        let mut r = Self{
+            ...
+        };
+
+        r.check_env();
+
+        r.init_structures();
+
+        r.device_reset();
+
+        r
+    }
+}
+</code></pre>
+<h3 id="check_env"><a class="header" href="#check_env">check_env()</a></h3>
+<p>检查当前环境支持哪个阶段的地址转换、支持什么类型的流表、支持多少位的sid等信息。</p>
+<p>以其中检查环境支持哪种表格式为例，支持的表的类型在 <code>IDR0</code> 寄存器中，通过 <code>self.rp.IDR0.get() as usize</code> 获取 <code>IDR0</code> 的数值，通过 <code>extract_bit</code> 进行截取，获取 <code>ST_LEVEL</code> 字段的值，根据手册可知，0b00代表支持线性表，0b01代表支持线性表和二级表，0b1x为保留位，我们可以根据该信息选择创建什么类型的流表。</p>
+<pre><code>impl Smmuv3{
+    fn check_env(&amp;mut self){
+        let idr0 = self.rp.IDR0.get() as usize;
+
+        info!("Smmuv3 IDR0:{:b}",idr0);
+
+        // supported types of stream tables.
+        let stb_support = extract_bits(idr0, IDR0_ST_LEVEL_OFF, IDR0_ST_LEVEL_LEN);
+        match stb_support{
+            0 =&gt; info!("Smmuv3 Linear Stream Table Supported."),
+            1 =&gt; {info!("Smmuv3 2-level Stream Table Supoorted.");
+                self.strtab_2lvl = true;
+            }
+            _ =&gt; info!("Smmuv3 don't support any stream table."),
+        }
+
+	...
+    }
+}
+</code></pre>
+<h3 id="init_linear_strtab"><a class="header" href="#init_linear_strtab">init_linear_strtab()</a></h3>
+<p>我们需要支持第二阶段地址转换，且系统中的设备并不多，所以我们选择用线性表。</p>
+<p>在申请线性表需要的空间时，我们应该根据当前的sid的最多位数得到表项的个数，乘上每个表项需要的空间 <code>STRTAB_STE_SIZE</code> ，进而知道需要申请多少个页帧。但SMMUv3对stream table的起始地址有着严格的要求，起始地址的低 (5+sid_max_bits) 位必须为0。</p>
+<p>由于当前的hvisor中暂不支持这样申请空间，我们在确保安全的情况下，申请一段空间，并在这段空间里面选定一个符合条件的地址作为表基址，虽然这样会造成一些空间的浪费。</p>
+<p>申请了空间后，我们可以将这个表的基地址填入 <code>STRTAB_BASE</code> 这个寄存器：</p>
+<pre><code>	let mut base = extract_bits(self.strtab_base, STRTAB_BASE_OFF, STRTAB_BASE_LEN);
+	base = base &lt;&lt; STRTAB_BASE_OFF;
+	base |= STRTAB_BASE_RA;
+	self.rp.STRTAB_BASE.set(base as _);
+</code></pre>
+<p>接着我们还要设置 <code>STRTAB_BASE_CFG</code> 寄存器，来表明我们使用的表的格式是线性表或者二级表，以及表项的个数（使用以LOG2的形式表示，即SID的最大位数）：</p>
+<pre><code>        // format : linear table
+        cfg |= STRTAB_BASE_CFG_FMT_LINEAR &lt;&lt; STRTAB_BASE_CFG_FMT_OFF;
+
+        // table size : log2(entries)
+        // entry_num = 2^(sid_bits)
+        // log2(size) = sid_bits
+        cfg |= self.sid_max_bits &lt;&lt; STRTAB_BASE_CFG_LOG2SIZE_OFF;
+
+        // linear table -&gt; ignore SPLIT field
+        self.rp.STRTAB_BASE_CFG.set(cfg as _);
+</code></pre>
+<h3 id="init_bypass_stesidusize"><a class="header" href="#init_bypass_stesidusize">init_bypass_ste(sid:usize)</a></h3>
+<p>当前我们还未配置任何相关信息，需要先将所有表项置为默认状态。</p>
+<p>对于每个sid，根据表基址找到表项的地址，即合法位为0，地址翻译设置为 <code>BYPASS</code>。</p>
+<pre><code>	let base = self.strtab_base + sid * STRTAB_STE_SIZE;
+	let tab = unsafe{&amp;mut *(base as *mut [u64;STRTAB_STE_DWORDS])};
+
+	let mut val:usize = 0;
+	val |= STRTAB_STE_0_V;
+	val |= STRTAB_STE_0_CFG_BYPASS &lt;&lt; STRTAB_STE_0_CFG_OFF;
+</code></pre>
+<h3 id="device_reset"><a class="header" href="#device_reset">device_reset()</a></h3>
+<p>上面我们做了一些准备工作，但还需要一些额外的配置，比如使能SMMU，否则会导致SMMU处于disabled状态。</p>
+<pre><code>	let cr0 = CR0_SMMUEN;
+	self.rp.CR0.set(cr0 as _);
+</code></pre>
+<h3 id="write_stesidusizevmidusizeroot_ptusize"><a class="header" href="#write_stesidusizevmidusizeroot_ptusize">write_ste(sid:usize,vmid:usize,root_pt:usize)</a></h3>
+<p>该方法用于配置具体设备的信息。</p>
+<p>首先我们同样要根据sid找到对应的表项地址。</p>
+<pre><code>	let base = self.strtab_base + sid * STRTAB_STE_SIZE;
+        let tab = unsafe{&amp;mut *(base as *mut [u64;STRTAB_STE_DWORDS])};
+</code></pre>
+<p>第二步我们要指明，这个设备的相关信息，我们是要用来进行第二阶段地址翻译的，且这个表项是合法的了。</p>
+<pre><code>        let mut val0:usize = 0;
+        val0 |= STRTAB_STE_0_V;
+        val0 |= STRTAB_STE_0_CFG_S2_TRANS &lt;&lt; STRTAB_STE_0_CFG_OFF;
+</code></pre>
+<p>第三步我们要说明当前这个设备分配给哪个虚拟机来用，并且开启第二阶段页表遍历，<code>S2AA64</code> 代表第二阶段翻译表是基于aarch64的，<code>S2R</code> 代表启用错误记录。</p>
+<pre><code>        let mut val2:usize = 0;
+        val2 |= vmid &lt;&lt; STRTAB_STE_2_S2VMID_OFF;
+        val2 |= STRTAB_STE_2_S2PTW;
+        val2 |= STRTAB_STE_2_S2AA64;
+        val2 |= STRTAB_STE_2_S2R;
+</code></pre>
+<p>最后一步就是要指出第二阶段翻译的依据，就是在hvisor中的对应虚拟机的页表，只需要将页表基地址填入对应位置即可，即 <code>S2TTB</code> 这个字段。</p>
+<p>这里我们也需要说明这个页表的配置信息，这样SMMU才知道这个页表的格式等信息，才能使用这个页表，即 <code>VTCR</code> 这个字段。</p>
+<pre><code>	let vtcr = 20 + (2&lt;&lt;6) + (1&lt;&lt;8) + (1&lt;&lt;10) + (3&lt;&lt;12) + (0&lt;&lt;14) + (4&lt;&lt;16);
+        let v = extract_bits(vtcr as _, 0, STRTAB_STE_2_VTCR_LEN);
+        val2 |= v &lt;&lt; STRTAB_STE_2_VTCR_OFF;
+
+        let vttbr = extract_bits(root_pt, STRTAB_STE_3_S2TTB_OFF, STRTAB_STE_3_S2TTB_LEN);
+</code></pre>
+<h2 id="初始化以及设备分配"><a class="header" href="#初始化以及设备分配">初始化以及设备分配</a></h2>
+<p>在 <code>src/main.rs</code> 中，进行了hvisor的页表初始化以后（映射了SMMU相关区域），可以进行SMMU的初始化。</p>
+<pre><code>fn primary_init_early(dtb: usize) {
+    ...
+
+    crate::arch::mm::init_hv_page_table(&amp;host_fdt).unwrap();
+
+    info!("Primary CPU init hv page table OK.");
+
+    iommu_init();
+
+    zone_create(0,ROOT_ENTRY,ROOT_ZONE_DTB_ADDR as _, DTB_IPA).unwrap();
+    INIT_EARLY_OK.store(1, Ordering::Release);
+}
+</code></pre>
+<p>接着需要分配设备，这一步我们在创建虚拟机的时候同步完成，目前我们只将设备分配给zone0使用。</p>
+<pre><code>// src/zone.rs
+
+pub fn zone_create(
+    zone_id: usize,
+    guest_entry: usize,
+    dtb_ptr: *const u8,
+    dtb_ipa: usize,
+) -&gt; HvResult&lt;Arc&lt;RwLock&lt;Zone&gt;&gt;&gt; {
+    ...
+
+    if zone_id==0{
+        // add_device(0, 0x8, zone.gpm.root_paddr());
+        iommu_add_device(zone_id, BLK_PCI_ID, zone.gpm.root_paddr());
+    }
+  
+    ...
+}
+</code></pre>
+<h2 id="简单验证"><a class="header" href="#简单验证">简单验证</a></h2>
+<p>在qemu启动参数中开启 <code>-trace smmuv3_*</code> ，即可看到相关输出：</p>
+<pre><code>smmuv3_config_cache_hit Config cache HIT for sid=0x10 (hits=1469, misses=1, hit rate=99)
+smmuv3_translate_success smmuv3-iommu-memory-region-16-2 sid=0x10 iova=0x8e043242 translated=0x8e043242 perm=0x3
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../../chap04/subchap03/IOMMU/IOMMU-Define.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../../chap04/subchap03/IOMMU/RISC-IOMMU.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../../chap04/subchap03/IOMMU/IOMMU-Define.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../../chap04/subchap03/IOMMU/RISC-IOMMU.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../../elasticlunr.min.js"></script>
+        <script src="../../../mark.min.js"></script>
+        <script src="../../../searcher.js"></script>
+
+        <script src="../../../clipboard.min.js"></script>
+        <script src="../../../highlight.js"></script>
+        <script src="../../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../../assets/fzf.umd.js"></script>
+        <script src="../../../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

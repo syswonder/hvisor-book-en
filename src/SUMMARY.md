@@ -6,11 +6,11 @@
 
 - [Overview of hvisor](./chap01/Overview.md)
 
-- [Instruction Sets and Processors Supported by hvisor](./chap01/ISA.md)
+- [Instruction sets and processors supported by hvisor](./chap01/ISA.md)
 
-- [Hardware Platforms Supported by hvisor](./chap01/Board.md)
+- [Hardware platforms supported by hvisor](./chap01/Board.md)
 
-# Quick Start Guide for hvisor
+# hvisor Quick Start Guide
 
 - [Quick Start with Qemu AArch64](./chap02/QemuAArch64.md)
 
@@ -24,13 +24,13 @@
 
 - [Quick Start with Xilinx ZCU102 hvisor](./chap02/subchap01/Xilinx-ZCU102.md)
 
-	- [Boot hvisor on Qemu ZCU102](./chap02/subchap01/Qemu-ZCU102.md)
+	- [Starting hvisor on Qemu ZCU102](./chap02/subchap01/Qemu-ZCU102.md)
 	
-	- [Multi-mode Boot hvisor on Board ZCU102](./chap02/subchap01/Board-ZCU102.md)
+	- [Multi-mode booting on Board ZCU102 hvisor](./chap02/subchap01/Board-ZCU102.md)
 	
-	- [Nonroot Boot on ZCU102](./chap02/subchap01/Nonroot-ZCU102.md)
+	- [Nonroot boot on ZCU102](./chap02/subchap01/Nonroot-ZCU102.md)
 	
-    - [UBOOT FIT Image Creation, Loading, and Booting](./chap02/subchap01/UbootFitImage-ZCU102.md)
+    - [UBOOT FIT image creation, loading, and booting](./chap02/subchap01/UbootFitImage-ZCU102.md)
 
 - [Quick Start with FPGA Xiangshan Kunming Lake]()
 
@@ -41,9 +41,9 @@
 
 - [Boot Management for Linux VM](./chap03/BootRootLinux.md)
 
-- [Boot Two VMs: Linux1 and Linux2](./chap03/BootNonRootLinux.md)
+- [Booting two VMs: Linux1 and Linux2](./chap03/BootNonRootLinux.md)
 
-- [Boot Two VMs: Linux and RTOS](./chap03/BootNonRootRTOS.md)
+- [Booting two VMs: Linux and RTOS](./chap03/BootNonRootRTOS.md)
 
 - [Configuration and Management of ZONE](./chap03/ZoneConfig.md)
 
@@ -51,7 +51,7 @@
 
 - [Using VirtIO](./chap03/VirtIOUseage.md)
 
-# Architecture and Implementation of hvisor
+# hvisor Architecture and Implementation
 
 - [Architecture of hvisor](./chap04/Structure.md)
 - [Boot and Operation of hvisor](./chap04/BootAndRun.md)
@@ -88,10 +88,10 @@
     - [Console](./chap04/subchap03/VirtIO/ConsoleDevice.md)
     - [GPU]()
 - [PCI Virtualization](./chap04/subchap03/PCI-Virtualization.md)
-- [Hvisor Management Tools](./chap04/subchap04/ManageTools.md)
+- [hvisor Management Tools](./chap04/subchap04/ManageTools.md)
   
     - [Hypercall](./chap04/subchap04/HyperCall.md)
 
-# Future Plans for hvisor
+# hvisor's Planning
 
 - [TODO]()

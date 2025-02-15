@@ -1,18 +1,18 @@
-# Zone的配置和管理
+# Configuration and Management of Zones
 
-hvisor项目作为一款轻量级的hypervisor，它使用了Type-1架构，允许在硬件之上直接运行多个虚拟机（zones）。下面是对zone配置和管理的关键点的详细说明：
+The hvisor project, as a lightweight hypervisor, uses a Type-1 architecture that allows multiple virtual machines (zones) to run directly on top of hardware. Below is a detailed explanation of the key points of zone configuration and management:
 
-## 资源分配
+## Resource Allocation
 
-资源如CPU、内存、设备和中断对每个zone都是静态分配的，这意味着一旦分配，这些资源就不会在zones之间动态调度。
+Resources such as CPU, memory, devices, and interrupts are statically allocated to each zone, meaning that once allocated, these resources will not be dynamically scheduled between zones.
 
-## Root Zone配置
+## Root Zone Configuration
 
-根zone的配置是硬编码在hvisor内部的，以Rust语言编写，并表现为一个C风格的结构体HvZoneConfig。这个结构体包含了zone ID、CPU数量、内存区域、中断信息、内核和设备树二进制（DTB）的物理地址与大小等关键信息。
+The configuration of the root zone is hardcoded inside hvisor, written in Rust language, and presented as a C-style structure HvZoneConfig. This structure contains key information such as zone ID, number of CPUs, memory regions, interrupt information, physical addresses and sizes of the kernel and device tree binaries (DTB).
 
-## Non-root Zones配置
+## Non-root Zones Configuration
 
-非root zones的配置则存储在root linux的文件系统中，通常以JSON格式表示。例如：
+The configuration of non-root zones is stored in the file system of root Linux, usually represented in JSON format. For example:
 
 ```json
     {
@@ -48,12 +48,12 @@ hvisor项目作为一款轻量级的hypervisor，它使用了Type-1架构，允�
     }
 ```
 
-- `arch`字段指定了目标架构（例如arm64）。
-- `cpus`是一个列表，指明了分配给该zone的CPU核心ID。
-- `memory_regions`描述了不同类型的内存区域及其物理和虚拟起始地址与大小。
-- `interrupts`列出了分配给zone的中断号。
-- `kernel_filepath`和`dtb_filepath`分别指明了内核和设备树二进制文件的路径。
-- `kernel_load_paddr`和`dtb_load_paddr`则是内核和设备树二进制在物理内存中的加载地址。
-- `entry_point`指定了内核的入口点地址。
+- The `arch` field specifies the target architecture (e.g., arm64).
+- `cpus` is a list indicating the CPU core IDs allocated to the zone.
+- `memory_regions` describes different types of memory regions along with their physical and virtual start addresses and sizes.
+- `interrupts` lists the interrupt numbers allocated to the zone.
+- `kernel_filepath` and `dtb_filepath` indicate the paths of the kernel and device tree binary files.
+- `kernel_load_paddr` and `dtb_load_paddr` are the physical memory load addresses for the kernel and device tree binaries.
+- `entry_point` specifies the entry point address of the kernel.
 
-root linux的管理工具负责读取JSON配置文件并将其转换为C风格的结构体，随后传递给hvisor以启动非root zones。
+The management tool of root Linux is responsible for reading the JSON configuration file and converting it into a C-style structure, which is then passed to hvisor to start non-root zones.

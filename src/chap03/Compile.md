@@ -1,46 +1,46 @@
-# 如何编译
+# How to Compile
 
-## 使用 Docker 编译
-### 1. 安装 Docker
+## Compiling with Docker
+### 1. Install Docker
 ```bash
 sudo snap install docker
 ```
-也可参考 [Docker 官方文档](https://docs.docker.com/install/) 安装 Docker。
+You can also refer to the [Docker official documentation](https://docs.docker.com/install/) to install Docker.
 
-### 2. 构建镜像
+### 2. Build the image
 
 ```bash
 make build_docker
 ```
 
-此步骤构建一个 Docker 镜像，自动构建编译所需的全部依赖。
+This step builds a Docker image, automatically creating all the dependencies required for compilation.
 
-### 3. 运行容器
+### 3. Run the container
 
 ```bash
 make docker
 ```
-此步骤会启动一个容器，将当前目录挂载到容器中，并进入容器的 shell。
+This step starts a container, mounts the current directory into the container, and enters the container's shell.
 
-### 4. 编译
+### 4. Compile
 
-在容器中执行以下命令编译即可编译。
+Execute the following command in the container to compile.
 ```bash
 make all
 ```
 
-## 使用本地环境编译
+## Compiling with Local Environment
 
-### 1. 安装 RustUp 与 Cargo
+### 1. Install RustUp and Cargo
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
 ```
 
-### 2. 安装工具链
+### 2. Install the toolchain
 
-目前项目使用的工具链如下：
+The toolchain currently used by the project is as follows:
 
  - Rust nightly 2023-07-12
  - [rustfmt](https://crates.io/crates/rustfmt)
@@ -48,23 +48,23 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
  - [cargo-binutils](https://crates.io/crates/cargo-binutils/0.3.6)
  - rust-src
  - llvm-tools-preview
- - taget: aarch64-unknown-none
+ - target: aarch64-unknown-none
 
-可以自行检查是否安装了这些工具，也可以使用以下命令安装：
+You can check if these tools are installed on your own, or use the following commands to install:
 
-#### (1) 安装 toml-cli 和 cargo-binutils
+#### (1) Install toml-cli and cargo-binutils
 
 ```bash
 cargo install toml-cli cargo-binutils
 ```
 
-#### (2) 安装目标平台交叉编译工具链
+#### (2) Install the target platform cross-compilation toolchain
 
 ```bash
 rustup target add aarch64-unknown-none
 ```
 
-#### (3) 解析 rust-toolchain.toml 安装 Rust 工具链
+#### (3) Parse rust-toolchain.toml to install the Rust toolchain
 
 ```bash
 RUST_VERSION=$(toml get -r rust-toolchain.toml toolchain.channel) && \
@@ -72,7 +72,7 @@ Components=$(toml get -r rust-toolchain.toml toolchain.components | jq -r 'join(
 rustup install $RUST_VERSION && \
 rustup component add --toolchain $RUST_VERSION $Components
 ```
-#### (4) 编译
+#### (4) Compile
 
 ```bash
 make all

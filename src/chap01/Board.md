@@ -2,6 +2,6 @@
 
 - [x] QEMU
 
-# hvisor soon to be supported hardware platforms
+# hvisor upcoming hardware platforms
 
 - [ ] OKMX8MP-C

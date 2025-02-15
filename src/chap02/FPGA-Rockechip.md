@@ -37,7 +37,7 @@ cd uintr-rocket-chip
 
 
 
-## 在RocketChip中开启H扩展
+## Enabling H Extension in RocketChip
 
 ```shell
 vim path/to/repo/common/src/main/scala/Configs.scala

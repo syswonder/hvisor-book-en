@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Multi-mode Boot hvisor on Board ZCU102 - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="board-zcu102-hvisor-多模式启动"><a class="header" href="#board-zcu102-hvisor-多模式启动">Board ZCU102 hvisor 多模式启动</a></h1>
+<h2 id="在-zcu102-开发板-sd-mode-下启动-hvisor"><a class="header" href="#在-zcu102-开发板-sd-mode-下启动-hvisor">在 ZCU102 开发板 SD mode 下启动 Hvisor</a></h2>
+<h3 id="准备-sd-卡"><a class="header" href="#准备-sd-卡">准备 SD 卡</a></h3>
+<ol>
+<li>准备一块标准 SD 卡，对其进行分区，一块为 Boot 分区（FAT32），其余为文件系统分区（EXT4），windows 分区可以使用 <a href="https://www.diskgenius.cn/download.php">DiskGenius</a>，Linux 分区可以使用 <a href="https://www.cnblogs.com/renshengdezheli/p/13941563.html">fdisk</a>、<a href="https://blog.csdn.net/linkedin_35878439/article/details/82020925">mkfs</a></li>
+<li>准备一个文件系统，将其内容拷贝到任一文件系统分区中，可以参考 《NXPIMX8》 制作 Ubuntu 文件系统、也可以直接使用 ZCU102 BSP 中的文件系统。</li>
+<li>将 <code>zcu102-root-aarch64.dtb、Image、hvisor</code> 拷贝到 Boot 分区中。</li>
+<li>在 SD mode 下，需要提供从 SD卡中提供 ATF、Uboot，因此将 ZCU102 BSP 中<code>pre-built/linux/images/boot.scr 和 BOOT.BIN</code> 拷贝到 BOOT 分区中。</li>
+</ol>
+<h4 id="启动-zcu102"><a class="header" href="#启动-zcu102">启动 ZCU102</a></h4>
+<ol>
+<li>将 ZCU102 设置为 SD mode，插入 SD 卡，连接串口，上电</li>
+<li>输入任意按键打断 Uboot 自动脚本执行，运行下述命令启动 hvisor 及 root linux:</li>
+</ol>
+<pre><code>fatload mmc 0:1 0x40400000 hvisor;fatload mmc 0:1 0x40000000 zcu102-root-aarch64.dtb
+fatload mmc 0:1 0x04000000 zcu102-root-aarch64.dtb;fatload mmc 0:1 0x00200000 Image;bootm 0x40400000 - 0x40000000
+</code></pre>
+<ol start="3">
+<li>如果成功启动，将可以在串口看到 hvisor 信息以及 linux 信息，最终进入文件系统。</li>
+</ol>
+<h2 id="在-zcu102-开发板-jtag-mode-下启动-hvisor"><a class="header" href="#在-zcu102-开发板-jtag-mode-下启动-hvisor">在 ZCU102 开发板 Jtag mode 下启动 Hvisor</a></h2>
+<p>首先将板子附带的两个线缆连接到板子的 JTAG 和 UART 接口上，另一端通过 USB 连接到 PC。</p>
+<p>然后在命令行打开一个 petalinux 工程，确保工程已经编译过并生成了对应的启动文件（vmlinux、BOOT.BIN等），之后进入工程根目录运行 [1]：</p>
+<pre><code class="language-bash">petalinux-boot --jtag --prebuilt 2
+</code></pre>
+<p>其中 prebuilt 代表启动的层次：</p>
+<ul>
+<li><strong>Level 1</strong>: 只下载 FPGA bitstream，启动 FSBL 和 PMUFW</li>
+<li><strong>Level 2</strong>: 下载 FPGA bitstream 并启动 UBOOT，并启动 FSBL、PMUFW 和 TF-A（Trusted Firmware-A [2]）</li>
+<li><strong>Level 3</strong>: 下载并启动 linux，并加载或启动 FPGA bitstream、FSBL、PMUFW、TF-A、UBOOT</li>
+</ul>
+<p>之后 JTAG 会通过 JTAG 线把对应的文件下载到板子上（保存到指的内存地址），并启动对应的 bootloader，具体官方的 UBOOT 默认脚本参见工程镜像目录的 boot.scr 文件。</p>
+<p>由于 hvisor 需要单独的 UBOOT 命令和自制的 fitImage 启动，请参考 <a href="../../chap02/subchap01/UbootFitImage-ZCU102.html">UBOOT FIT 镜像制作、加载与启动</a>。</p>
+<p>制作好 fitImage 后，请替换 petalinux images生成目录内的文件（Image.ub），使得 JTAG 加载我们自己制作的 fitImage 到 petalinux 工程配置好的默认 FIT 镜像加载地址，这样 JTAG 启动时会将我们的 fitImage 通过 JTAG 线加载到板子内存对应的地址中，之后再通过 uboot 命令行 extract 和 bootm。</p>
+<p>另一个 UART 线可用于以观察 ZCU102 板子的输出（包括 FSBL、UBOOT、linux 等输出），可以通过 <code>screen</code> / <code>gtkterm</code> / <code>termius</code> / <code>minicom</code> 等串口工具查看。</p>
+<div class="warning">
+    <h3 id="请注意"><a class="header" href="#请注意">请注意</a></h3>
+    <p> 由于 petalinux 规定了一些固定内存地址，如 linux kernel、fitImage、DTB 的默认加载地址（可在 petalinux 编译工程时配置），由于我们需要加载启动自制的 fitImage，目前发现的问题是如果 root linux dtb 在 its 中所写的加载地址和 petalinux 编译时的加载地址一致，会导致该 dtb 被覆盖为默认的 petalinux dtb，从而导致root linux接受到错误的 dtb 而无法启动。因此需要在编译时指定和 petalinux 默认 dtb/fitImage 加载地址不同的地址，以防止出现其他问题。
+</div>
+<h1 id="参考文献"><a class="header" href="#参考文献">参考文献</a></h1>
+<p>[1] PetaLinux Tools Documentation: Reference Guide (UG1144).<a href="https://docs.amd.com/r/2023.1-English/ug1144-petalinux-tools-reference-guide/Booting-a-PetaLinux-Image-on-Hardware-with-JTAG">https://docs.amd.com/r/2023.1-English/ug1144-petalinux-tools-reference-guide/Booting-a-PetaLinux-Image-on-Hardware-with-JTAG</a>
+[2] Trusted Firmware-A Documentation.<a href="https://trustedfirmware-a.readthedocs.io/en/latest/">https://trustedfirmware-a.readthedocs.io/en/latest/</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../chap02/subchap01/Qemu-ZCU102.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../chap02/subchap01/Nonroot-ZCU102.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../chap02/subchap01/Qemu-ZCU102.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../chap02/subchap01/Nonroot-ZCU102.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/fzf.umd.js"></script>
+        <script src="../../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

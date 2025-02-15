@@ -1,29 +1,30 @@
-# 总体结构
-AIA主要包括两个部分，消息中断控制器 IMSIC 和高级平台级中断控制器 APLIC ，总体结构如图所示
+# Overall Structure
+AIA mainly includes two parts, the Interrupt Message Service Controller (IMSIC) and the Advanced Platform-Level Interrupt Controller (APLIC), with the overall structure shown in the figure below.
 
 <img src="../img/riscv_aia_struct.jpg"  style="zoom: 50%;" />
 
-外设既可以选择发送消息中断，也可以选择通过线连接的方式发送有线中断。
+Peripherals can choose to send message interrupts or send wired interrupts via line connections.
 
-如果外设 A 支持MSI，那么只需要向指定 hart 的中断文件写入指定的数据，之后 IMSIC 就会向目标处理器投送一个中断。
+If peripheral A supports MSI, it only needs to write the specified data to the interrupt file of the designated hart, and then IMSIC will deliver an interrupt to the target processor.
 
-对于所有设备，都可以通过中断线与 APLIC 连接， APLIC 将会根据配置，选择中断投送模式为：
-* 有线中断
+For all devices, they can connect to APLIC via an interrupt line, and APLIC will choose the interrupt delivery mode according to the configuration:
+* Wired interrupt
 * MSI
 
-在hvisor中，中断的投送模式为 MSI
+In hvisor, the interrupt delivery mode is MSI.
 
-在hvisor中使用 `IRQ=aia`开启 AIA 规范后，时钟中断的处理仍然一致，软件中断和外部中断的处理有些变化
-# 外部中断
+After enabling the AIA specification with `IRQ=aia` in hvisor, the handling of clock interrupts remains consistent, while the handling of software interrupts and external interrupts changes.
+
+# External Interrupt
 ## IMSIC
 
-hvisor中一个物理 CPU 对应一个虚拟 CPU ，它们都拥有自己的中断文件
+In hvisor, a physical CPU corresponds to a virtual CPU, and they both have their own interrupt files.
 
 <img src="../img/riscv_aia_intfile.png"  style="zoom: 80%;" />
 
-向某个中断文件写入，即可触发指定 hart 指定特权级别的外部中断
+Writing to an interrupt file can trigger an external interrupt of the specified privilege level for the specified hart.
 
-为 IMSIC 提供二阶段地址映射表
+Provide a two-stage address mapping table for IMSIC:
 ```rs
         let paddr = 0x2800_0000 as HostPhysAddr;
         let size = PAGE_SIZE;
@@ -37,14 +38,14 @@ hvisor中一个物理 CPU 对应一个虚拟 CPU ，它们都拥有自己的中�
 ```
 
 ## APLIC
-### 结构
-全局只有一个 APLIC 
+### Structure
+There is only one global APLIC.
 
-有线中断到来时，首先到达位于机器模式的根中断域（OpenSBI），之后中断路由到子中断域（hvisor），hvisor将中断信号按照 APLIC 配置好的 target 的寄存器，以 MSI 的方式发送给虚拟机对应的 CPU。
+When a wired interrupt arrives, it first reaches the root interrupt domain in machine mode (OpenSBI), and then the interrupt is routed to the sub-interrupt domain (hvisor). Hvisor sends the interrupt signal to the virtual machine's corresponding CPU in MSI mode according to the target registers configured in APLIC.
 
 <img src="../img/riscv_aia_aplicdomain.png"  style="zoom: 70%;" />
 
-在 AIA 规范手册中指定了 APLIC 各个字段的字节偏移。定义 APLIC 结构体如下，通过以下方法实现对 APLIC 字段的读写
+The APLIC specification manual specifies the byte offsets for various fields of APLIC. Define the APLIC structure as follows, and implement reading and writing of APLIC fields through the following methods:
 ```rs
 #[repr(C)]
 pub struct Aplic {
@@ -74,8 +75,8 @@ impl Aplic {
 }
 ```
 
-### 初始化
-根据设备树中的基地址和大小初始化 APLIC
+### Initialization
+Initialize APLIC based on the base address and size in the device tree:
 ```rs
 pub fn primary_init_early(host_fdt: &Fdt) {
     let aplic_info = host_fdt.find_node("/soc/aplic").unwrap();
@@ -93,9 +94,9 @@ pub fn host_aplic<'a>() -> &'a RwLock<Aplic> {
     APLIC.get().expect("Uninitialized hypervisor aplic!")
 }
 ```
-APLIC全局只有一个，因此加锁避免读写冲突，使用 host_aplic() 方法进行访问
+Since there is only one global APLIC, locking is used to avoid read-write conflicts, and the host_aplic() method is used for access.
 
-虚拟机启动时，将访问 APLIC 的地址空间进行初始化配置，这个地址空间是未被映射的。因此会触发缺页异常，陷入到 hvisor 中来处理
+When the virtual machine starts, the address space accessing APLIC is initialized, which is unmapped. Therefore, a page fault is triggered, falling into hvisor for handling:
 ```rs
 pub fn guest_page_fault_handler(current_cpu: &mut ArchCpu) {
     ...
@@ -110,7 +111,7 @@ pub fn guest_page_fault_handler(current_cpu: &mut ArchCpu) {
     }
 }
 ```
-判断访问的地址空间属于 APLIC 的范围，解析访问指令，进入 vaplic_emul_handler 实现对虚拟机中 APLIC 的模拟
+Determine if the accessed address space belongs to APLIC, parse the access instruction, and enter vaplic_emul_handler to simulate APLIC in the virtual machine.
 
 ```rs
 pub fn vaplic_emul_handler(
@@ -136,13 +137,14 @@ pub fn vaplic_emul_handler(
     ...
 }
 ```
-## 中断过程
-hvisor 通过缺页异常的方式完成对虚拟机模拟 APLIC 初始化后，进入到虚拟机中，以键盘按下产生的中断为例:中断信号首先来到 OpenSBI ，之后中断路由至 hvisor ,根据target寄存器的配置，向虚拟中断文件写入触发虚拟机的外部中断。
-# 软件中断
-开启 AIA 规范后，虚拟机的 linux 内核会通过 msi 的方式来发送 IPI，不需要再使用 ecall 指令陷入到 hvisor 中
+## Interrupt Process
+After hvisor completes the simulation of APLIC initialization through a page fault, it enters the virtual machine. Taking the interrupt generated by a keyboard press as an example: the interrupt signal first arrives at OpenSBI, then is routed to hvisor, and according to the configuration of the target register, it writes to the virtual interrupt file to trigger the external interrupt of the virtual machine.
+
+# Software Interrupt
+After enabling the AIA specification, the Linux kernel of the virtual machine sends IPIs via MSI mode, eliminating the need to use the ecall instruction to fall into hvisor.
 
 <img src="../img/riscv_aia_ipi.jpg"  style="zoom:40%;" />
 
-如图所示，在hvisor中，向指定hart的中断文件写入，即可触发 IPI。
+As shown in the figure, in hvisor, writing to the specified hart's interrupt file can trigger an IPI.
 
-在虚拟机中，只需要向指定的虚拟中断文件写入，即可实现虚拟机中的 IPI，无需hvisor的模拟支持。
+In the virtual machine, writing to the specified virtual interrupt file can implement IPIs within the virtual machine without the need for hvisor's simulation support.

@@ -1,17 +1,17 @@
-## ZCU102 NonRoot 启动
-1. 使用启动 Root 时所用的 Linux 内核源码编译 [hvisor-tool](https://github.com/syswonder/hvisor-tool)，详细编译流程可以参考 [Readme](https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md).
-2. 准备启动 NonRoot 所需要的 ```virtio_cfg.json``` 和 ```zone1_linux.json```，这里可以直接使用 hvisor-tool 目录下的 ```example/zcu102-aarch64```，里面的内容已经经过验证，确保可以启动。
-3. 准备 NonRoot 所需要的 linux 内核 Image，文件系统 rootfs，以及设备树 linux1.dtb。其中的内核和文件系统可以和 Root 一样，Linux1.dtb 则是按需配置，也可以使用 hvisor 目录下的 ```images/aarch64/devicetree/zcu102-nonroot-aarch64.dts```.
-4. 将 ```hvisor.ko, hvisor, virtio_cfg, zone1_linux.json, linux1.dtb, Image, rootfs.ext4``` 拷贝到 Root Linux 所用的文件系统中。
-5. 在 RootLinux 输入下述命令启动 NonRoot:
+## ZCU102 NonRoot Boot
+1. Compile [hvisor-tool](https://github.com/syswonder/hvisor-tool) using the Linux kernel source code used during the Root boot. The detailed compilation process can be referred to in [Readme](https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md).
+2. Prepare the required `virtio_cfg.json` and `zone1_linux.json` for NonRoot boot. You can directly use the `example/zcu102-aarch64` in the hvisor-tool directory, which has been verified to ensure it can boot.
+3. Prepare the Linux kernel Image, filesystem rootfs, and device tree linux1.dtb needed for NonRoot. The kernel and filesystem can be the same as Root, while Linux1.dtb should be configured as needed, or you can use `images/aarch64/devicetree/zcu102-nonroot-aarch64.dts` from the hvisor directory.
+4. Copy `hvisor.ko, hvisor, virtio_cfg, zone1_linux.json, linux1.dtb, Image, rootfs.ext4` to the filesystem used by Root Linux.
+5. Enter the following commands in RootLinux to start NonRoot:
 ```
-# 加载内核模块
+# Load kernel module
 insmod hvisor.ko
-# 创建 virtio 设备
+# Create virtio device
 nohup ./hvisor virtio start virtio_cfg.json &
-# 根据 json 配置文件启动 NonRoot
-./hvisor zone start zone1_linux.json 
-# 查看 NonRoot 的输出，并交互。
+# Start NonRoot based on the json configuration file
+./hvisor zone start zone1_linux.json
+# View the output of NonRoot and interact.
 screen /dev/pts/0
 ```
-更多操作细节参考 [hvisor-tool Readme](https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md)
+For more operation details, refer to [hvisor-tool Readme](https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md)

@@ -1,22 +1,22 @@
-# 在龙芯3A5000主板（7A2000）上启动hvisor
+# Booting hvisor on Loongson 3A5000 Motherboard (7A2000)
 
-韩喻泷 <enkerewpo@hotmail.com>
+Han Yulu <enkerewpo@hotmail.com>
 
-更新时间：2024.12.4
+Updated: December 4, 2024
 
-## 第一步：获取hvisor源码并编译
+## Step 1: Obtain and compile the hvisor source code
 
-克隆代码到本地：
+Clone the code locally:
 
 ```bash
-git clone -b dev-loongarch https://github.com/syswonder/hvisor # dev-loongarch分支
+git clone -b dev-loongarch https://github.com/syswonder/hvisor # dev-loongarch branch
 make ARCH=loongarch64
 ```
-编译完成后在target目录下可以找到strip之后的hvisor.bin（编译输出的最后一行会显示文件路径）。
+After compilation, you can find the stripped hvisor.bin in the target directory (the file path will be displayed in the last line of the compilation output).
 
-## 获取vmlinux.bin镜像
+## Obtain the vmlinux.bin image
 
-请从<https://github.com/enkerewpo/linux-hvisor-loongarch64/releases>下载最新发布的hvisor默认龙芯linux镜像（包括root linux kernel+root linux dtb+root linux rootfs，其中root linux rootfs中包括non root linux+nonroot linux dtb+nonroot linux rootfs）。如果你需要自行编译linux kernel以及rootfs，可参考该仓库的`arch/loongarch`目录中hvisor相关设备树以及我为3A5000移植的buildroot环境（<https://github.com/enkerewpo/buildroot-loongarch64>）。如果你需要手动编译hvisor-tool，请参考<https://github.com/enkerewpo/hvisor-tool>，关于所有环境的编译顺序和脚本调用流程请参考`Makefile.1`文件中`world`目标内的代码（<https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1>），并通过运行`./make_world`脚本编译所有东西，如果你需要手动编译这些，则需要在Makefile.1内修改对应的代码路径变量，包括：
+Please download the latest released hvisor default Loongson Linux image from <https://github.com/enkerewpo/linux-hvisor-loongarch64/releases> (including root Linux kernel + root Linux dtb + root Linux rootfs, where root Linux rootfs includes non-root Linux + non-root Linux dtb + non-root Linux rootfs). If you need to compile the Linux kernel and rootfs yourself, refer to the `arch/loongarch` directory in the repository for hvisor-related device trees and the buildroot environment I ported for 3A5000 (<https://github.com/enkerewpo/buildroot-loongarch64>). If you need to manually compile hvisor-tool, refer to <https://github.com/enkerewpo/hvisor-tool>. For the compilation order and script invocation process of all environments, refer to the code inside the `world` target in the `Makefile.1` file (<https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1>), and compile everything by running the `./make_world` script. If you need to manually compile these, you need to modify the corresponding code path variables in Makefile.1, including:
 
 ```
 HVISOR_LA64_LINUX_DIR = ../hvisor-la64-linux
@@ -24,40 +24,40 @@ BUILDROOT_DIR = ../buildroot-loongarch64
 HVISOR_TOOL_DIR = ../hvisor-tool
 ```
 
-然后运行 `./make_world`，请注意，第一次编译linux和buildroot的时间可能相当长（可能长达几十分钟，取决于你的机器性能）。
+Then run `./make_world`. Please note that the first compilation of Linux and buildroot may take a long time (possibly up to several tens of minutes, depending on your machine performance).
 
-## 获取hvisor UEFI Image Packer
+## Obtain hvisor UEFI Image Packer
 
-由于3A5000以及之后的3系CPU的主板均采用UEFI启动，所以只能通过efi镜像的方法启动hvisor，克隆仓库<https://github.com/enkerewpo/hvisor_uefi_packer>到本地：
+Since the 3A5000 and subsequent Series 3 CPUs' motherboards use UEFI boot, hvisor can only be booted via an EFI image method. Clone the repository <https://github.com/enkerewpo/hvisor_uefi_packer> locally:
 
 ```bash
-make menuconfig # 配置为你本地的loongarch64 gcc工具链前缀、hvisor.bin路径、vmlinux.bin路径
-# 修改make_image中的HVISOR_SRC_DIR=../hvisor为你实际保存hvisor源码的路径，之后再运行脚本
+make menuconfig # Configure for your local loongarch64 gcc toolchain prefix, hvisor.bin path, vmlinux.bin path
+# Modify make_image's HVISOR_SRC_DIR=../hvisor to your actual hvisor source code path, then run the script
 ./make_image
-# 得到 BOOTLOONGARCH64.EFI 文件
+# You will get the BOOTLOONGARCH64.EFI file
 ```
 
-得到的`BOOTLOONGARCH64.EFI`必须放在U盘的第一个FAT32分区的`/EFI/BOOT/BOOTLOONGARCH64.EFI`位置。然后插入U盘启动即可进入hvisor并自动启动root linux。
+The obtained `BOOTLOONGARCH64.EFI` must be placed in the first FAT32 partition of the USB drive at `/EFI/BOOT/BOOTLOONGARCH64.EFI`. Then insert the USB drive to boot and enter hvisor, which will automatically start root Linux.
 
-由于root linux相关的元信息（加载地址，内存区域等）硬编码在hvisor源码中（`src/platform/ls3a5000_loongarch64.rs`），如果你是手动编译linux内核，则需要修改这里的配置再重新编译hvisor。
+Since the metadata related to root Linux (loading address, memory area, etc.) is hardcoded in the hvisor source code (`src/platform/ls3a5000_loongarch64.rs`), if you are manually compiling the Linux kernel, you need to modify the configuration here and recompile hvisor.
 
-## 上板启动
+## Board Boot
 
-主板上电开机，按 **F12** 进入UEFI Boot Menu，选择你插入的U盘后回车，会自动启动hvisor，并进入root linux的bash环境。
+Power on the motherboard, press **F12** to enter the UEFI Boot Menu, select your inserted USB drive and press Enter. It will automatically boot hvisor and enter the root Linux bash environment.
 
-## 启动nonroot
+## Start nonroot
 
-如果你使用的是release中提供的相关镜像，启动后在root linux的bash内输入：
+If you are using the related images provided in the release, after booting, enter in the root Linux bash:
 
 ```bash
 ./daemon.sh
 ./linux2_virtio.sh
 ```
 
-之后会自动启动nonroot（一些相关配置文件位于root linux的`/tool`目录内，包括提供给hvisor-tool的nonroot zone配置json以及virtio配置json文件），之后回自动打开一个screen进程连接nonroot linux的virtio-console，你会看到一个打印了nonroot字样的bash出现，你可以在使用screen时按CTRL+A D快捷键detach（请记住显示的screen session名称），此时会返回root linux，如果希望返回nonroot linux，则运行
+This will automatically start nonroot (some related configuration files are located in the root Linux `/tool` directory, including the nonroot zone configuration JSON and virtio configuration JSON files provided to hvisor-tool). Afterwards, a screen process will open connecting to nonroot Linux's virtio-console, displaying a bash with "nonroot" printed. You can use the CTRL+A D shortcut key to detach (remember the displayed screen session name) during screen use. To return to nonroot Linux, run:
 
 ```bash
-screen -r {刚才的session全名 或者 只输入最前面的数字}
+screen -r {the full name of the session just now or just enter the first few numbers}
 ```
 
-之后会返回nonroot linux的bash。
+This will return you to the nonroot Linux bash.

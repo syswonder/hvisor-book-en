@@ -1,0 +1,540 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Memory Virtualization - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="内存管理"><a class="header" href="#内存管理">内存管理</a></h1>
+<h2 id="堆上的内存分配"><a class="header" href="#堆上的内存分配">堆上的内存分配</a></h2>
+<h3 id="初始化分配器"><a class="header" href="#初始化分配器">初始化分配器</a></h3>
+<p>平常在使用编程语言的时候，会遇到动态分配内存，比如在C语言中通过 <code>malloc</code> 或者 <code>new</code> 分配一块内存，再比如Rust中的 <code>Vec</code> 、<code>String</code> 等，都是在堆上分配内存。</p>
+<p>为了能够在堆上分配内存，我们需要做以下这些事情：</p>
+<ul>
+<li>初始化的时候提供一大块内存空间</li>
+<li>提供分配和释放的接口</li>
+<li>管理空闲块</li>
+</ul>
+<p>总之，我们需要分配一大段空间，并且要设置一个分配器，将这段空间交给分配器管理，并且告诉Rust，我们现在有一个分配器了，请你把它用起来，允许我们使用 <code>Vec</code> 、<code>String</code> 这种在堆上分配内存的变量。也就是下面这几句在做的事情。</p>
+<pre><code>use buddy_system_allocator::LockedHeap;
+
+use crate::consts::HV_HEAP_SIZE;
+
+#[cfg_attr(not(test), global_allocator)]
+static HEAP_ALLOCATOR: LockedHeap&lt;32&gt; = LockedHeap::&lt;32&gt;::new();
+
+/// Initialize the global heap allocator.
+pub fn init() {
+    const MACHINE_ALIGN: usize = core::mem::size_of::&lt;usize&gt;();
+    const HEAP_BLOCK: usize = HV_HEAP_SIZE / MACHINE_ALIGN;
+    static mut HEAP: [usize; HEAP_BLOCK] = [0; HEAP_BLOCK];
+    let heap_start = unsafe { HEAP.as_ptr() as usize };
+    unsafe {
+        HEAP_ALLOCATOR
+            .lock()
+            .init(heap_start, HEAP_BLOCK * MACHINE_ALIGN);
+    }
+    info!(
+        "Heap allocator initialization finished: {:#x?}",
+        heap_start..heap_start + HV_HEAP_SIZE
+    );
+}
+</code></pre>
+<p><code>#[cfg_attr(not(test), global_allocator)]</code> 是条件编译的属性，仅当不在测试环境中时，将下一行定义的 <code>HEAP_ALLOCATOR</code>设置为Rust的全局内存分配器，现在Rust知道我们可以进行动态分配了。</p>
+<p><code>HEAP_ALLOCATOR.lock().init(heap_start, HEAP_BLOCK * MACHINE_ALIGN)</code> 将我们申请的一大段空间交给分配器管理。</p>
+<h3 id="测试"><a class="header" href="#测试">测试</a></h3>
+<pre><code>pub fn test() {
+    use alloc::boxed::Box;
+    use alloc::vec::Vec;
+    extern "C" {
+        fn sbss();
+        fn ebss();
+    }
+    let bss_range = sbss as usize..ebss as usize;
+    let a = Box::new(5);
+    assert_eq!(*a, 5);
+    assert!(bss_range.contains(&amp;(a.as_ref() as *const _ as usize)));
+    drop(a);
+    let mut v: Vec&lt;usize&gt; = Vec::new();
+    for i in 0..500 {
+        v.push(i);
+    }
+    for (i, val) in v.iter().take(500).enumerate() {
+        assert_eq!(*val, i);
+    }
+    assert!(bss_range.contains(&amp;(v.as_ptr() as usize)));
+    drop(v);
+    info!("heap_test passed!");
+}
+</code></pre>
+<p>在这段测试中，使用 <code>Box</code> 和 <code>Vec</code> 来检验我们分配的内存，是否在 <code>bss</code> 段中。</p>
+<p>我们刚才交给分配器的一大段内存，是一个未初始化的全局变量，会被放在 <code>bss</code> 段，只需要测试我们获得变量的地址是否在这个范围内即可。</p>
+<h2 id="armv8的内存管理知识"><a class="header" href="#armv8的内存管理知识">Armv8的内存管理知识</a></h2>
+<h3 id="寻址"><a class="header" href="#寻址">寻址</a></h3>
+<p>地址总线默认48位，而发出的寻址请求是64位的，所以可以根据高16位将虚拟地址划分为2个空间：</p>
+<ul>
+<li>高16位为1：内核空间</li>
+<li>高16位为0：用户空间</li>
+</ul>
+<p>站在guestVM的角度，在进行虚拟地址到物理地址的转换的时候，CPU会根据虚拟地址第63位的值选择TTBR寄存器，TTBR寄存器存的是一级页表的基地址，如果是用户空间，选择TTBR0，如果是内核空间，选择TTBR1。</p>
+<h3 id="四级页表映射以页面大小为4k举例"><a class="header" href="#四级页表映射以页面大小为4k举例">四级页表映射（以页面大小为4K举例）</a></h3>
+<p>除了高16位是用来判断使用哪个页表基址寄存器外，后面的36位中，每9位作为每一级页表的页表项的索引，低12位为页内偏移。如下图所示。</p>
+<p><img src="./img/memory_level4_pagetable.png" alt="Level4_PageTable" /></p>
+<h3 id="stage-2页表机制"><a class="header" href="#stage-2页表机制">Stage-2页表机制</a></h3>
+<p>在开启虚拟化的环境下，系统中存在着两种地址映射过程：</p>
+<ul>
+<li>guestVM通过Stage-1地址转换，利用 <code>TTBR0_EL1</code> 或者 <code>TTBR1_EL1</code> ，将访问的VA转换为IPA，再通过Stage-2地址转换，利用 <code>VTTBR0_EL2</code> 将IPA转化为PA。</li>
+<li>Hypervisor上可能会跑自己的应用，该应用的VA到PA的转换只需要一次转换，利用 <code>TTBR0_EL2</code> 寄存器。</li>
+</ul>
+<p><img src="./img/memory_nested_translation.png" alt="Nested_Address_Translation" /></p>
+<h2 id="hvsior的内存管理"><a class="header" href="#hvsior的内存管理">hvsior的内存管理</a></h2>
+<h3 id="物理页帧的管理"><a class="header" href="#物理页帧的管理">物理页帧的管理</a></h3>
+<p>和上面关于堆的构造类似，页帧的分配也需要一个分配器，然后把我们用来分配的一段内存交给分配器管理。</p>
+<p><strong>基于位图的分配器</strong></p>
+<pre><code>use bitmap_allocator::BitAlloc;
+type FrameAlloc = bitmap_allocator::BitAlloc1M;
+
+struct FrameAllocator {
+    base: PhysAddr,
+    inner: FrameAlloc,
+}
+</code></pre>
+<p><code>BitAlloc1M</code> 是一个基于位图的分配器，它通过管理页面编号，<strong>提供哪些页面是空闲的、哪些是占用的信息</strong>。</p>
+<p>然后将位图分配器和用于页帧分配的起始地址封装成一个页帧分配器。</p>
+<p>所以我们看到初始化函数如下：</p>
+<pre><code>fn init(&amp;mut self, base: PhysAddr, size: usize) {
+        self.base = align_up(base);
+        let page_count = align_up(size) / PAGE_SIZE;
+        self.inner.insert(0..page_count);
+    }
+</code></pre>
+<p>传入页帧分配区域的起始地址，以及可供分配的空间大小，计算出这段空间中可供分配的页帧数 <code>page_size</code>，然后将所有页帧的编号通过 <code>insert</code> 函数告诉位图分配器。</p>
+<p><strong>页帧的结构</strong></p>
+<pre><code>pub struct Frame {
+    start_paddr: PhysAddr,
+    frame_count: usize,
+}
+</code></pre>
+<p>页帧的结构中包含了这个页帧的起始地址，这个页帧实例对应的页帧数，可能是0、1、或者大于1。</p>
+<blockquote>
+<p>为什么存在页帧数为0的情况？</p>
+<p>当hvisor希望访问通过 <code>Frame</code> 访问页帧内容时，这时需要一个临时的实例，不涉及页帧分配以及页帧回收，就以0作为一个标志。</p>
+</blockquote>
+<blockquote>
+<p>为什么存在页帧数大于1的情况？</p>
+<p>某些情况下，要求我们分配连续的内存，并且大小超过一个页，也就是分配多个连续页帧。</p>
+</blockquote>
+<p><strong>分配alloc</strong></p>
+<p>现在我们知道了页帧分配器可以分配一个空闲页帧的编号，把编号变为以一个 <code>Frame</code> 实例就完成了页帧的分配，单个页帧分配如下：</p>
+<pre><code>impl FrameAllocator {
+    fn init(&amp;mut self, base: PhysAddr, size: usize) {
+        self.base = align_up(base);
+        let page_count = align_up(size) / PAGE_SIZE;
+        self.inner.insert(0..page_count);
+    }
+}
+
+impl Frame {
+    /// Allocate one physical frame.
+    pub fn new() -&gt; HvResult&lt;Self&gt; {
+        unsafe {
+            FRAME_ALLOCATOR
+                .lock()
+                .alloc()
+                .map(|start_paddr| Self {
+                    start_paddr,
+                    frame_count: 1,
+                })
+                .ok_or(hv_err!(ENOMEM))
+        }
+    }
+}
+</code></pre>
+<p>可以看到帧分配器帮助我们分配一个页帧，并返回起始物理地址，然后再创建 <code>Frame</code> 实例。</p>
+<p><strong>页帧的回收</strong></p>
+<p><code>Frame</code> 结构和实际物理页联系在一起，遵循RAII设计规范，那么当一个 <code>Frame</code> 离开作用域，对应的内存区域也需要归还给hvisor。这要求我们实现 <code>Drop Trait</code> 中的 <code>drop</code> 方法，如下：</p>
+<pre><code>impl Drop for Frame {
+    fn drop(&amp;mut self) {
+        unsafe {
+            match self.frame_count {
+                0 =&gt; {} // Do not deallocate when use Frame::from_paddr()
+                1 =&gt; FRAME_ALLOCATOR.lock().dealloc(self.start_paddr),
+                _ =&gt; FRAME_ALLOCATOR
+                    .lock()
+                    .dealloc_contiguous(self.start_paddr, self.frame_count),
+            }
+        }
+    }
+}
+
+impl FrameAllocator{
+    unsafe fn dealloc(&amp;mut self, target: PhysAddr) {
+        trace!("Deallocate frame: {:x}", target);
+        self.inner.dealloc((target - self.base) / PAGE_SIZE)
+    }
+}
+</code></pre>
+<p>在 <code>drop</code> 中可以看到，帧计数为0的页帧不需要释放对应的物理页，帧计数大于1的说明是连续分配的页帧，需要回收不止一个物理页。</p>
+<h3 id="页表相关的数据结构"><a class="header" href="#页表相关的数据结构">页表相关的数据结构</a></h3>
+<p>通过上面有关Armv8内存管理的知识，我们知道构建页表的过程分为两个部分，hvisor自己用的页表，以及Stage-2转换的页表，我们重点介绍Stage-2页表。</p>
+<p>在此之前，我们还需要了解几个会用到的数据结构。</p>
+<p><strong>逻辑段MemoryRegion</strong></p>
+<p>逻辑段的描述，包括起始地址、大小、权限标志、映射方式。</p>
+<pre><code>pub struct MemoryRegion&lt;VA&gt; {
+    pub start: VA,
+    pub size: usize,
+    pub flags: MemFlags,
+    pub mapper: Mapper,
+}
+</code></pre>
+<p><strong>地址空间MemorySet</strong></p>
+<p>每个进程的地址空间的描述，包括了逻辑段的集合，以及该进程对应的页表。</p>
+<pre><code>pub struct MemorySet&lt;PT: GenericPageTable&gt;
+where
+    PT::VA: Ord,
+{
+    regions: BTreeMap&lt;PT::VA, MemoryRegion&lt;PT::VA&gt;&gt;,
+    pt: PT,
+}
+</code></pre>
+<p><strong>4级页表Level4PageTableImmut</strong></p>
+<p><code>root</code> 是L0页表所在的页帧。</p>
+<pre><code>pub struct Level4PageTableImmut&lt;VA, PTE: GenericPTE&gt; {
+    /// Root table frame.
+    root: Frame,
+    /// Phantom data.
+    _phantom: PhantomData&lt;(VA, PTE)&gt;,
+}
+</code></pre>
+<h3 id="构建stage-2页表"><a class="header" href="#构建stage-2页表">构建Stage-2页表</a></h3>
+<p>我们需要为每个zone都构建一个Stage-2页表。</p>
+<h4 id="stage-2页表需要映射的区域"><a class="header" href="#stage-2页表需要映射的区域">Stage-2页表需要映射的区域：</a></h4>
+<ul>
+<li>guestVM所见的memory区域</li>
+<li>guestVM会访问的设备树的IPA</li>
+<li>guestVM所见的UART设备的内存区域</li>
+</ul>
+<h4 id="向地址空间中添加映射关系"><a class="header" href="#向地址空间中添加映射关系">向地址空间中添加映射关系</a></h4>
+<pre><code>/// Add a memory region to this set.
+    pub fn insert(&amp;mut self, region: MemoryRegion&lt;PT::VA&gt;) -&gt; HvResult {
+        assert!(is_aligned(region.start.into()));
+        assert!(is_aligned(region.size));
+        if region.size == 0 {
+            return Ok(());
+        }
+        if !self.test_free_area(&amp;region) {
+            warn!(
+                "MemoryRegion overlapped in MemorySet: {:#x?}\n{:#x?}",
+                region, self
+            );
+            return hv_result_err!(EINVAL);
+        }
+        self.pt.map(&amp;region)?;
+        self.regions.insert(region.start, region);
+        Ok(())
+    }
+</code></pre>
+<p>在地址空间中添加映射关系，除了上面的在我们的 <code>Map</code> 结构中添加虚拟地址和逻辑段的映射关系，还需要在页表中进行映射，如下：</p>
+<pre><code>fn map(&amp;mut self, region: &amp;MemoryRegion&lt;VA&gt;) -&gt; HvResult {
+        assert!(
+            is_aligned(region.start.into()),
+            "region.start = {:#x?}",
+            region.start.into()
+        );
+        assert!(is_aligned(region.size), "region.size = {:#x?}", region.size);
+        trace!(
+            "create mapping in {}: {:#x?}",
+            core::any::type_name::&lt;Self&gt;(),
+            region
+        );
+        let _lock = self.clonee_lock.lock();
+        let mut vaddr = region.start.into();
+        let mut size = region.size;
+        while size &gt; 0 {
+            let paddr = region.mapper.map_fn(vaddr);
+            let page_size = if PageSize::Size1G.is_aligned(vaddr)
+                &amp;&amp; PageSize::Size1G.is_aligned(paddr)
+                &amp;&amp; size &gt;= PageSize::Size1G as usize
+                &amp;&amp; !region.flags.contains(MemFlags::NO_HUGEPAGES)
+            {
+                PageSize::Size1G
+            } else if PageSize::Size2M.is_aligned(vaddr)
+                &amp;&amp; PageSize::Size2M.is_aligned(paddr)
+                &amp;&amp; size &gt;= PageSize::Size2M as usize
+                &amp;&amp; !region.flags.contains(MemFlags::NO_HUGEPAGES)
+            {
+                PageSize::Size2M
+            } else {
+                PageSize::Size4K
+            };
+            let page = Page::new_aligned(vaddr.into(), page_size);
+            self.inner
+                .map_page(page, paddr, region.flags)
+                .map_err(|e: PagingError| {
+                    error!(
+                        "failed to map page: {:#x?}({:?}) -&gt; {:#x?}, {:?}",
+                        vaddr, page_size, paddr, e
+                    );
+                    e
+                })?;
+            vaddr += page_size as usize;
+            size -= page_size as usize;
+        }
+        Ok(())
+    }
+</code></pre>
+<p>我们大概解读一下上面这段函数，对于一个逻辑段 <code>MemoryRegion</code> ，我们以页为单位进行映射，每次映射一个页，直到覆盖整个逻辑段的大小。</p>
+<p>具体的行为如下：</p>
+<p>在对每一页映射之前，首先我们根据逻辑段的映射方式，确定这一页映射后对应的物理地址 <code>paddr</code> 。</p>
+<p>然后确定页面的大小 <code>page_size</code> ，我们从1G的页面开始判断，如果物理地址能够对齐，剩下未映射的页面大小大于1G，并且没有禁用大页面映射，则选择1G作为页面大小，否则再检查2M页面大小，如果都不满足，则使用常规的4KB大小的页面。</p>
+<p>目前我们获取了需要填充到页表项的信息了，我们将页面起始地址和页面大小合并为一个 <code>Page</code> 实例，在页表中进行映射，也就是修改页表项：</p>
+<pre><code>fn map_page(
+        &amp;mut self,
+        page: Page&lt;VA&gt;,
+        paddr: PhysAddr,
+        flags: MemFlags,
+    ) -&gt; PagingResult&lt;&amp;mut PTE&gt; {
+        let entry: &amp;mut PTE = self.get_entry_mut_or_create(page)?;
+        if !entry.is_unused() {
+            return Err(PagingError::AlreadyMapped);
+        }
+        entry.set_addr(page.size.align_down(paddr));
+        entry.set_flags(flags, page.size.is_huge());
+        Ok(entry)
+    }
+</code></pre>
+<p>简单阐述这个函数的功能：首先我们根据VA，准确的说是根据这个VA对应的页号VPN，获取到对应的PTE，在PTE中填入控制位信息，以及物理地址（其实应该是PPN），具体可以在 <code>PageTableEntry</code> 中的set_addr方法看到，我们并没有把整个物理地址都填入，而是填入了除低12位以外的内容，因为我们的页表只关注页帧号的映射。</p>
+<p>我们重点来看下如何获取PTE：</p>
+<pre><code>fn get_entry_mut_or_create(&amp;mut self, page: Page&lt;VA&gt;) -&gt; PagingResult&lt;&amp;mut PTE&gt; {
+        let vaddr: usize = page.vaddr.into();
+        let p4 = table_of_mut::&lt;PTE&gt;(self.inner.root_paddr());
+        let p4e = &amp;mut p4[p4_index(vaddr)];
+
+        let p3 = next_table_mut_or_create(p4e, || self.alloc_intrm_table())?;
+        let p3e = &amp;mut p3[p3_index(vaddr)];
+        if page.size == PageSize::Size1G {
+            return Ok(p3e);
+        }
+
+        let p2 = next_table_mut_or_create(p3e, || self.alloc_intrm_table())?;
+        let p2e = &amp;mut p2[p2_index(vaddr)];
+        if page.size == PageSize::Size2M {
+            return Ok(p2e);
+        }
+
+        let p1 = next_table_mut_or_create(p2e, || self.alloc_intrm_table())?;
+        let p1e = &amp;mut p1[p1_index(vaddr)];
+        Ok(p1e)
+    }
+</code></pre>
+<p>首先我们找到L0页表的起始地址，然后根据VA中L0的索引获取对应的页表项 <code>p4e</code> ，不过我们还不可以直接从 <code>p4e</code> 中获取下一级页表的起始地址，可能对应的页表还没创建，如果没有创建，就创建一个新的页表（这个过程也是需要分配页帧的），接着返回页表的起始地址，以此类推，我们获得了最后的L4页表中L4索引对应的页表项PTE。</p>
+<p><strong>经过上面这样的过程对memory的映射（UART设备同理），我们还需要将L0页表基址填入VTTBR_EL2寄存器中，这个过程可以在Zone的MemorySet的Level4PageTable的activate函数中看到。</strong></p>
+<blockquote>
+<p>在非虚拟化环境下，guestVM应该还可以访问MMIO和GIC等设备相关的内存区域，为什么没有进行映射？</p>
+<p>这是因为虚拟化环境下，hvisor才是资源的管理者，不能随意让guestVM访问设备相关的区域，在前面异常处理中我们提过对MMIO/GIC的访问，实际上会由于没有进行地址映射而陷入EL2，由EL2进行访问后返回结果，如果在页表中进行了映射，那就会直接通过二阶段地址转换访问到资源，而没有经过EL2的控制。</p>
+<p>所以在我们的设计中，只是对允许该Zone访问的MMIO在Zone中进行了注册，当发生相关异常的时候用来判断某个MMIO资源是否允许该Zone访问。</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap04/subchap01/LoongArchVirtualization.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap04/subchap02/InterruptVirtualization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap04/subchap01/LoongArchVirtualization.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap04/subchap02/InterruptVirtualization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

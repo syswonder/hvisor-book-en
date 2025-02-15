@@ -1,29 +1,29 @@
-# VirtIO设备的使用
+# Use of VirtIO Devices
 
-目前hvisor支持三种Virtio设备：Virtio block，Virtio net和Virtio Console，以MMIO方式呈现给Root Linux以外的虚拟机。Virtio设备源码仓库位于[hvisor-tool](https://github.com/syswonder/hvisor-tool)，随命令行工具一起编译和使用。通过命令行工具创建Virtio设备后，Virtio设备会成为Root Linux上的一个守护进程，其日志信息会输出到nohup.out文件中。
+Currently, hvisor supports three types of Virtio devices: Virtio block, Virtio net, and Virtio Console, presented to virtual machines other than Root Linux via MMIO. The Virtio device source repository is located at [hvisor-tool](https://github.com/syswonder/hvisor-tool), compiled and used together with the command line tool. After creating Virtio devices through the command line tool, the Virtio device will become a daemon on Root Linux, and its log information will be output to the nohup.out file.
 
-## 创建和启动Virtio设备
+## Creating and Starting Virtio Devices
 
-通过命令行创建Virtio设备前，需执行`insmod hvisor.ko`加载内核模块。
+Before creating Virtio devices through the command line, execute `insmod hvisor.ko` to load the kernel module.
 
-### Virtio blk设备
+### Virtio blk Device
 
-在Root Linux控制台执行以下示例指令，可创建一个Virtio blk设备：
+Execute the following example command on the Root Linux console to create a Virtio blk device:
 
 ```shell
 nohup ./hvisor virtio start \
 	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 &
 ```
 
-其中`--device blk`表示创建一个Virtio磁盘设备，供id为`zone_id`的虚拟机使用。该虚拟机会通过一片MMIO区域与该设备交互，这片MMIO区域的起始地址为`addr`，长度为`len`，设备中断号为`irq`，对应的磁盘镜像路径为`img`。
+Here `--device blk` indicates creating a Virtio disk device for use by the virtual machine with id `zone_id`. This virtual machine will interact with the device through an MMIO region, which starts at `addr`, with a length of `len`, the device interrupt number is `irq`, and the corresponding disk image path is `img`.
 
-> 使用Virtio设备的虚拟机需要在设备树中增加该Virtio mmio节点的相关信息。
+> Virtual machines using Virtio devices need to add information about the Virtio mmio node in the device tree.
 
-### Virtio net设备
+### Virtio net Device
 
-#### 创建网络拓扑
+#### Creating Network Topology
 
-使用Virtio net设备前，需要在root Linux中创建一个网络拓扑图，以便Virtio net设备通过Tap设备和网桥设备连通真实网卡。在root Linux中执行以下指令：
+Before using the Virtio net device, a network topology needs to be created in root Linux so that the Virtio net device can connect to the real network card through the Tap device and bridge device. Execute the following commands in root Linux:
 
 ```shell
 mount -t proc proc /proc
@@ -39,41 +39,41 @@ brctl addif br0 tap0
 ip link set dev tap0 up
 ```
 
-便可创建`tap0设备<-->网桥设备<-->真实网卡`的网络拓扑。
+This will create a network topology of `tap0 device<-->bridge device<-->real network card`.
 
-#### 启动Virtio net
+#### Starting Virtio net
 
-在Root Linux控制台执行以下示例指令，可创建一个Virtio net设备：
+Execute the following example command on the Root Linux console to create a Virtio net device:
 
 ```shell
 nohup ./hvisor virtio start \
 	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 &
 ```
 
-`--device net`表示创建一个Virtio网络设备，供id为`zone_id`的虚拟机使用。该虚拟机会通过一片MMIO区域与该设备交互，这片MMIO区域的起始地址为`addr`，长度为`len`，设备中断号为`irq`，并连接到名为`tap`的Tap设备。
+`--device net` indicates creating a Virtio network device for use by the virtual machine with id `zone_id`. This virtual machine will interact with the device through an MMIO region, which starts at `addr`, with a length of `len`, the device interrupt number is `irq`, and it connects to the Tap device named `tap`.
 
-### Virtio console设备
+### Virtio console Device
 
-在Root Linux控制台执行以下示例指令，可创建一个Virtio console设备：
+Execute the following example command on the Root Linux console to create a Virtio console device:
 
 ```shell
 nohup ./hvisor virtio start \
 	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &
 ```
 
-`--device console`表示创建一个Virtio控制台，供id为`zone_id`的虚拟机使用。该虚拟机会通过一片MMIO区域与该设备交互，这片MMIO区域的起始地址为`addr`，长度为`len`，设备中断号为`irq`。
+`--device console` indicates creating a Virtio console for use by the virtual machine with id `zone_id`. This virtual machine will interact with the device through an MMIO region, which starts at `addr`, with a length of `len`, the device interrupt number is `irq`.
 
-执行`cat nohup.out | grep "char device"`，可观察到输出`char device redirected to /dev/pts/xx`。在Root Linux上执行：
+Execute `cat nohup.out | grep "char device"`, and you will observe the output `char device redirected to /dev/pts/xx`. Execute on Root Linux:
 
 ```
 screen /dev/pts/xx
 ```
 
-即可进入该虚拟控制台，与该虚拟机进行交互。按下快捷键`Ctrl +a d`，即可返回Root Linux终端。执行`screen -r [session_id]`，即可重新进入虚拟控制台。
+This will enter the virtual console and interact with the virtual machine. Press the shortcut key `Ctrl +a d` to return to the Root Linux terminal. Execute `screen -r [session_id]` to re-enter the virtual console.
 
-### 创建多个Virtio设备
+### Creating Multiple Virtio Devices
 
-执行以下命令，可同时创建Virtio blk、net、console设备，所有设备均位于一个守护进程。
+Execute the following command to create Virtio blk, net, and console devices simultaneously, all devices are within one daemon process.
 
 ```shell
 nohup ./hvisor virtio start \
@@ -82,11 +82,10 @@ nohup ./hvisor virtio start \
 	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &
 ```
 
-## 关闭Virtio设备
+## Closing Virtio Devices
 
-执行该命令即可关闭Virtio守护进程及所有创建的设备：
+Execute the following command to close the Virtio daemon and all created devices:
 
 ```
 pkill hvisor
 ```
-

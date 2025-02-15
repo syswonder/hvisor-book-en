@@ -1,17 +1,17 @@
-# hvisor总体架构
+# hvisor Overall Architecture
 
-- CPU虚拟化
-    - 架构兼容性：支持aarch64, riscv64, 和loongarch等架构，每种架构有专门的CPU虚拟化组件。
-    - CPU分配：采用静态分配方式，预先决定每个虚拟机的CPU资源。
+- CPU Virtualization
+    - Architectural Compatibility: Supports aarch64, riscv64, and loongarch architectures, each with a dedicated CPU virtualization component.
+    - CPU Allocation: Uses static allocation, pre-determining the CPU resources for each virtual machine.
 
-- 内存虚拟化
-    - 二阶段页表：利用二阶段页表技术，优化内存虚拟化过程。
+- Memory Virtualization
+    - Two-Level Page Table: Utilizes two-level page table technology to optimize the memory virtualization process.
 
-- 中断虚拟化
-    - 中断控制器虚拟化：支持ARM GIC、RISC-V PLIC等不同架构的中断控制器虚拟化。
-    - 中断处理：管理中断信号的传递和处理流程。
+- Interrupt Virtualization
+    - Interrupt Controller Virtualization: Supports ARM GIC, RISC-V PLIC, and other architecture-specific interrupt controller virtualizations.
+    - Interrupt Handling: Manages the transmission and processing of interrupt signals.
 
-- I/O虚拟化
-    - IOMMU集成：支持IOMMU，增强DMA虚拟化的效率和安全性。
-    - VirtIO标准：遵循VirtIO规范，提供高性能的虚拟设备。
-    - PCI虚拟化：实现PCI虚拟化，确保虚拟机可以访问物理或虚拟I/O设备。
+- I/O Virtualization
+    - IOMMU Integration: Supports IOMMU, enhancing the efficiency and security of DMA virtualization.
+    - VirtIO Standard: Adheres to the VirtIO specification, providing high-performance virtual devices.
+    - PCI Virtualization: Implements PCI virtualization, ensuring virtual machines can access physical or virtual I/O devices.

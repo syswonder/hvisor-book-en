@@ -1,6 +1,3 @@
-
-
-
-此目录主要与 ZCU102 相关，介绍如下：
-1. 如何使用 Qemu 仿真 Xilinx ZynqMP ZCU102
-2. 如何在 Qemu ZCU102 和 ZCU102 实体开发板上启动 hvisor root linux 和 nonroot linux。
+This directory is mainly related to ZCU102, and the introduction is as follows:
+1. How to use Qemu to simulate Xilinx ZynqMP ZCU102
+2. How to boot hvisor root linux and nonroot linux on Qemu ZCU102 and ZCU102 physical development board.

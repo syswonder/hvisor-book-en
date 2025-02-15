@@ -1,58 +1,58 @@
-# 命令行工具
+# Command Line Tools
 
-命令行工具是附属于hvisor的管理工具，用于在管理虚拟机Root Linux上创建和关闭其他虚拟机，并负责启动Virtio守护进程，提供Virtio设备模拟。仓库地址位于[hvisor-tool](https://github.com/syswonder/hvisor-tool)。
+Command line tools are management tools affiliated with hvisor, used to create and close other virtual machines on the management virtual machine Root Linux, and are responsible for starting the Virtio daemon, providing Virtio device emulation. The repository address is located at [hvisor-tool](https://github.com/syswonder/hvisor-tool).
 
-## 如何编译
+## How to Compile
 
-命令行工具目前支持两种体系结构：arm64和riscv，且需要配合一个内核模块才能使用。在x86主机上通过交叉编译可针对不同体系结构进行编译
+The command line tool currently supports two architectures: arm64 and riscv, and requires a kernel module to be used. Cross-compilation on an x86 host can be used to compile for different architectures.
 
-* arm64编译
+* arm64 compilation
 
-在hvisor-tool目录下执行以下命令，即可得到面向arm64体系结构的命令行工具hvisor以及内核模块hvisorl.ko。
+Execute the following command in the hvisor-tool directory to obtain the command line tool hvisor and kernel module hvisorl.ko for the arm64 architecture.
 
 ```
 make all ARCH=arm64 KDIR=xxx
 ```
 
-其中KDIR为Root Linux源码路径，用于内核模块的编译。
+Where KDIR is the source path of Root Linux, used for the compilation of the kernel module.
 
-* riscv编译
+* riscv compilation
 
-编译面向riscv体系结构的命令行工具和内核模块：
+Compile the command line tool and kernel module for the riscv architecture:
 
 ```
 make all ARCH=riscv KDIR=xxx
 ```
 
-## 对虚拟机进行管理
+## Managing Virtual Machines
 
-### 加载内核模块
+### Loading the Kernel Module
 
-使用命令行工具前，需要加载内核模块，便于用户态程序与Hyperviosr进行交互：
+Before using the command line tool, you need to load the kernel module to facilitate interaction between the user-mode program and Hypervisor:
 
 ```
 insmod hvisor.ko
 ```
 
-卸载内核模块的操作为：
+The operation to unload the kernel module is:
 
 ```
 rmmod hvisor.ko
 ```
 
-其中hvisor.ko位于hvisor-tool/driver目录下。
+Where hvisor.ko is located in the hvisor-tool/driver directory.
 
-### 启动一个虚拟机
+### Starting a Virtual Machine
 
-在Root Linux上可通过以下命令，创建一个id为1的虚拟机。该命令会将虚拟机的操作系统镜像文件`Image`加载到真实物理地址`xxxa`处，将虚拟机的设备树文件`linux2.dtb`加载到真实物理地址`xxxb`处，并进行启动。
+On Root Linux, you can create a virtual machine with id 1 using the following command. This command will load the virtual machine's operating system image file `Image` into the real physical address `xxxa`, load the virtual machine's device tree file `linux2.dtb` into the real physical address `xxxb`, and start it.
 
 ```
 ./hvisor zone start --kernel Image,addr=xxxa --dtb linux2.dtb,addr=xxxb --id 1
 ```
 
-### 关闭一个虚拟机
+### Shutting Down a Virtual Machine
 
-关闭id为1的虚拟机：
+Shut down the virtual machine with id 1:
 
 ```
 ./hvisor zone shutdown -id 1

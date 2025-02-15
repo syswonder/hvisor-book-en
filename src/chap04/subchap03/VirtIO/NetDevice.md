@@ -1,10 +1,10 @@
-# Virtio Network设备
+# Virtio Network Device
 
-Virtio网络设备，本质上是一块虚拟网卡。目前支持的特性包括`VIRTIO_NET_F_MAC`、`VIRTIO_NET_F_STATUS`、`VIRTIO_F_VERSION_1`、`VIRTIO-RING_F_INDIRECT_DESC`、`VIRTIO_RING_F_EVENT_IDX`。
+Virtio network device is essentially a virtual network card. The currently supported features include `VIRTIO_NET_F_MAC`, `VIRTIO_NET_F_STATUS`, `VIRTIO_F_VERSION_1`, `VIRTIO-RING_F_INDIRECT_DESC`, `VIRTIO_RING_F_EVENT_IDX`.
 
-## Virtio Network设备的描述信息
+## Description of Virtio Network Device
 
-对于Virtio网络设备，VirtIODevice中type字段为VirtioTNet，vqs_len为2，表示有2个Virtqueue，分别是Receive Queue接收队列和Transmit Queue发送队列，dev指针指向描述网络设备具体信息的virtio_net_dev结构体。Virtio_net_dev中config用来表示该网卡的MAC地址和连接状态，tapfd为该设备对应的Tap设备的文件描述符，rx_ready表示接收队列是否可用，event则用于接收报文线程通过epoll监视Tap设备的可读事件。
+For Virtio network devices, the type field in VirtIODevice is VirtioTNet, vqs_len is 2, indicating that there are 2 Virtqueues, which are the Receive Queue and the Transmit Queue, respectively. The dev pointer points to the virtio_net_dev structure that describes specific information about the network device. In Virtio_net_dev, config is used to represent the MAC address and connection status of the network card, tapfd is the file descriptor of the Tap device corresponding to the device, rx_ready indicates whether the receive queue is available, and the event is used for the receive packet thread to monitor the readable events of the Tap device through epoll.
 
 ```c
 typedef struct virtio_net_dev {
@@ -22,26 +22,26 @@ struct hvisor_event {
 };
 ```
 
-## Tap设备和网桥设备
+## Tap Devices and Bridge Devices
 
-Virtio网络设备的实现基于两种Linux内核提供的虚拟设备：Tap设备和网桥设备。
+The implementation of Virtio network devices is based on two virtual devices provided by the Linux kernel: Tap devices and bridge devices.
 
-Tap设备是一个由Linux内核用软件实现的以太网设备，通过在用户态读写Tap设备就可以模拟以太网帧的接收和发送。具体而言，当进程或内核执行一次对Tap设备的写操作时，就相当于将一个报文发送给Tap设备。对Tap设备执行一次读操作时，就相当于从Tap设备接收一个报文。这样，分别对Tap设备进行读和写操作，即可实现内核与进程之间报文的传递。
+A Tap device is an Ethernet device implemented in software by the Linux kernel, and Ethernet frames can be simulated by reading and writing to the Tap device in user space. Specifically, when a process or kernel performs a write operation on a Tap device, it is equivalent to sending a packet to the Tap device. When a read operation is performed on a Tap device, it is equivalent to receiving a packet from the Tap device. Thus, by reading and writing to the Tap device, the transfer of packets between the kernel and the process can be achieved.
 
-创建tap设备的命令为：`ip tuntap add dev tap0 mode tap`。该命令会创建一个名为tap0的tap设备。如果一个进程要使用该设备，需要首先打开/dev/net/tun设备，获得一个文件描述符tun_fd，并对其调用ioctl(TUNSETIFF)，将进程链接到tap0设备上。之后tun_fd实际上就成为了tap0设备的文件描述符，对其进行读写和epoll即可。
+The command to create a tap device is: `ip tuntap add dev tap0 mode tap`. This command creates a tap device named tap0. If a process wants to use this device, it needs to first open the /dev/net/tun device, obtain a file descriptor tun_fd, and call ioctl(TUNSETIFF) on it to link the process to the tap0 device. Afterward, tun_fd actually becomes the file descriptor of the tap0 device, and it can be read, written, and monitored with epoll.
 
-网桥设备是一个Linux内核提供的功能类似于交换机的虚拟设备。当其他网络设备连接到网桥设备时，其他设备会退化成网桥设备的端口，由网桥设备接管所有设备的收发包过程。当其他设备收到报文时，会直接发向网桥设备，由网桥设备根据MAC地址转发到其他端口。因此，连接在网桥上的所有设备可以互通报文。
+A bridge device is a virtual device provided by the Linux kernel that functions similarly to a switch. When other network devices are connected to the bridge device, those devices become ports of the bridge device, and the bridge device takes over the packet sending and receiving process of all connected devices. When other devices receive packets, they are sent directly to the bridge device, which forwards them to other ports based on the MAC address. Therefore, all devices connected to the bridge can communicate with each other.
 
-创建网桥设备的命令为：`brctl addbr br0`。将物理网卡eth0连接到br0上的命令为：brctl addif br0 eth0。将tap0设备连接到br0上的命令为：brctl addif br0 tap0。
+The command to create a bridge device is: `brctl addbr br0`. The command to connect the physical network card eth0 to br0 is: brctl addif br0 eth0. The command to connect the tap0 device to br0 is: brctl addif br0 tap0.
 
-在Virtio网络设备启动前，Root Linux需要提前在命令行中创建和启动tap设备和网桥设备，并将tap设备和Root Linux上的物理网卡分别与网桥设备进行连接。每个Virtio网络设备都需要连接一个tap设备，最终形成一张如下图的网络拓扑图。这样，Virtio网络设备通过读写tap设备，就可以与外网进行报文的传输了。
+Before the Virtio network device starts, Root Linux needs to create and start the tap and bridge devices in advance on the command line, and connect the tap device and the physical network card on Root Linux to the bridge device, respectively. Each Virtio network device needs to be connected to a tap device, ultimately forming a network topology diagram as shown below. In this way, the Virtio network device can transmit packets to the external network by reading and writing to the tap device.
 
 ![hvisor-virtio-net](./img/hvisor-virtio-net.svg)
 
-## 发送报文
+## Sending Packets
 
-Virtio网络设备的Transmit Virtqueue用于存放发送缓冲区。当设备收到驱动写QueueNotify寄存器的请求时，如果此时QueueSel寄存器指向Transmit Queue，表示驱动告知设备有新的报文要发送。Virtio-net设备会从可用环中取出描述符链，一个描述符链对应一个报文，其指向的内存缓冲区均为要发送的报文数据。报文数据包含2部分，第一部分为Virtio协议规定的报文头virtio_net_hdr_v1结构体，该结构体包含该报文的一些描述信息，第二部分为以太网帧。发送报文时只需将以太网帧的部分通过writev函数写入Tap设备，Tap设备收到该帧后会转发给网桥设备，网桥设备根据MAC地址会通过物理网卡转发到外网。
+The Transmit Virtqueue of the Virtio network device is used to store the send buffer. When the device receives a request from the driver to write to the QueueNotify register, if the QueueSel register points to the Transmit Queue at this time, it indicates that the driver is informing the device that there are new packets to send. The Virtio-net device will take out a descriptor chain from the available ring, each descriptor chain corresponds to a packet, and the memory buffers pointed to by the descriptor chains are all packet data to be sent. The packet data includes 2 parts, the first part is the packet header virtio_net_hdr_v1 structure specified by the Virtio protocol, which contains some descriptive information about the packet, and the second part is the Ethernet frame. When sending packets, only the Ethernet frame part needs to be written into the Tap device through the writev function. After the Tap device receives the frame, it will forward it to the bridge device, and the bridge device will forward it to the external network through the physical network card based on the MAC address.
 
-## 接收报文
+## Receiving Packets
 
-Virtio网络设备在初始化时，会将Tap设备的文件描述符加到event monitor线程epoll实例的interest list中。event monito线程会循环调用epoll_wait函数，监视tap设备的可读事件，一旦发生可读事件，说明tap设备收到了内核发来的报文，epoll_wait函数返回，执行接收报文处理函数。处理函数会从Receive Virtqueue的可用环中取出一个描述符链，并读取tap设备，将数据写入描述符链指向的内存缓冲区中，并更新已用环。处理函数将重复该步骤，直到读取tap设备返回值为负并且errno为EWOULDBLOCK，表明tap设备已经没有新的报文，之后中断通知其他虚拟机收报文。
+When initializing, the Virtio network device adds the file descriptor of the Tap device to the interest list of the event monitor thread's epoll instance. The event monitor thread will loop and call the epoll_wait function to monitor the readable events of the tap device. Once a readable event occurs, indicating that the tap device has received a packet from the kernel, the epoll_wait function returns, and the packet reception processing function is executed. The processing function will take out a descriptor chain from the available ring of the Receive Virtqueue and read the tap device to write data into the memory buffer pointed to by the descriptor chain, and update the used ring. The processing function will repeat this step until reading the tap device returns a negative value and errno is EWOULDBLOCK, indicating that the tap device has no new packets, and then interrupts notify other virtual machines to receive packets.
