@@ -1,0 +1,267 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Using VirtIO - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="use-of-virtio-devices"><a class="header" href="#use-of-virtio-devices">Use of VirtIO Devices</a></h1>
+<p>Currently, hvisor supports three types of Virtio devices: Virtio block, Virtio net, and Virtio Console, presented to virtual machines other than Root Linux via MMIO. The Virtio device source repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, compiled and used together with the command line tool. After creating Virtio devices through the command line tool, the Virtio device will become a daemon on Root Linux, and its log information will be output to the nohup.out file.</p>
+<h2 id="creating-and-starting-virtio-devices"><a class="header" href="#creating-and-starting-virtio-devices">Creating and Starting Virtio Devices</a></h2>
+<p>Before creating Virtio devices through the command line, execute <code>insmod hvisor.ko</code> to load the kernel module.</p>
+<h3 id="virtio-blk-device"><a class="header" href="#virtio-blk-device">Virtio blk Device</a></h3>
+<p>Execute the following example command on the Root Linux console to create a Virtio blk device:</p>
+<pre><code class="language-shell">nohup ./hvisor virtio start \
+	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 &amp;
+</code></pre>
+<p>Here <code>--device blk</code> indicates creating a Virtio disk device for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>, and the corresponding disk image path is <code>img</code>.</p>
+<blockquote>
+<p>Virtual machines using Virtio devices need to add information about the Virtio mmio node in the device tree.</p>
+</blockquote>
+<h3 id="virtio-net-device"><a class="header" href="#virtio-net-device">Virtio net Device</a></h3>
+<h4 id="creating-network-topology"><a class="header" href="#creating-network-topology">Creating Network Topology</a></h4>
+<p>Before using the Virtio net device, a network topology needs to be created in root Linux so that the Virtio net device can connect to the real network card through the Tap device and bridge device. Execute the following commands in root Linux:</p>
+<pre><code class="language-shell">mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+ip link set eth0 up
+dhclient eth0
+brctl addbr br0
+brctl addif br0 eth0
+ifconfig eth0 0
+dhclient br0
+ip tuntap add dev tap0 mode tap
+brctl addif br0 tap0
+ip link set dev tap0 up
+</code></pre>
+<p>This will create a network topology of <code>tap0 device&lt;--&gt;bridge device&lt;--&gt;real network card</code>.</p>
+<h4 id="starting-virtio-net"><a class="header" href="#starting-virtio-net">Starting Virtio net</a></h4>
+<p>Execute the following example command on the Root Linux console to create a Virtio net device:</p>
+<pre><code class="language-shell">nohup ./hvisor virtio start \
+	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 &amp;
+</code></pre>
+<p><code>--device net</code> indicates creating a Virtio network device for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>, and it connects to the Tap device named <code>tap</code>.</p>
+<h3 id="virtio-console-device"><a class="header" href="#virtio-console-device">Virtio console Device</a></h3>
+<p>Execute the following example command on the Root Linux console to create a Virtio console device:</p>
+<pre><code class="language-shell">nohup ./hvisor virtio start \
+	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &amp;
+</code></pre>
+<p><code>--device console</code> indicates creating a Virtio console for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>.</p>
+<p>Execute <code>cat nohup.out | grep "char device"</code>, and you will observe the output <code>char device redirected to /dev/pts/xx</code>. Execute on Root Linux:</p>
+<pre><code>screen /dev/pts/xx
+</code></pre>
+<p>This will enter the virtual console and interact with the virtual machine. Press the shortcut key <code>Ctrl +a d</code> to return to the Root Linux terminal. Execute <code>screen -r [session_id]</code> to re-enter the virtual console.</p>
+<h3 id="creating-multiple-virtio-devices"><a class="header" href="#creating-multiple-virtio-devices">Creating Multiple Virtio Devices</a></h3>
+<p>Execute the following command to create Virtio blk, net, and console devices simultaneously, all devices are within one daemon process.</p>
+<pre><code class="language-shell">nohup ./hvisor virtio start \
+	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 \
+	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 \
+	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &amp;
+</code></pre>
+<h2 id="closing-virtio-devices"><a class="header" href="#closing-virtio-devices">Closing Virtio Devices</a></h2>
+<p>Execute the following command to close the Virtio daemon and all created devices:</p>
+<pre><code>pkill hvisor
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap03/CMDTools.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap04/Structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap03/CMDTools.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap04/Structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

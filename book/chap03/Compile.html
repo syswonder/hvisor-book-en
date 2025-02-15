@@ -1,0 +1,261 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>How to Compile - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h1>
+<h2 id="compiling-with-docker"><a class="header" href="#compiling-with-docker">Compiling with Docker</a></h2>
+<h3 id="1-install-docker"><a class="header" href="#1-install-docker">1. Install Docker</a></h3>
+<pre><code class="language-bash">sudo snap install docker
+</code></pre>
+<p>You can also refer to the <a href="https://docs.docker.com/install/">Docker official documentation</a> to install Docker.</p>
+<h3 id="2-build-the-image"><a class="header" href="#2-build-the-image">2. Build the image</a></h3>
+<pre><code class="language-bash">make build_docker
+</code></pre>
+<p>This step builds a Docker image, automatically creating all the dependencies required for compilation.</p>
+<h3 id="3-run-the-container"><a class="header" href="#3-run-the-container">3. Run the container</a></h3>
+<pre><code class="language-bash">make docker
+</code></pre>
+<p>This step starts a container, mounts the current directory into the container, and enters the container's shell.</p>
+<h3 id="4-compile"><a class="header" href="#4-compile">4. Compile</a></h3>
+<p>Execute the following command in the container to compile.</p>
+<pre><code class="language-bash">make all
+</code></pre>
+<h2 id="compiling-with-local-environment"><a class="header" href="#compiling-with-local-environment">Compiling with Local Environment</a></h2>
+<h3 id="1-install-rustup-and-cargo"><a class="header" href="#1-install-rustup-and-cargo">1. Install RustUp and Cargo</a></h3>
+<pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
+</code></pre>
+<h3 id="2-install-the-toolchain"><a class="header" href="#2-install-the-toolchain">2. Install the toolchain</a></h3>
+<p>The toolchain currently used by the project is as follows:</p>
+<ul>
+<li>Rust nightly 2023-07-12</li>
+<li><a href="https://crates.io/crates/rustfmt">rustfmt</a></li>
+<li><a href="https://crates.io/crates/clippy">clippy</a></li>
+<li><a href="https://crates.io/crates/cargo-binutils/0.3.6">cargo-binutils</a></li>
+<li>rust-src</li>
+<li>llvm-tools-preview</li>
+<li>target: aarch64-unknown-none</li>
+</ul>
+<p>You can check if these tools are installed on your own, or use the following commands to install:</p>
+<h4 id="1-install-toml-cli-and-cargo-binutils"><a class="header" href="#1-install-toml-cli-and-cargo-binutils">(1) Install toml-cli and cargo-binutils</a></h4>
+<pre><code class="language-bash">cargo install toml-cli cargo-binutils
+</code></pre>
+<h4 id="2-install-the-target-platform-cross-compilation-toolchain"><a class="header" href="#2-install-the-target-platform-cross-compilation-toolchain">(2) Install the target platform cross-compilation toolchain</a></h4>
+<pre><code class="language-bash">rustup target add aarch64-unknown-none
+</code></pre>
+<h4 id="3-parse-rust-toolchaintoml-to-install-the-rust-toolchain"><a class="header" href="#3-parse-rust-toolchaintoml-to-install-the-rust-toolchain">(3) Parse rust-toolchain.toml to install the Rust toolchain</a></h4>
+<pre><code class="language-bash">RUST_VERSION=$(toml get -r rust-toolchain.toml toolchain.channel) &amp;&amp; \
+Components=$(toml get -r rust-toolchain.toml toolchain.components | jq -r 'join(" ")') &amp;&amp; \
+rustup install $RUST_VERSION &amp;&amp; \
+rustup component add --toolchain $RUST_VERSION $Components
+</code></pre>
+<h4 id="4-compile-1"><a class="header" href="#4-compile-1">(4) Compile</a></h4>
+<pre><code class="language-bash">make all
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap02/subchap01/UbootFitImage-ZCU102.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap03/BootRootLinux.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap02/subchap01/UbootFitImage-ZCU102.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap03/BootRootLinux.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Implementation of RISC-V IOMMU Standard - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../../favicon.svg">
+        <link rel="shortcut icon" href="../../../favicon.png">
+        <link rel="stylesheet" href="../../../css/variables.css">
+        <link rel="stylesheet" href="../../../css/general.css">
+        <link rel="stylesheet" href="../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../../highlight.css">
+        <link rel="stylesheet" href="../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h3 id="4612-implementation-of-risc-v-iommu-standard"><a class="header" href="#4612-implementation-of-risc-v-iommu-standard">4.6.1.2 Implementation of RISC-V IOMMU Standard</a></h3>
+<h4 id="risc-v-iommu-workflow"><a class="header" href="#risc-v-iommu-workflow">RISC-V IOMMU Workflow</a></h4>
+<p>For virtualized systems with DMA devices, there is a possibility that the system's stability could be compromised due to malicious DMA configurations by virtual machines. The introduction of IOMMU can further enhance the isolation between Zones, ensuring the system's security.</p>
+<p>IOMMU supports two-stage address translation, providing DMA remapping functionality. On one hand, it offers memory protection for DMA operations, limiting the physical memory areas that devices can access, making DMA operations safer. On the other hand, device DMA operations only require continuous IOVA, not continuous PA, allowing efficient use of scattered pages in physical memory.</p>
+<p>To perform address translation and memory protection, RISC-V IOMMU uses the same page table format as the CPU's MMU in both the first and second stages. Using the same page table format as the CPU MMU simplifies some complexities in memory management for DMA and allows the CPU MMU and IOMMU to use the same page tables.</p>
+<p>The second-stage address translation process supported in hvisor, i.e., the translation from device-side IOVA (GPA) to HPA, is shown in the following diagrams, and the second-stage page tables are shared between the CPU MMU and IOMMU:</p>
+<p>IOMMU needs to first locate the device context (DC) in the device directory table using the device identifier (device_id) before translation. Each device has a unique device_id, which is specified during hardware implementation for platform devices, and for PCI/PCIe devices, the BDF number of the PCI/PCIe device is used as the device_id. The DC contains information such as the base address of the two-stage address translation page tables and some translation control information. For example, in two-stage address translation, the I/O device's IOVA is first translated into GPA in the Stage-1 page table pointed to by the fsc field, then into HPA in the Stage-2 page table pointed to by the iohgatp field, and then accesses memory accordingly. In hvisor, only the second-stage translation using the iohgatp field is supported, as shown below:</p>
+<p>RISC-V IOMMU, as a physical hardware, can be accessed via MMIO, and its various fields' byte offsets are specified in the IOMMU specification manual. Implementation needs to access these fields correctly according to the specified offsets and sizes. The IommuHw structure is defined to simplify access to the physical IOMMU, as shown below:</p>
+<p>The Capabilities of the IOMMU is a read-only register that reports the supported functions of the IOMMU. When initializing the IOMMU, it is necessary to first check this register to determine if the hardware supports IOMMU functions.</p>
+<p>During initialization, the IOMMU must first check if the current IOMMU matches the driver. The rv_iommu_check_features function is defined to check for hardware support for features like Sv39x4, WSI, etc., as shown below:</p>
+<p>The fctl of the IOMMU is a functional control register, providing some functional controls of the IOMMU, including whether the IOMMU accesses memory data in big-endian or little-endian, whether the interrupts generated by the IOMMU are WSI or MSI interrupts, and controls for the Guest address translation scheme.</p>
+<p>The ddtp of the IOMMU is a device directory table pointer register, which contains the root page's PPN of the device directory table and the IOMMU Mode. It can be configured to Off, Bare, 1LVL, 2LVL, or 3LVL, where Off means the IOMMU does not allow device access to memory, Bare means the IOMMU allows all memory access by devices without translation and protection, and 1LVL, 2LVL, 3LVL indicate the number of levels in the device directory table used by the IOMMU.</p>
+<p>The rv_iommu_init function is defined for checking and controlling the functions of the physical IOMMU, such as configuring interrupts as WSI, configuring the device directory table, etc., as shown below:</p>
+<p>The entry format of the device directory table is provided in the specification manual. To make the hardware work, it needs to be implemented in conjunction with the specification. The DdtEntry structure is defined to represent an entry in the device directory table, representing a DMA device. The iohgatp saves the PPN of the second-stage page table, the Guest Software Context ID (GSCID), and the Mode field used to select the second-stage address translation scheme. The tc contains many transformation control bits, most of which are not used in hvisor, and the valid bits need to be set to 1 for subsequent more advanced feature extensions. The structure of the device directory table entry is as follows:</p>
+<p>Currently, hvisor only supports a single-level device directory table. The Lvl1DdtHw structure is defined to facilitate access to the device directory table entries. A single-level device directory table can support 64 DMA devices, occupying one physical page, as shown below:</p>
+<p>The Iommu structure is defined as a higher-level abstraction of the IOMMU, where base is the base address of the IommuHw, i.e., the physical address of the IOMMU, which can be used to access the physical IOMMU, and ddt is the device directory table, which needs to be allocated physical pages during IOMMU initialization. Since it supports only a single-level device directory table, only one physical page is needed, as shown below:</p>
+<p>The device directory table and translation page tables of the IOMMU are stored in memory and need to be allocated according to actual needs, i.e., the device directory table's memory needs to be allocated during new. In addition, adding device entries to the device directory table is a very important task because DMA devices perform DMA operations, the first step is to find the translation page tables and other information from the device directory table, and then the IOMMU performs the translation based on the page table-related information. The contents such as tc, iohgatp, etc., need to be filled in, as shown below:</p>
+<p>Since hvisor supports RISC-V's IOMMU and Arm's SMMUv3, two interfaces for external calls, iommu_init and iommu_add_device, are encapsulated during implementation. These two functions have the same function names and parameters as the common call interface functions under the Arm architecture, as shown below:</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../../chap04/subchap03/IOMMU/ARM-SMMU.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../../chap04/subchap03/IOMMU/ARM-SMMU.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../../chap04/subchap03/VirtIO/VirtIO-Define.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../../elasticlunr.min.js"></script>
+        <script src="../../../mark.min.js"></script>
+        <script src="../../../searcher.js"></script>
+
+        <script src="../../../clipboard.min.js"></script>
+        <script src="../../../highlight.js"></script>
+        <script src="../../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../../assets/fzf.umd.js"></script>
+        <script src="../../../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

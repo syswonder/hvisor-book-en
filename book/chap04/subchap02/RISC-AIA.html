@@ -1,0 +1,336 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>RISC-V Interrupt Control AIA - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="overall-structure"><a class="header" href="#overall-structure">Overall Structure</a></h1>
+<p>AIA mainly includes two parts, the Interrupt Message Service Controller (IMSIC) and the Advanced Platform-Level Interrupt Controller (APLIC), with the overall structure shown in the figure below.</p>
+<img src="../img/riscv_aia_struct.jpg"  style="zoom: 50%;" />
+<p>Peripherals can choose to send message interrupts or send wired interrupts via line connections.</p>
+<p>If peripheral A supports MSI, it only needs to write the specified data to the interrupt file of the designated hart, and then IMSIC will deliver an interrupt to the target processor.</p>
+<p>For all devices, they can connect to APLIC via an interrupt line, and APLIC will choose the interrupt delivery mode according to the configuration:</p>
+<ul>
+<li>Wired interrupt</li>
+<li>MSI</li>
+</ul>
+<p>In hvisor, the interrupt delivery mode is MSI.</p>
+<p>After enabling the AIA specification with <code>IRQ=aia</code> in hvisor, the handling of clock interrupts remains consistent, while the handling of software interrupts and external interrupts changes.</p>
+<h1 id="external-interrupt"><a class="header" href="#external-interrupt">External Interrupt</a></h1>
+<h2 id="imsic"><a class="header" href="#imsic">IMSIC</a></h2>
+<p>In hvisor, a physical CPU corresponds to a virtual CPU, and they both have their own interrupt files.</p>
+<img src="../img/riscv_aia_intfile.png"  style="zoom: 80%;" />
+<p>Writing to an interrupt file can trigger an external interrupt of the specified privilege level for the specified hart.</p>
+<p>Provide a two-stage address mapping table for IMSIC:</p>
+<pre><code class="language-rs">        let paddr = 0x2800_0000 as HostPhysAddr;
+        let size = PAGE_SIZE;
+        self.gpm.insert(MemoryRegion::new_with_offset_mapper(
+            paddr as GuestPhysAddr,
+            paddr + PAGE_SIZE * 1,
+            size,
+            MemFlags::READ | MemFlags::WRITE,
+        ))?;
+        ...
+</code></pre>
+<h2 id="aplic"><a class="header" href="#aplic">APLIC</a></h2>
+<h3 id="structure"><a class="header" href="#structure">Structure</a></h3>
+<p>There is only one global APLIC.</p>
+<p>When a wired interrupt arrives, it first reaches the root interrupt domain in machine mode (OpenSBI), and then the interrupt is routed to the sub-interrupt domain (hvisor). Hvisor sends the interrupt signal to the virtual machine's corresponding CPU in MSI mode according to the target registers configured in APLIC.</p>
+<img src="../img/riscv_aia_aplicdomain.png"  style="zoom: 70%;" />
+<p>The APLIC specification manual specifies the byte offsets for various fields of APLIC. Define the APLIC structure as follows, and implement reading and writing of APLIC fields through the following methods:</p>
+<pre><code class="language-rs">#[repr(C)]
+pub struct Aplic {
+    pub base: usize,
+    pub size: usize,
+}
+impl Aplic {
+    pub fn new(base: usize, size: usize) -&gt; Self {
+        Self {
+            base,
+            size,
+        }
+    }
+    pub fn read_domaincfg(&amp;self) -&gt; u32{
+        let addr = self.base + APLIC_DOMAINCFG_BASE;
+        unsafe { core::ptr::read_volatile(addr as *const u32) }
+    }
+    pub fn set_domaincfg(&amp;self, bigendian: bool, msimode: bool, enabled: bool){
+        ...
+        let addr = self.base + APLIC_DOMAINCFG_BASE;
+        let src = (enabled &lt;&lt; 8) | (msimode &lt;&lt; 2) | bigendian;
+        unsafe {
+            core::ptr::write_volatile(addr as *mut u32, src);
+        }
+    }
+    ...
+}
+</code></pre>
+<h3 id="initialization"><a class="header" href="#initialization">Initialization</a></h3>
+<p>Initialize APLIC based on the base address and size in the device tree:</p>
+<pre><code class="language-rs">pub fn primary_init_early(host_fdt: &amp;Fdt) {
+    let aplic_info = host_fdt.find_node("/soc/aplic").unwrap();
+    init_aplic(
+        aplic_info.reg().unwrap().next().unwrap().starting_address as usize,
+        aplic_info.reg().unwrap().next().unwrap().size.unwrap(),
+    );
+}
+pub fn init_aplic(aplic_base: usize, aplic_size: usize) {
+    let aplic = Aplic::new(aplic_base, aplic_size);
+    APLIC.call_once(|| RwLock::new(aplic));
+}
+pub static APLIC: Once&lt;RwLock&lt;Aplic&gt;&gt; = Once::new();
+pub fn host_aplic&lt;'a&gt;() -&gt; &amp;'a RwLock&lt;Aplic&gt; {
+    APLIC.get().expect("Uninitialized hypervisor aplic!")
+}
+</code></pre>
+<p>Since there is only one global APLIC, locking is used to avoid read-write conflicts, and the host_aplic() method is used for access.</p>
+<p>When the virtual machine starts, the address space accessing APLIC is initialized, which is unmapped. Therefore, a page fault is triggered, falling into hvisor for handling:</p>
+<pre><code class="language-rs">pub fn guest_page_fault_handler(current_cpu: &amp;mut ArchCpu) {
+    ...
+    if addr &gt;= host_aplic_base &amp;&amp; addr &lt; host_aplic_base + host_aplic_size {
+        let mut inst: u32 = read_csr!(CSR_HTINST) as u32;
+        ...
+        if let Some(inst) = inst {
+                vaplic_emul_handler(current_cpu, addr, inst);
+                current_cpu.sepc += ins_size;
+            }
+        ...
+    }
+}
+</code></pre>
+<p>Determine if the accessed address space belongs to APLIC, parse the access instruction, and enter vaplic_emul_handler to simulate APLIC in the virtual machine.</p>
+<pre><code class="language-rs">pub fn vaplic_emul_handler(
+    current_cpu: &amp;mut ArchCpu,
+    addr: GuestPhysAddr,
+    inst: Instruction,
+) {
+    let host_aplic = host_aplic();
+    let offset = addr.wrapping_sub(host_aplic.read().base);
+    if offset &gt;= APLIC_DOMAINCFG_BASE &amp;&amp; offset &lt; APLIC_SOURCECFG_BASE {
+        match inst {
+            Instruction::Sw(i) =&gt; {
+                ...
+                host_aplic.write().set_domaincfg(bigendian, msimode, enabled);
+            }
+            Instruction::Lw(i) =&gt; {
+                let value = host_aplic.read().read_domaincfg();
+                current_cpu.x[i.rd() as usize] = value as usize;
+            }
+            _ =&gt; panic!("Unexpected instruction {:?}", inst),
+        }
+    }
+    ...
+}
+</code></pre>
+<h2 id="interrupt-process"><a class="header" href="#interrupt-process">Interrupt Process</a></h2>
+<p>After hvisor completes the simulation of APLIC initialization through a page fault, it enters the virtual machine. Taking the interrupt generated by a keyboard press as an example: the interrupt signal first arrives at OpenSBI, then is routed to hvisor, and according to the configuration of the target register, it writes to the virtual interrupt file to trigger the external interrupt of the virtual machine.</p>
+<h1 id="software-interrupt"><a class="header" href="#software-interrupt">Software Interrupt</a></h1>
+<p>After enabling the AIA specification, the Linux kernel of the virtual machine sends IPIs via MSI mode, eliminating the need to use the ecall instruction to fall into hvisor.</p>
+<img src="../img/riscv_aia_ipi.jpg"  style="zoom:40%;" />
+<p>As shown in the figure, in hvisor, writing to the specified hart's interrupt file can trigger an IPI.</p>
+<p>In the virtual machine, writing to the specified virtual interrupt file can implement IPIs within the virtual machine without the need for hvisor's simulation support.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../chap04/subchap02/RISC-PLIC.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../chap04/subchap02/LoongArch-Controller.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../chap04/subchap02/RISC-PLIC.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../chap04/subchap02/LoongArch-Controller.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../assets/fzf.umd.js"></script>
+        <script src="../../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

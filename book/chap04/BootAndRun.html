@@ -1,0 +1,307 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Boot and Operation of hvisor - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="initialization-process-of-hvisor"><a class="header" href="#initialization-process-of-hvisor">Initialization process of hvisor</a></h1>
+<p>Abstract: Introduces the relevant knowledge involved in running hvisor on qemu and the initialization process of hvisor. Starting from the start of qemu, track the entire process, and you will have a general understanding of the initialization process of hvisor after reading this article.</p>
+<h2 id="qemu-startup-process"><a class="header" href="#qemu-startup-process">qemu startup process</a></h2>
+<p>The startup process of the computer simulated by qemu: After the necessary files are loaded into memory, the PC register is initialized to 0x1000, and a few instructions are executed from here before jumping to 0x80000000 to start executing the bootloader (hvsior arm part uses Uboot), after executing a few instructions, it jumps to the starting address of the kernel that uboot can recognize and executes.</p>
+<h3 id="generate-the-executable-file-of-hvisor"><a class="header" href="#generate-the-executable-file-of-hvisor">Generate the executable file of hvisor</a></h3>
+<pre><code>rust-objcopy --binary-architecture=aarch64 target/aarch64-unknown-none/debug/hvisor --strip-all -O binary target/aarch64-unknown-none/debug/hvisor.bin.tmp
+</code></pre>
+<p>Convert the executable file of hvisor into logical binary and save it as <code>hvisor.bin.tmp</code>.</p>
+<h3 id="generate-an-image-file-that-uboot-can-recognize"><a class="header" href="#generate-an-image-file-that-uboot-can-recognize">Generate an image file that uboot can recognize</a></h3>
+<p>uboot is a bootloader, its main task is to jump to the first instruction of the hvisor image to start execution, so it is necessary to ensure that the generated hvisor image is recognizable by uboot, here you need to use the <code>mkimage</code> tool.</p>
+<pre><code>mkimage -n hvisor_img -A arm64 -O linux -C none -T kernel -a 0x40400000 -e 0x40400000 -d target/aarch64-unknown-none/debug/hvisor.bin.tmp target/aarch64-unknown-none/debug/hvisor.bin
+</code></pre>
+<ul>
+<li><code>-n hvisor_img</code>: Specify the name of the kernel image.</li>
+<li><code>-A arm64</code>: Specify the architecture as ARM64.</li>
+<li><code>-O linux</code>: Specify the operating system as Linux.</li>
+<li><code>-C none</code>: Do not use compression algorithms.</li>
+<li><code>-T kernel</code>: Specify the type as kernel.</li>
+<li><code>-a 0x40400000</code>: Specify the loading address as <code>0x40400000</code>.</li>
+<li><code>-e 0x40400000</code>: Specify the entry address as <code>0x40400000</code>.</li>
+<li><code>-d target/aarch64-unknown-none/debug/hvisor.bin.tmp</code>: Specify the input file as the previously generated temporary binary file.</li>
+<li>The last parameter is the generated output file name, which is the final kernel image file <code>hvisor.bin</code>.</li>
+</ul>
+<h2 id="initialization-process"><a class="header" href="#initialization-process">Initialization process</a></h2>
+<h3 id="aarch64ld-link-script"><a class="header" href="#aarch64ld-link-script">aarch64.ld link script</a></h3>
+<p>To understand how hvisor executes, we first look at the link script <code>aarch64.ld</code>, which gives us a general understanding of the execution process of hvisor.</p>
+<pre><code>ENTRY(arch_entry)
+BASE_ADDRESS = 0x40400000;
+</code></pre>
+<p>The first line sets the program entry <code>arch_entry</code>, which can be found in <code>arch/aarch64/entry.rs</code>, introduced later.</p>
+<pre><code>.text : {
+        *(.text.entry)
+        *(.text .text.*)
+    }
+</code></pre>
+<p>We make the <code>.text</code> section the very beginning section, and put the <code>.text.entry</code> containing the first entry instruction at the beginning of the <code>.text</code> section, ensuring that hvisor indeed starts executing from the 0x40400000 location agreed with qemu.</p>
+<p>Here we also need to remember something called <code>__core_end</code>, which is the address of the end position of the link script, which can be known during the startup process.</p>
+<h3 id="arch_entry"><a class="header" href="#arch_entry">arch_entry</a></h3>
+<p>With the above prerequisites, we can step into the first instruction of hvisor, which is <code>arch_entry()</code>.</p>
+<pre><code>// src/arch/aarch64/entry.rs
+
+pub unsafe extern "C" fn arch_entry() -&gt; i32 {
+    unsafe {
+        core::arch::asm!(
+            "
+            // x0 = dtbaddr
+            mov x1, x0
+            mrs x0, mpidr_el1
+            and x0, x0, #0xff
+            ldr x2, =__core_end          // x2 = &amp;__core_end
+            mov x3, {per_cpu_size}      // x3 = per_cpu_size
+            madd x4, x0, x3, x3       // x4 = cpuid * per_cpu_size + per_cpu_size
+            add x5, x2, x4
+            mov sp, x5           // sp = &amp;__core_end + (cpuid + 1) * per_cpu_size
+            b {rust_main}             // x0 = cpuid, x1 = dtbaddr
+            ",
+            options(noreturn),
+            per_cpu_size=const PER_CPU_SIZE,
+            rust_main = sym crate::rust_main,
+        );
+    }
+}
+</code></pre>
+<p>First, look at the embedded assembly part. The first instruction <code>mov x1,x0</code>, passes the value of the <code>x0</code> register into the <code>x1</code> register, where x0 contains the address of the device tree. qemu simulates an arm architecture computer, which also has various devices such as input/output devices like mice and displays, as well as various storage devices. When we want to get input from the keyboard and output to the display, we need to get input from somewhere or put the output data somewhere. In the computer, we use specific addresses to access these devices. The device tree saves the access addresses of these devices. As the supervisor of all software, the hypervisor naturally needs to know the information of the device tree, so Uboot will put this information in <code>x0</code> before entering the kernel, which is a convention.</p>
+<p><code>mrs x0, mpidr_el1</code> is an instruction to access system-level registers, that is, to send the contents of the system register <code>mpidr_el1</code> to <code>x0</code>, and <code>mpidr_el1</code> contains information about which CPU we are currently dealing with (the computer supports multi-core CPUs), and there are many cooperations with the CPU later, so we need to know which CPU is currently in use. This register contains a lot of information about the CPU, and what we currently need is the lower 8 bits, which extract the corresponding CPU id, which is what the sentence <code>and x0, x0, #0xff</code> is doing.</p>
+<p><code>ldr x2, = __core_end</code>, we set a symbol <code>__core_end</code> at the end of the link script, as the end address of the entire hvisor program space, and put this address into <code>x2</code>.</p>
+<p><code>mov x3,{per_cpu_size}</code> puts the size of each CPU's stack into <code>x3</code>, this <code>{xxx}</code> is to replace the value of <code>xxx</code> with the assembly code, you can see below <code>per_cpu_size=const PER_CPU_SIZE</code> The external variable is renamed as a parameter. Another parameter with <code>sym</code> indicates that what follows is a symbol defined elsewhere.</p>
+<p><code>per_cpu_size</code> In this size space, related registers can be saved and restored, including the CPU's stack space.</p>
+<p><code>madd x4, x0, x3, x3</code> is a multiply-add instruction, cpu_id * per_cpu_size + per_cpu_size, the result is put into <code>x4</code>, at this time <code>x4</code> contains how much space the current number of CPUs needs. (The sequence starts from 0, so add per_cpu_size one more time).</p>
+<p><code>add x5,x2,x4</code> means to add the end address of hvisor to the total space required by the CPU and put it into <code>x5</code>.</p>
+<p><code>mov sp,x5</code> is to find the top of the current CPU's stack.</p>
+<p><code>b {rust_main}</code> means to jump to <code>rust_main</code> to start execution, which also indicates that this piece of assembly code will not return, corresponding to <code>option(noreturn)</code>.</p>
+<h2 id="enter-rust_main"><a class="header" href="#enter-rust_main">Enter rust_main()</a></h2>
+<h3 id="fn-rust_maincpuidusize-host_dtbusize"><a class="header" href="#fn-rust_maincpuidusize-host_dtbusize">fn rust_main(cpuid:usize, host_dtb:usize)</a></h3>
+<p>Entering <code>rust_main</code> requires two parameters, which are passed through <code>x0</code> and <code>x1</code>. Remember that in the previous entry, our <code>x0</code> stored the cpu_id and <code>x1</code> stored the device tree related information.</p>
+<h3 id="install_trap_vector"><a class="header" href="#install_trap_vector">install_trap_vector()</a></h3>
+<p>When the processor encounters an exception or interrupt, it needs to jump to the corresponding location for processing. Here, these corresponding jump addresses are set (can be regarded as setting a table) for handling exceptions at the Hypervisor level. Each privilege level has its own corresponding exception vector table, except for EL0, the application privilege level, which must jump to other privilege levels to handle exceptions. The <code>VBAR_ELn</code> register is used to store the base address of the exception vector table under the ELn privilege level.</p>
+<pre><code>extern "C" {
+    fn _hyp_trap_vector();
+}
+
+pub fn install_trap_vector() {
+    // Set the trap vector.
+    VBAR_EL2.set(_hyp_trap_vector as _)
+}
+
+</code></pre>
+<p><code>VBAR_EL2.set()</code> sets the address of <code>_hyp_trap_vector()</code> as the base address of the exception vector table for EL2 privilege level.</p>
+<p><code>_hyp_trap_vector()</code> This assembly code is constructing the exception vector table.</p>
+<p><strong>Simple introduction to the format of the exception vector table</strong></p>
+<p>According to the level of the exception and whether the level of handling the exception is the same, it is divided into two categories. If the level remains unchanged, it is divided into two groups according to whether the current level's SP is used. If the exception level changes, it is divided into two groups according to whether the execution mode is 64-bit/32-bit. At this point, the exception vector table is divided into 4 groups. In each group, each table entry represents an entry for handling a certain type of exception.</p>
+<h3 id="main-cpu"><a class="header" href="#main-cpu">Main CPU</a></h3>
+<pre><code>static MASTER_CPU: AtomicI32 = AtomicI32::new(-1);
+
+let mut is_primary = false;
+    if</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap04/Structure.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap04/subchap01/CPUVirtualization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap04/Structure.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap04/subchap01/CPUVirtualization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>
