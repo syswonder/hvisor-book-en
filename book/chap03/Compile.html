@@ -156,16 +156,16 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h1>
-<h2 id="compiling-with-docker"><a class="header" href="#compiling-with-docker">Compiling with Docker</a></h2>
+<h2 id="compile-using-docker"><a class="header" href="#compile-using-docker">Compile using Docker</a></h2>
 <h3 id="1-install-docker"><a class="header" href="#1-install-docker">1. Install Docker</a></h3>
 <pre><code class="language-bash">sudo snap install docker
 </code></pre>
-<p>You can also refer to the <a href="https://docs.docker.com/install/">Docker official documentation</a> to install Docker.</p>
-<h3 id="2-build-the-image"><a class="header" href="#2-build-the-image">2. Build the image</a></h3>
+<p>You can also refer to the <a href="https://docs.docker.com/install/">Docker Official Documentation</a> to install Docker.</p>
+<h3 id="2-build-the-image"><a class="header" href="#2-build-the-image">2. Build the Image</a></h3>
 <pre><code class="language-bash">make build_docker
 </code></pre>
-<p>This step builds a Docker image, automatically creating all the dependencies required for compilation.</p>
-<h3 id="3-run-the-container"><a class="header" href="#3-run-the-container">3. Run the container</a></h3>
+<p>This step builds a Docker image, automatically compiling all required dependencies.</p>
+<h3 id="3-run-the-container"><a class="header" href="#3-run-the-container">3. Run the Container</a></h3>
 <pre><code class="language-bash">make docker
 </code></pre>
 <p>This step starts a container, mounts the current directory into the container, and enters the container's shell.</p>
@@ -173,13 +173,13 @@
 <p>Execute the following command in the container to compile.</p>
 <pre><code class="language-bash">make all
 </code></pre>
-<h2 id="compiling-with-local-environment"><a class="header" href="#compiling-with-local-environment">Compiling with Local Environment</a></h2>
+<h2 id="compile-using-the-local-environment"><a class="header" href="#compile-using-the-local-environment">Compile using the local environment</a></h2>
 <h3 id="1-install-rustup-and-cargo"><a class="header" href="#1-install-rustup-and-cargo">1. Install RustUp and Cargo</a></h3>
 <pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
 </code></pre>
-<h3 id="2-install-the-toolchain"><a class="header" href="#2-install-the-toolchain">2. Install the toolchain</a></h3>
-<p>The toolchain currently used by the project is as follows:</p>
+<h3 id="2-install-the-toolchain"><a class="header" href="#2-install-the-toolchain">2. Install the Toolchain</a></h3>
+<p>The toolchain currently used by the project includes:</p>
 <ul>
 <li>Rust nightly 2023-07-12</li>
 <li><a href="https://crates.io/crates/rustfmt">rustfmt</a></li>
@@ -189,11 +189,11 @@
 <li>llvm-tools-preview</li>
 <li>target: aarch64-unknown-none</li>
 </ul>
-<p>You can check if these tools are installed on your own, or use the following commands to install:</p>
+<p>You can check if these tools are installed yourself, or use the following commands to install them:</p>
 <h4 id="1-install-toml-cli-and-cargo-binutils"><a class="header" href="#1-install-toml-cli-and-cargo-binutils">(1) Install toml-cli and cargo-binutils</a></h4>
 <pre><code class="language-bash">cargo install toml-cli cargo-binutils
 </code></pre>
-<h4 id="2-install-the-target-platform-cross-compilation-toolchain"><a class="header" href="#2-install-the-target-platform-cross-compilation-toolchain">(2) Install the target platform cross-compilation toolchain</a></h4>
+<h4 id="2-install-the-cross-compilation-toolchain-for-the-target-platform"><a class="header" href="#2-install-the-cross-compilation-toolchain-for-the-target-platform">(2) Install the cross-compilation toolchain for the target platform</a></h4>
 <pre><code class="language-bash">rustup target add aarch64-unknown-none
 </code></pre>
 <h4 id="3-parse-rust-toolchaintoml-to-install-the-rust-toolchain"><a class="header" href="#3-parse-rust-toolchaintoml-to-install-the-rust-toolchain">(3) Parse rust-toolchain.toml to install the Rust toolchain</a></h4>

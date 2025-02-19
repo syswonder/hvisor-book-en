@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Boot Management for Linux VM - hvisor Manual</title>
+        <title>Boot Management Linux VM - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -169,7 +169,7 @@
 tar -xvf qemu-${QEMU_VERSION}.tar.xz
 </code></pre>
 <h4 id="2-conditionally-compile-and-install-qemu"><a class="header" href="#2-conditionally-compile-and-install-qemu">2. Conditionally Compile and Install QEMU</a></h4>
-<p>Here we only compile QEMU for simulating aarch64. If you need QEMU for other architectures, you can refer to <a href="https://wiki.qemu.org/Hosts/Linux">QEMU Official Documentation</a>.</p>
+<p>Here we only compile QEMU for emulating aarch64, if you need QEMU for other architectures, refer to <a href="https://wiki.qemu.org/Hosts/Linux">QEMU Official Documentation</a>.</p>
 <pre><code class="language-bash">cd qemu-7.0.0 &amp;&amp; \
 ./configure --target-list=aarch64-softmmu,aarch64-linux-user &amp;&amp; \
 make -j$(nproc) &amp;&amp; \
@@ -187,7 +187,7 @@ make install
 <pre><code class="language-bash">make run
 </code></pre>
 <h4 id="3-enter-qemu"><a class="header" href="#3-enter-qemu">3. Enter QEMU</a></h4>
-<p>It will automatically load uboot. After uboot loading is complete, enter <code>bootm 0x40400000 - 0x40000000</code> to enter Root Linux.</p>
+<p>It will automatically load uboot, wait for uboot to finish loading, then enter <code>bootm 0x40400000 - 0x40000000</code> to enter Root Linux.</p>
 
                     </main>
 

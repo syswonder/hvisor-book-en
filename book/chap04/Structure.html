@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Architecture of hvisor - hvisor Manual</title>
+        <title>hvisor Architecture - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -160,28 +160,28 @@
 <li>
 <p>CPU Virtualization</p>
 <ul>
-<li>Architectural Compatibility: Supports aarch64, riscv64, and loongarch architectures, each with a dedicated CPU virtualization component.</li>
-<li>CPU Allocation: Uses static allocation, pre-determining the CPU resources for each virtual machine.</li>
+<li>Architecture Compatibility: Supports architectures such as aarch64, riscv64, and loongarch, with dedicated CPU virtualization components for each architecture.</li>
+<li>CPU Allocation: Uses static allocation method, pre-determining the CPU resources for each virtual machine.</li>
 </ul>
 </li>
 <li>
 <p>Memory Virtualization</p>
 <ul>
-<li>Two-Level Page Table: Utilizes two-level page table technology to optimize the memory virtualization process.</li>
+<li>Two-stage Page Table: Utilizes two-stage page table technology to optimize the memory virtualization process.</li>
 </ul>
 </li>
 <li>
 <p>Interrupt Virtualization</p>
 <ul>
-<li>Interrupt Controller Virtualization: Supports ARM GIC, RISC-V PLIC, and other architecture-specific interrupt controller virtualizations.</li>
-<li>Interrupt Handling: Manages the transmission and processing of interrupt signals.</li>
+<li>Interrupt Controller Virtualization: Supports virtualization of different architecture's interrupt controllers like ARM GIC and RISC-V PLIC.</li>
+<li>Interrupt Handling: Manages the transmission and processing flow of interrupt signals.</li>
 </ul>
 </li>
 <li>
 <p>I/O Virtualization</p>
 <ul>
-<li>IOMMU Integration: Supports IOMMU, enhancing the efficiency and security of DMA virtualization.</li>
-<li>VirtIO Standard: Adheres to the VirtIO specification, providing high-performance virtual devices.</li>
+<li>IOMMU Integration: Supports IOMMU to enhance the efficiency and security of DMA virtualization.</li>
+<li>VirtIO Standard: Follows the VirtIO specification, providing high-performance virtual devices.</li>
 <li>PCI Virtualization: Implements PCI virtualization, ensuring virtual machines can access physical or virtual I/O devices.</li>
 </ul>
 </li>

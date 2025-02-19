@@ -161,18 +161,15 @@
 </div>
 <h1 id="welcome-to-hvisor"><a class="header" href="#welcome-to-hvisor">Welcome to hvisor!</a></h1>
 <p>Hello~</p>
-<div style="break-before: page; page-break-before: always;"></div><div align=center>
-	<img src="chap01/img/hvisor-logo.svg"/>
-</div>
-<h1 id="welcome-to-hvisor-1"><a class="header" href="#welcome-to-hvisor-1">Welcome to hvisor!</a></h1>
-<p><a href="https://github.com/syswonder/hvisor">hvisor</a> is a lightweight Type-1 hypervisor written in Rust, offering efficient resource management and low-overhead virtualization performance.</p>
+<div style="break-before: page; page-break-before: always;"></div><p>Welcome to hvisor!</p>
+<p><a href="https://github.com/syswonder/hvisor">hvisor</a> is a lightweight Type-1 virtual machine monitor written in Rust, offering efficient resource management and low-overhead virtualization performance.</p>
 <p>Features</p>
 <ol>
 <li><strong>Cross-platform support</strong>: Supports multiple architectures including AARCH64, RISC-V, and LoongArch.</li>
-<li><strong>Lightweight</strong>: Focuses on core virtualization functionalities, avoiding unnecessary complexity found in traditional virtualization solutions, suitable for resource-constrained environments.</li>
-<li><strong>Efficient</strong>: Runs directly on hardware without the need for an operating system layer, providing near-native performance.</li>
+<li><strong>Lightweight</strong>: Focuses on core virtualization features, avoiding unnecessary complexity found in traditional virtualization solutions, suitable for resource-constrained environments.</li>
+<li><strong>Efficient</strong>: Runs directly on hardware without going through an OS layer, providing near-native performance.</li>
 <li><strong>Security</strong>: Rust is known for its memory safety and concurrent programming model, helping to reduce common system-level programming errors such as memory leaks and data races.</li>
-<li><strong>Fast startup</strong>: Designed with simplicity in mind, it has a short startup time, suitable for scenarios requiring rapid deployment of virtualization.</li>
+<li><strong>Fast startup</strong>: Designed to be simple with a short startup time, suitable for scenarios that require rapid deployment of virtualization.</li>
 </ol>
 <p>Main Functions</p>
 <ol>
@@ -204,44 +201,44 @@ OKMX8MP-C</li>
 tar xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
 ls gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/
 </code></pre>
-<p>Once installed, remember the path, for example: /home/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-, this path will be used later.</p>
+<p>After installation, remember the path, for example, at: /home/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-, this path will be used later.</p>
 <h2 id="2-compile-and-install-qemu-7212"><a class="header" href="#2-compile-and-install-qemu-7212">2. Compile and Install QEMU 7.2.12</a></h2>
 <pre><code># Install required dependencies for compilation
 sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \
               gawk build-essential bison flex texinfo gperf libtool patchutils bc \
               zlib1g-dev libexpat-dev pkg-config  libglib2.0-dev libpixman-1-dev libsdl2-dev \
               git tmux python3 python3-pip ninja-build
-# Download the source code
+# Download source code
 wget https://download.qemu.org/qemu-7.2.12.tar.xz
-# Extract
+# Unzip
 tar xvJf qemu-7.2.12.tar.xz
 cd qemu-7.2.12
-# Generate configuration file
+# Generate configuration files
 ./configure --enable-kvm --enable-slirp --enable-debug --target-list=aarch64-softmmu,x86_64-softmmu
 # Compile
 make -j$(nproc)
 </code></pre>
 <p>Then edit the <code>~/.bashrc</code> file, add a few lines at the end of the file:</p>
-<pre><code># Note that the parent directory of qemu-7.2.12 can be adjusted flexibly according to your actual installation location
+<pre><code># Please note, the parent directory of qemu-7.2.12 can be flexibly adjusted according to your actual installation location
 export PATH=$PATH:/path/to/qemu-7.2.12/build
 </code></pre>
-<p>Then you can update the system path in the current terminal by <code>source ~/.bashrc</code>, or simply restart a new terminal. At this point, you can confirm the qemu version:</p>
-<pre><code>qemu-system-aarch64 --version   # Check the version
+<p>Afterward, you can update the system path in the current terminal by <code>source ~/.bashrc</code>, or directly restart a new terminal. At this point, you can check the qemu version:</p>
+<pre><code>qemu-system-aarch64 --version   #Check version
 </code></pre>
 <blockquote>
-<p>Note, the above dependencies may not be complete, for example:</p>
+<p>Note, the above dependency packages may not be complete, for example:</p>
 <ul>
-<li>If <code>ERROR: pkg-config binary 'pkg-config' not found</code> occurs, you can install the <code>pkg-config</code> package;</li>
-<li>If <code>ERROR: glib-2.48 gthread-2.0 is required to compile QEMU</code> occurs, you can install the <code>libglib2.0-dev</code> package;</li>
-<li>If <code>ERROR: pixman &gt;= 0.21.8 not present</code> occurs, you can install the <code>libpixman-1-dev</code> package.</li>
+<li>If you encounter <code>ERROR: pkg-config binary 'pkg-config' not found</code>, you can install the <code>pkg-config</code> package;</li>
+<li>If you encounter <code>ERROR: glib-2.48 gthread-2.0 is required to compile QEMU</code>, you can install the <code>libglib2.0-dev</code> package;</li>
+<li>If you encounter <code>ERROR: pixman &gt;= 0.21.8 not present</code>, you can install the <code>libpixman-1-dev</code> package.</li>
 </ul>
 </blockquote>
 <blockquote>
-<p>If you encounter an error ERROR: Dependency "slirp" not found, tried pkgconfig when generating the configuration file:</p>
-<p>Download the <a href="https://gitlab.freedesktop.org/slirp/libslirp">https://gitlab.freedesktop.org/slirp/libslirp</a> package and install it according to the readme.</p>
+<p>If you encounter an error ERROR: Dependency "slirp" not found, tried pkgconfig while generating configuration files:</p>
+<p>Download <a href="https://gitlab.freedesktop.org/slirp/libslirp">https://gitlab.freedesktop.org/slirp/libslirp</a> package, and install according to the readme.</p>
 </blockquote>
 <h2 id="3-compile-linux-kernel-54"><a class="header" href="#3-compile-linux-kernel-54">3. Compile Linux Kernel 5.4</a></h2>
-<p>Before compiling the root linux image, change the CONFIG_IPV6 and CONFIG_BRIDGE config in the .config file to y to support creating bridges and tap devices in root linux. The specific operations are as follows:</p>
+<p>Before compiling the root linux image, change the CONFIG_IPV6 and CONFIG_BRIDGE config in the .config file to y, to support creating bridges and tap devices in root linux. The specific operations are as follows:</p>
 <pre><code>git clone https://github.com/torvalds/linux -b v5.4 --depth=1
 cd linux
 git checkout v5.4
@@ -256,15 +253,15 @@ CONFIG_BRIDGE=y
 make ARCH=arm64 CROSS_COMPILE=/root/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- Image -j$(nproc)
 </code></pre>
 <blockquote>
-<p>If there is an error when compiling linux:</p>
+<p>If you encounter an error while compiling linux:</p>
 <pre><code>/usr/bin/ld: scripts/dtc/dtc-parser.tab.o:(.bss+0x20): multiple definition of `yylloc'; scripts/dtc/dtc-lexer.lex.o:(.bss+0x0): first defined here
 </code></pre>
-<p>Then modify <code>scripts/dtc/dtc-lexer.lex.c</code> under the linux folder, add <code>extern</code> before <code>YYLTYPE yylloc;</code>. Compile again, if you encounter the error: openssl/bio.h: No such file or directory, then execute <code>sudo apt install libssl-dev</code></p>
+<p>Then modify the file <code>scripts/dtc/dtc-lexer.lex.c</code> under the linux folder, add <code>extern</code> before <code>YYLTYPE yylloc;</code>. Compile again, if you encounter an error: openssl/bio.h: No such file or directory, then execute <code>sudo apt install libssl-dev</code></p>
 </blockquote>
-<p>Once compiled, the kernel file is located at: arch/arm64/boot/Image. Remember the path of the entire linux folder, for example: home/korwylee/lgw/hypervisor/linux, we will use this path again in step 7.</p>
-<h2 id="4-build-file-system-based-on-ubuntu-2004-arm64-base"><a class="header" href="#4-build-file-system-based-on-ubuntu-2004-arm64-base">4. Build File System Based on Ubuntu 20.04 Arm64 Base</a></h2>
+<p>After compilation, the kernel file is located at: arch/arm64/boot/Image. Remember the entire linux folder's path, for example: home/korwylee/lgw/hypervisor/linux, we will use this path in step 7.</p>
+<h2 id="4-build-file-system-based-on-ubuntu-2004-arm64-base"><a class="header" href="#4-build-file-system-based-on-ubuntu-2004-arm64-base">4. Build File System Based on Ubuntu 20.04 arm64 Base</a></h2>
 <blockquote>
-<p>This section can be omitted, you can directly download the ready-made disk image to use. https://blog.syswonder.org/#/2024/20240415_Virtio_devices_tutorial</p>
+<p>This section can be omitted, you can directly download the ready-made disk image for use. https://blog.syswonder.org/#/2024/20240415_Virtio_devices_tutorial</p>
 </blockquote>
 <p>We use Ubuntu 20.04 (22.04 is also possible) to build the root file system.</p>
 <p>Download: <a href="http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz">ubuntu-base-20.04.5-base-arm64.tar.gz</a></p>
@@ -272,14 +269,14 @@ make ARCH=arm64 CROSS_COMPILE=/root/gcc-arm-10.3-2021.07-x86_64-aarch64-none-lin
 <pre><code class="language-bash">wget http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz
 
 mkdir rootfs
-# Create a 1G size ubuntu.img, you can modify the count to change the img size
+# Create a 1G ubuntu.img, you can modify the count to change the img size
 dd if=/dev/zero of=ubuntu-20.04-rootfs_ext4.img bs=1M count=1024 oflag=direct
 mkfs.ext4 ubuntu-20.04-rootfs_ext4.img
 # Put ubuntu.tar.gz into the ubuntu.img that has been mounted on rootfs
 sudo mount -t ext4 ubuntu-20.04-rootfs_ext4.img rootfs/
 sudo tar -xzf ubuntu-base-20.04.5-base-arm64.tar.gz -C rootfs/
 
-# Let rootfs bind and obtain some information and hardware of the physical machine
+# Let rootfs bind and get some information and hardware of the physical machine
 # qemu-path is your qemu path
 sudo cp qemu-path/build/qemu-system-aarch64 rootfs/usr/bin/
 sudo cp /etc/resolv.conf rootfs/etc/resolv.conf
@@ -293,7 +290,7 @@ sudo chroot rootfs
 sudo apt-get install git sudo vim bash-completion \
 		kmod net-tools iputils-ping resolvconf ntpdate
 
-# The following content surrounded by # can be done or not
+# The following content surrounded by # is optional
 ###################
 adduser arm64
 adduser arm64 sudo
@@ -311,14 +308,50 @@ sudo umount rootfs/dev/pts
 sudo umount rootfs/dev
 sudo umount rootfs
 </code></pre>
-<p>Finally, unmount the mount to complete the production of the root file system.</p>
+<p>Finally, unmount the mount to complete the root file system production.</p>
 <blockquote>
-<p>When executing `sudo chroot .</p>
+<p>When executing <code>sudo chroot .</code>, if you encounter the error <code>chroot: failed to run command ‘/bin/bash’: Exec format error</code>, you can execute the command:</p>
+<pre><code>sudo apt-get install qemu-user-static
+sudo update-binfmts --enable qemu-aarch64
+</code></pre>
 </blockquote>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="install-qemu"><a class="header" href="#install-qemu">Install QEMU</a></h1>
+<h2 id="5-rust-environment-configuration"><a class="header" href="#5-rust-environment-configuration">5. Rust Environment Configuration</a></h2>
+<p>Please refer to: <a href="https://course.rs/first-try/intro.html">Rust Language Bible</a></p>
+<h2 id="6-compile-and-run-hvisor"><a class="header" href="#6-compile-and-run-hvisor">6. Compile and Run hvisor</a></h2>
+<p>First, pull the <a href="https://github.com/KouweiLee/hvisor">hvisor code repository</a> locally, then switch to the dev branch, and in the hvisor/images/aarch64 folder, put the previously compiled root file system and Linux kernel image respectively in the virtdisk and kernel directories, and rename them as rootfs1.ext4 and Image respectively. And in the devicetree directory, execute <code>make all</code>.</p>
+<p>Then, in the hvisor directory, execute:</p>
+<pre><code>make ARCH=aarch64 LOG=info FEATURES=platform_qemu run
+</code></pre>
+<p>Afterward, you will enter the uboot startup interface, under this interface execute:</p>
+<pre><code>bootm 0x40400000 - 0x40000000
+</code></pre>
+<p>This startup command will boot hvisor from the physical address <code>0x40400000</code>, with the device tree address at <code>0x40000000</code>. When hvisor starts, it will automatically start root linux (used for management) and enter the shell interface of root linux, root linux is zone0, taking on management tasks.</p>
+<blockquote>
+<p>If missing <code>dtc</code>, you can execute the command:</p>
+<pre><code>sudo apt install device-tree-compiler
+</code></pre>
+</blockquote>
+<h2 id="7-use-hvisor-tool-to-start-zone1-linux"><a class="header" href="#7-use-hvisor-tool-to-start-zone1-linux">7. Use hvisor-tool to Start zone1-linux</a></h2>
+<p>First, complete the compilation of the latest version of hvisor-tool. For details, please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a> (the Chinese version is the latest version, the English README may not be updated in time). For example, if you want to compile a command line tool for arm64, and the source code of the Linux image in the Hvisor environment is located at <code>~/linux</code>, you can execute</p>
+<pre><code>make all ARCH=arm64 LOG=LOG_WARN KDIR=~/linux
+</code></pre>
+<blockquote>
+<p>Please make sure that the Linux image in Hvisor is compiled from the Linux source directory specified in the options of compiling hvisor-tool.</p>
+</blockquote>
+<p>After compilation, copy driver/hvisor.ko, tools/hvisor, driver/ivc.ko (if this file exists) to the directory where zone1 linux is started in the image/virtdisk/rootfs1.ext4 root file system (currently /home/arm64); then put the kernel image of zone1 (if it is the same Linux as zone0, copy a copy of image/aarch64/kernel/Image), and the device tree (image/aarch64/linux2.dtb) in the same directory (/home/arm64) of rootfs1.ext4, and rename them as Image and linux2.dtb respectively.</p>
+<p>Finally, copy rootfs1.ext4 in place in image/aarch64/virtdisk, rename it as rootfs2.etx4.</p>
+<p>Then, zone1-linux can be started on QEMU through root linux-zone0.</p>
+<blockquote>
+<p>For detailed steps to start zone1-linux, refer to the README of hvisor-tool. Here is a reference (subject to hvisor-tool), where linux2.json is the configuration file for zone1-linux:</p>
+</blockquote>
+<pre><code># Execute in the /home/arm64 directory:
+insmod hvisor.ko
+./hvisor zone start linux2.json
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="install-qemu"><a class="header" href="#install-qemu">Install qemu</a></h1>
 <p>Install QEMU 7.2.12:</p>
 <pre><code>wget https://download.qemu.org/qemu-7.2.12.tar.xz
-# Extract
+# Unzip
 tar xvJf qemu-7.2.12.tar.xz
 cd qemu-7.2.12
 # Configure Riscv support
@@ -326,7 +359,7 @@ cd qemu-7.2.12
 make -j$(nproc)
 # Add to environment variable
 export PATH=$PATH:/path/to/qemu-7.2.12/build
-# Test if the installation is successful
+# Test if installation is successful
 qemu-system-riscv64 --version
 </code></pre>
 <h1 id="install-cross-compiler"><a class="header" href="#install-cross-compiler">Install Cross Compiler</a></h1>
@@ -338,7 +371,7 @@ git clone https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
 git rm qemu 
 git submodule update --init --recursive
-# The above operation will occupy more than 5GB of disk space
+# The above operations will occupy more than 5GB of disk space
 # If git reports a network error, you can execute:
 git config --global http.postbuffer 524288000
 </code></pre>
@@ -352,14 +385,14 @@ sudo make linux -j $(nproc)
 echo 'export PATH=/opt/riscv64/bin:$PATH' &gt;&gt; ~/.bashrc
 source ~/.bashrc
 </code></pre>
-<p>This gives you the riscv64-unknown-linux-gnu toolchain.</p>
+<p>This will get the riscv64-unknown-linux-gnu toolchain.</p>
 <h1 id="compile-linux"><a class="header" href="#compile-linux">Compile Linux</a></h1>
 <pre><code>git clone https://github.com/torvalds/linux -b v6.2 --depth=1
 cd linux
 git checkout v6.2
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- defconfig
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- modules -j$(nproc)
-# Start compiling
+# Start compilation
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- Image -j$(nproc)
 
 </code></pre>
@@ -391,20 +424,20 @@ sudo umount rootfs/dev
 sudo umount rootfs
 </code></pre>
 <h1 id="run-hvisor"><a class="header" href="#run-hvisor">Run hvisor</a></h1>
-<p>Place the prepared root file system and Linux kernel image in the specified location in the hvisor directory, and execute <code>make run ARCH=riscv64</code> in the root directory of hvisor</p>
-<p>By default, it uses PLIC, execute <code>make run ARCH=riscv64 IRQ=aia</code> to enable AIA specification</p>
+<p>Place the prepared root file system and Linux kernel image in the specified location under the hvisor directory, and execute <code>make run ARCH=riscv64</code> in the root directory of hvisor</p>
+<p>By default, PLIC is used, execute <code>make run ARCH=riscv64 IRQ=aia</code> to enable AIA specification</p>
 <h1 id="possible-issues"><a class="header" href="#possible-issues">Possible Issues</a></h1>
-<p>After running Linux, the display shows <code>/bin/sh: 0: can't access tty; job control turned off</code>, enter <code>bash</code> in the console</p>
+<p>After running Linux, the display shows <code>/bin/sh: 0: can't access tty; job control turned off</code>, type <code>bash</code> in the console.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nxp-launches-jailhouse"><a class="header" href="#nxp-launches-jailhouse">NXP Launches Jailhouse</a></h1>
 <p>Date: 2024/2/25
-Updated: 2024/3/13</p>
+Update Date: 2024/3/13</p>
 <p>Authors: Yang Junyi, Chen Xingyu</p>
 <p>Overall Approach:</p>
 <ol>
-<li>Boot the first Linux using an SD card, it is recommended to use Ubuntu's rootfs and set up the network for convenience in package installation.</li>
+<li>Boot the first Linux using an SD card, it is recommended to use Ubuntu's rootfs for this Linux and ensure it is network-enabled for easy package installation.</li>
 <li>Boot the root Linux and compile the Linux kernel and Jailhouse.</li>
-<li>Restart, modify the root dtb, and boot the root Linux.</li>
-<li>Jailhouse boots non-root Linux, which is the Linux on the eMMC (original manufacturer's Linux), specifying the rootfs as eMMC.</li>
+<li>Restart, modify the root dtb, and boot root Linux.</li>
+<li>Jailhouse boots nonroot Linux, which is the Linux on the eMMC (original manufacturer's Linux), specifying rootfs as eMMC.</li>
 </ol>
 <h2 id="1-creating-an-ubuntu-sd-card-image"><a class="header" href="#1-creating-an-ubuntu-sd-card-image">1. Creating an Ubuntu SD Card Image</a></h2>
 <pre><code class="language-shell">wget https://cdimage.ubuntu.com/ubuntu-base/releases/18.04/release/ubuntu-base-18.04.5-base-arm64.tar.gz
@@ -429,32 +462,31 @@ sudo LC_ALL=C chroot . /bin/bash
 sudo arch-chroot .
 
 sudo apt-get update 
-# Install required packages such as vim, build-essential, python3, python3-dev, gcc, g++, git, make, kmod.
+# Install necessary packages, such as vim, build-essential, python3, python3-dev, gcc, g++, git, make, kmod.
 sudo apt-get install &lt;PKG_NAME&gt; 
 
 exit
 
-# If using arch-chroot, manual umount is not needed
+# If using arch-chroot, no need to manually umount
 sudo umount ./sys
 sudo umount ./proc
 sudo umount ./dev
 
 mv etc/resolv.conf.saved etc/resolv.conf
 
-## Additionally, copy Linux and jailhouse to the SD card, change to local path.
-sudo cp -r LINUX_DEMO ubuntu-base-18.04.5-base-arm64/home #source path see Linux kernel compilation section
+## Additionally, copy Linux and jailhouse to the SD card, change to local path here.
+sudo cp -r LINUX_DEMO ubuntu-base-18.04.5-base-arm64/home # Source path see Linux kernel compilation section
 sudo cp -r Jailhouse_DEMO ubuntu-base-18.04.5-base-arm64/home
-# Then copy the ubuntu-base-18.04.5-base-arm64 directory into the SD card as rootfs.
-# It is recommended to complete the "Compilation" section before copying, or you can enter the system and then compile
-sudo fdisk -l # determine the SD card device name
+# Then copy the ubuntu-base-18.04.5-base-arm64 directory to the SD card as rootfs.
+# It is recommended to complete the "Compilation" section before copying, or you can compile after entering the system
+sudo fdisk -l # Determine the SD card device name
 sudo mount /dev/sdb1 /mnt 
 sudo cp -r ubuntu-base-18.04.5-base-arm64 /mnt
 </code></pre>
 <h2 id="2-compile-nxp-linux-kernel"><a class="header" href="#2-compile-nxp-linux-kernel">2. Compile NXP Linux Kernel</a></h2>
-<p>The source code can be obtained from the manufacturer's materials (source location: /OKMX8MP-C_Linux5.4.70+Qt5.15.0_User Information_R5 (update date: 20231012)/Linux/source/OK8MP-linux-sdk/OK8MP-linux-kernel)</p>
-<p>This step can be done in a chroot environment or by first using an existing Image and dtb to boot the board (official files provide an Image and OK8MP-C.dtb)</p>
-<h3 id="add-root-device-tree"><a class="header" href="#add-root-device-tree">Add Root Device Tree</a></h3>
-<p>The device tree storage location is arch/arm64/boot/dts/freescale, add a new device tree OK8MP-C-root.dts, mainly modify to disable usdhc3 (eMMC) and uart4, and share pins between usdhc3 and usdhc2 to facilitate booting non-root-linux</p>
+<p>The source code can be obtained from the manufacturer's materials (source location: /OKMX8MP-C_Linux5.4.70+Qt5.15.0_User Data_R5 (update date: 20231012)/Linux/Source/OK8MP-linux-sdk/OK8MP-linux-kernel)</p>
+<h3 id="adding-root-device-tree"><a class="header" href="#adding-root-device-tree">Adding root device tree</a></h3>
+<p>Device tree storage location is arch/arm64/boot/dts/freescale, add new device tree OK8MP-C-root.dts, mainly modify to disable usdhc3 (eMMC) and uart4, and share pins between usdhc3 and usdhc2 to facilitate booting non-root-linux</p>
 <p>Content:</p>
 <pre><code class="language-C">// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 /*
@@ -536,7 +568,7 @@ sudo cp -r ubuntu-base-18.04.5-base-arm64 /mnt
         status = "disabled";
 };
 
-&amp;uart4 { // Also disable this, used for nonroot boot.
+&amp;uart4 { // This is also disabled, used for nonroot boot.
         /delete-property/ dmas;
         /delete-property/ dma-names;
         pinctrl-names = "default";
@@ -562,10 +594,10 @@ sudo cp -r ubuntu-base-18.04.5-base-arm64 /mnt
 make OK8MP-C_defconfig # Configure default config
 make -j$(nproc) ARCH=arm64 # Compilation takes about 15 minutes
 </code></pre>
-<p>If the gcc version is too high, it might cause yylloc issues. You can downgrade the version or add 'extern' before yylloc in scripts/dtc/dtc-lexer.lex.c_shipped</p>
+<p>If the gcc version is high, you may encounter yylloc issues, which can be resolved by lowering the version or by adding extern in front of yylloc in scripts/dtc under dtc-lexer.lex.c_shipped</p>
 <p>If there are definition conflicts between jailhouse and the kernel, prioritize the kernel and modify jailhouse accordingly</p>
-<h3 id="compile-jailhouse"><a class="header" href="#compile-jailhouse">Compile Jailhouse</a></h3>
-<p>Jailhouse version uses v0.12 then manually add dts and configuration files</p>
+<h3 id="compile-jailhouse"><a class="header" href="#compile-jailhouse">Compile jailhouse</a></h3>
+<p>Use jailhouse version v0.12 and manually add dts and configuration files</p>
 <pre><code class="language-shell">git checkout v0.12
 </code></pre>
 <p>.c file addition location configs/arm64</p>
@@ -607,9 +639,244 @@ struct {
                         .address = 0x30890000,
                         .size = 0x1000,
                         .flags = JAILHOUSE_CON_TYPE_IMX |
-                                 JAILHOUSE</code></pre>
+                                 JAILHOUSE_CON_ACCESS_MMIO |
+                                 JAILHOUSE_CON_REGDIST_4,
+                        .type = JAILHOUSE_CON_TYPE_IMX,
+                },
+                .platform_info = {
+                        .pci_mmconfig_base = 0xfd700000,
+                        .pci_mmconfig_end_bus = 0,
+                        .pci_is_virtual = 1,
+                        .pci_domain = 0,
+
+                        .arm = {
+                                .gic_version = 3,
+                                .gicd_base = 0x38800000,
+                                .gicr_base = 0x38880000,
+                                .maintenance_irq = 25,
+                        },
+                },
+                .root_cell = {
+                        .name = "imx8mp",
+
+                        .num_pci_devices = ARRAY_SIZE(config.pci_devices),
+                        .cpu_set_size = sizeof(config.cpus),
+                        .num_memory_regions = ARRAY_SIZE(config.mem_regions),
+                        .num_irqchips = ARRAY_SIZE(config.irqchips),
+                        /* gpt5/4/3/2 not used by root cell */
+                        .vpci_irq_base = 51, /* Not include 32 base */
+                },
+        },
+
+        .cpus = {
+                0xf,
+        },
+
+        .mem_regions = {
+                /* IVHSMEM shared memory region for 00:00.0 (demo )*/ {
+                        .phys_start = 0xfd900000,
+                        .virt_start = 0xfd900000,
+                        .size = 0x1000,
+                        .flags = JAILHOUSE_MEM_READ,
+                },
+                {
+                        .phys_start = 0xfd901000,
+                        .virt_start = 0xfd901000,
+                        .size = 0x9000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE ,
+                },
+                {
+                        .phys_start = 0xfd90a000,
+                        .virt_start = 0xfd90a000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE ,
+                },
+                {
+                        .phys_start = 0xfd90c000,
+                        .virt_start = 0xfd90c000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ,
+                },
+                {
+                        .phys_start = 0xfd90e000,
+                        .virt_start = 0xfd90e000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ,
+                },
+                /* IVSHMEM shared memory regions for 00:01.0 (networking) */
+                JAILHOUSE_SHMEM_NET_REGIONS(0xfda00000, 0),
+                /* IO */ {
+                        .phys_start = 0x00000000,
+                        .virt_start = 0x00000000,
+                        .size =       0x40000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_IO,
+                },
+                /* RAM 00*/ {
+                        .phys_start = 0x40000000,
+                        .virt_start = 0x40000000,
+                        .size = 0x80000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE,
+                },
+                /* Inmate memory */{
+                        .phys_start = 0x60000000,
+                        .virt_start = 0x60000000,
+                        .size = 0x10000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE | JAILHOUSE_MEM_DMA,
+                },
+                /* Loader */{
+                        .phys_start = 0xfdb00000,
+                        .virt_start = 0xfdb00000,
+                        .size = 0x100000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_EXECUTE,
+                },
+                /* OP-TEE reserved memory?? */{
+                        .phys_start = 0xfe000000,
+                        .virt_start = 0xfe000000,
+                        .size = 0x2000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE,
+                },
+                /* RAM04 */{
+                        .phys_start = 0x100000000,
+                        .virt_start = 0x100000000,
+                        .size = 0xC0000000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE,
+                },
+        },
+
+        .irqchips = {
+                /* GIC */ {
+                        .address = 0x38800000,
+                        .pin_base = 32,
+                        .pin_bitmap = {
+                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+                        },
+                },
+                /* GIC */ {
+                        .address = 0x38800000,
+                        .pin_base = 160,
+                        .pin_bitmap = {
+                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+                        },
+                },
+                /* GIC */ {
+                        .address = 0x38800000,
+                        .pin_base = 288,
+                        .pin_bitmap = {
+                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+                        },
+                },
+        },
+
+        .pci_devices = {
+                { /* IVSHMEM 0000:00:00.0 (demo) */
+                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
+                        .domain = 0,
+                        .bdf = 0 &lt;&lt; 3,
+                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
+                        .shmem_regions_start = 0,
+                        .shmem_dev_id = 0,
+                        .shmem_peers = 3,
+                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_UNDEFINED,
+                },
+                { /* IVSHMEM 0000:00:01.0 (networking) */
+                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
+                        .domain = 0,
+                        .bdf = 1 &lt;&lt; 3,
+                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
+                        .shmem_regions_start = 5,
+                        .shmem_dev_id = 0,
+                        .shmem_peers = 2,
+                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_VETH,
+                },
+        },
+};
+</code></pre>
+<p>imx8mp-linux-demo.c</p>
+<pre><code class="language-C">/*
+ * iMX8MM target - linux-demo
+ *
+ * Copyright 2019 NXP
+ *
+ * Authors:
+ *  Peng Fan &lt;peng.fan@nxp.com&gt;
+ *
+ * This work is licensed under the terms of the GNU GPL, version 2.  See
+ * the COPYING file in the top-level directory.
+ */
+
+/*
+ * Boot 2nd Linux cmdline:
+ * export PATH=$PATH:/usr/share/jailhouse/tools/
+ * jailhouse cell linux imx8mp-linux-demo.cell Image -d imx8mp-evk-inmate.dtb -c "clk_ignore_unused console=ttymxc3,115200 earlycon=ec_imx6q,0x30890000,115200  root=/dev/mmcblk2p2 rootwait rw"
+ */
+#include &lt;jailhouse/types.h&gt;
+#include &lt;jailhouse/cell-config.h&gt;
+
+struct {
+        struct jailhouse_cell_desc cell;
+        __u64 cpus[1];
+        struct jailhouse_memory mem_regions[15];
+        struct jailhouse_irqchip irqchips[2];
+        struct jailhouse_pci_device pci_devices[2];
+} __attribute__((packed)) config = {
+        .cell = {
+                .signature = JAILHOUSE_CELL_DESC_SIGNATURE,
+                .revision = JAILHOUSE_CONFIG_REVISION,
+                .name = "linux-inmate-demo",
+                .flags = JAILHOUSE_CELL_PASSIVE_COMMREG,
+
+                .cpu_set_size = sizeof(config.cpus),
+                .num_memory_regions = ARRAY_SIZE(config.mem_regions),
+                .num_irqchips = ARRAY_SIZE(config.irqchips),
+                .num_pci_devices = ARRAY_SIZE(config.pci_devices),
+                .vpci_irq_base = 154, /* Not include 32 base */
+        },
+
+        .cpus = {
+                0xc,
+        },
+
+        .mem_regions = {
+                /* IVHSMEM shared memory region for 00:00.0 (demo )*/ {
+                        .phys_start = 0xfd900000,
+                        .virt_start = 0xfd900000,
+                        .size = 0x1000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd901000,
+                        .virt_start = 0xfd901000,
+                        .size = 0x9000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd90a000,
+                        .virt_start = 0xfd90a000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd90c000,
+                        .virt_start = 0xfd90c000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
+                },
+                {
+                        .phys_start = 0xfd90e000,
+                        .virt_start = 0xfd90e000,
+                        .size = 0x2000,
+                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
+                                JAILHOUSE_MEM_ROOTSHARED,
+                },
+                /* IVSHMEM shared memory regions for 00:01.0 (networking) */
+                JAILHOUSE_SH</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fpga-zcu102"><a class="header" href="#fpga-zcu102">FPGA zcu102</a></h1>
-<p>Author: 杨竣轶(Jerry) github.com/comet959</p>
+<p>Author: 杨竣轶 (Jerry) github.com/comet959</p>
 <pre><code class="language-shell"># Before, Install vivado 2022.2 software
 # Ubuntu 20.04 can work fine
 sudo apt update
@@ -641,7 +908,7 @@ cd uintr-rocket-chip
 # Focus on ttyUSB2, then you will see the Riscv Linux Boot Msg.
 
 </code></pre>
-<h2 id="enabling-h-extension-in-rocketchip"><a class="header" href="#enabling-h-extension-in-rocketchip">Enabling H Extension in RocketChip</a></h2>
+<h2 id="enable-h-extension-in-rocketchip"><a class="header" href="#enable-h-extension-in-rocketchip">Enable H extension in RocketChip</a></h2>
 <pre><code class="language-shell">vim path/to/repo/common/src/main/scala/Configs.scala
 </code></pre>
 <pre><code class="language-scala">// change
@@ -679,94 +946,94 @@ class UintrConfig extends Config(
 )
 
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="booting-hvisor-on-loongson-3a5000-motherboard-7a2000"><a class="header" href="#booting-hvisor-on-loongson-3a5000-motherboard-7a2000">Booting hvisor on Loongson 3A5000 Motherboard (7A2000)</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="starting-hvisor-on-loongson-3a5000-motherboard-7a2000"><a class="header" href="#starting-hvisor-on-loongson-3a5000-motherboard-7a2000">Starting hvisor on Loongson 3A5000 motherboard (7A2000)</a></h1>
 <p>Han Yulu <a href="mailto:chap02/enkerewpo@hotmail.com">enkerewpo@hotmail.com</a></p>
-<p>Updated: December 4, 2024</p>
-<h2 id="step-1-obtain-and-compile-the-hvisor-source-code"><a class="header" href="#step-1-obtain-and-compile-the-hvisor-source-code">Step 1: Obtain and compile the hvisor source code</a></h2>
+<p>Updated: 2024.12.4</p>
+<h2 id="step-1-obtain-hvisor-source-code-and-compile"><a class="header" href="#step-1-obtain-hvisor-source-code-and-compile">Step 1: Obtain hvisor source code and compile</a></h2>
 <p>Clone the code locally:</p>
 <pre><code class="language-bash">git clone -b dev-loongarch https://github.com/syswonder/hvisor # dev-loongarch branch
 make ARCH=loongarch64
 </code></pre>
-<p>After compilation, you can find the stripped hvisor.bin in the target directory (the file path will be displayed in the last line of the compilation output).</p>
-<h2 id="obtain-the-vmlinuxbin-image"><a class="header" href="#obtain-the-vmlinuxbin-image">Obtain the vmlinux.bin image</a></h2>
-<p>Please download the latest released hvisor default Loongson Linux image from <a href="https://github.com/enkerewpo/linux-hvisor-loongarch64/releases">https://github.com/enkerewpo/linux-hvisor-loongarch64/releases</a> (including root Linux kernel + root Linux dtb + root Linux rootfs, where root Linux rootfs includes non-root Linux + non-root Linux dtb + non-root Linux rootfs). If you need to compile the Linux kernel and rootfs yourself, refer to the <code>arch/loongarch</code> directory in the repository for hvisor-related device trees and the buildroot environment I ported for 3A5000 (<a href="https://github.com/enkerewpo/buildroot-loongarch64">https://github.com/enkerewpo/buildroot-loongarch64</a>). If you need to manually compile hvisor-tool, refer to <a href="https://github.com/enkerewpo/hvisor-tool">https://github.com/enkerewpo/hvisor-tool</a>. For the compilation order and script invocation process of all environments, refer to the code inside the <code>world</code> target in the <code>Makefile.1</code> file (<a href="https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1">https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1</a>), and compile everything by running the <code>./make_world</code> script. If you need to manually compile these, you need to modify the corresponding code path variables in Makefile.1, including:</p>
+<p>After compiling, you can find the stripped hvisor.bin in the target directory (the file path will be displayed in the last line of the compilation output).</p>
+<h2 id="obtain-vmlinuxbin-image"><a class="header" href="#obtain-vmlinuxbin-image">Obtain vmlinux.bin image</a></h2>
+<p>Please download the latest released hvisor default Loongson Linux image from <a href="https://github.com/enkerewpo/linux-hvisor-loongarch64/releases">https://github.com/enkerewpo/linux-hvisor-loongarch64/releases</a> (including root linux kernel + root linux dtb + root linux rootfs, where root linux rootfs includes non-root linux + nonroot linux dtb + nonroot linux rootfs). If you need to compile the Linux kernel and rootfs yourself, refer to the <code>arch/loongarch</code> directory in the repository for hvisor-related device trees and the buildroot environment I ported for 3A5000 (<a href="https://github.com/enkerewpo/buildroot-loongarch64">https://github.com/enkerewpo/buildroot-loongarch64</a>). If you need to manually compile hvisor-tool, please refer to <a href="https://github.com/enkerewpo/hvisor-tool">https://github.com/enkerewpo/hvisor-tool</a>, for the compilation order and script invocation process of all environments, refer to the code within the <code>world</code> target in the <code>Makefile.1</code> file (<a href="https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1">https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1</a>), and compile everything by running the <code>./make_world</code> script. If you need to manually compile these, you need to modify the corresponding code path variables in Makefile.1, including:</p>
 <pre><code>HVISOR_LA64_LINUX_DIR = ../hvisor-la64-linux
 BUILDROOT_DIR = ../buildroot-loongarch64
 HVISOR_TOOL_DIR = ../hvisor-tool
 </code></pre>
-<p>Then run <code>./make_world</code>. Please note that the first compilation of Linux and buildroot may take a long time (possibly up to several tens of minutes, depending on your machine performance).</p>
+<p>Then run <code>./make_world</code>, please note that the first time compiling Linux and buildroot may take quite a long time (possibly up to several tens of minutes, depending on your machine performance).</p>
 <h2 id="obtain-hvisor-uefi-image-packer"><a class="header" href="#obtain-hvisor-uefi-image-packer">Obtain hvisor UEFI Image Packer</a></h2>
-<p>Since the 3A5000 and subsequent Series 3 CPUs' motherboards use UEFI boot, hvisor can only be booted via an EFI image method. Clone the repository <a href="https://github.com/enkerewpo/hvisor_uefi_packer">https://github.com/enkerewpo/hvisor_uefi_packer</a> locally:</p>
+<p>Since the 3A5000 and subsequent 3 series CPUs' motherboards all use UEFI boot, hvisor can only be started through the efi image method, clone the repository <a href="https://github.com/enkerewpo/hvisor_uefi_packer">https://github.com/enkerewpo/hvisor_uefi_packer</a> locally:</p>
 <pre><code class="language-bash">make menuconfig # Configure for your local loongarch64 gcc toolchain prefix, hvisor.bin path, vmlinux.bin path
-# Modify make_image's HVISOR_SRC_DIR=../hvisor to your actual hvisor source code path, then run the script
+# Modify make_image in HVISOR_SRC_DIR=../hvisor to your actual saved hvisor source code path, then run the script
 ./make_image
-# You will get the BOOTLOONGARCH64.EFI file
+# Get BOOTLOONGARCH64.EFI file
 </code></pre>
-<p>The obtained <code>BOOTLOONGARCH64.EFI</code> must be placed in the first FAT32 partition of the USB drive at <code>/EFI/BOOT/BOOTLOONGARCH64.EFI</code>. Then insert the USB drive to boot and enter hvisor, which will automatically start root Linux.</p>
-<p>Since the metadata related to root Linux (loading address, memory area, etc.) is hardcoded in the hvisor source code (<code>src/platform/ls3a5000_loongarch64.rs</code>), if you are manually compiling the Linux kernel, you need to modify the configuration here and recompile hvisor.</p>
-<h2 id="board-boot"><a class="header" href="#board-boot">Board Boot</a></h2>
-<p>Power on the motherboard, press <strong>F12</strong> to enter the UEFI Boot Menu, select your inserted USB drive and press Enter. It will automatically boot hvisor and enter the root Linux bash environment.</p>
+<p>The obtained <code>BOOTLOONGARCH64.EFI</code> must be placed in the <code>/EFI/BOOT/BOOTLOONGARCH64.EFI</code> position of the first FAT32 partition of the USB drive. Then insert the USB drive to boot into hvisor and automatically start root linux.</p>
+<p>Since the metadata related to root linux (loading address, memory area, etc.) is hard-coded in the hvisor source code (<code>src/platform/ls3a5000_loongarch64.rs</code>), if you are manually compiling the Linux kernel, you need to modify the configuration here and recompile hvisor.</p>
+<h2 id="board-boot"><a class="header" href="#board-boot">Board boot</a></h2>
+<p>Power on the motherboard, press <strong>F12</strong> to enter the UEFI Boot Menu, select the inserted USB drive and press Enter, hvisor will automatically start and enter the root linux bash environment.</p>
 <h2 id="start-nonroot"><a class="header" href="#start-nonroot">Start nonroot</a></h2>
-<p>If you are using the related images provided in the release, after booting, enter in the root Linux bash:</p>
+<p>If you are using the related images provided in the release, after starting, enter in the root linux bash:</p>
 <pre><code class="language-bash">./daemon.sh
 ./linux2_virtio.sh
 </code></pre>
-<p>This will automatically start nonroot (some related configuration files are located in the root Linux <code>/tool</code> directory, including the nonroot zone configuration JSON and virtio configuration JSON files provided to hvisor-tool). Afterwards, a screen process will open connecting to nonroot Linux's virtio-console, displaying a bash with "nonroot" printed. You can use the CTRL+A D shortcut key to detach (remember the displayed screen session name) during screen use. To return to nonroot Linux, run:</p>
-<pre><code class="language-bash">screen -r {the full name of the session just now or just enter the first few numbers}
+<p>Afterward, nonroot will automatically start (some related configuration files are located in the root linux <code>/tool</code> directory, including the nonroot zone configuration json and virtio configuration json files provided to hvisor-tool), then a screen process connected to nonroot linux's virtio-console will automatically open, and you will see a bash printed with the nonroot label appear, you can use the CTRL+A D shortcut key to detach during screen (please remember the displayed screen session name), at this point you will return to root linux, if you want to return to nonroot linux, run</p>
+<pre><code class="language-bash">screen -r {the full name of the session just now or just enter the first few digits}
 </code></pre>
-<p>This will return you to the nonroot Linux bash.</p>
-<div style="break-before: page; page-break-before: always;"></div><p>This directory is mainly related to ZCU102, and the introduction is as follows:</p>
+<p>Afterward, you will return to the nonroot linux bash.</p>
+<div style="break-before: page; page-break-before: always;"></div><p>This catalog is mainly related to ZCU102, and the introduction is as follows:</p>
 <ol>
 <li>How to use Qemu to simulate Xilinx ZynqMP ZCU102</li>
 <li>How to boot hvisor root linux and nonroot linux on Qemu ZCU102 and ZCU102 physical development board.</li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-zcu102-hvisor-startup"><a class="header" href="#qemu-zcu102-hvisor-startup">Qemu ZCU102 hvisor Startup</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-zcu102-hvisor-boot"><a class="header" href="#qemu-zcu102-hvisor-boot">Qemu ZCU102 hvisor Boot</a></h1>
 <h2 id="install-petalinux"><a class="header" href="#install-petalinux">Install Petalinux</a></h2>
 <ol>
 <li>Install <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">Petalinux 2024.1</a>
-Please note that this article uses version 2024.1 as an example, which does not mean that other versions are not possible, but other versions have not been verified, and tests have found that Petalinux has a strong dependency on the operating system, so please install the version of Petalinux suitable for your operating system.</li>
-<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions to it, and then run the installer directly with <code>./petalinux.run</code>.</li>
-<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, just need to <code>apt install</code> one by one.</li>
-<li>After installation, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables before using Petalinux each time. If it is too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
+Please note that this article uses 2024.1 as an example, which does not mean that other versions are not possible, but other versions have not been verified, and it has been found that Petalinux has a strong dependency on the operating system. Please install the version of Petalinux suitable for your operating system.</li>
+<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions to it, and then directly run the installer with <code>./petalinux.run</code>.</li>
+<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, which can be installed one by one with <code>apt install</code>.</li>
+<li>After installation, before using Petalinux each time, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables. If it's too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
 </ol>
 <h2 id="install-zcu102-bsp"><a class="header" href="#install-zcu102-bsp">Install ZCU102 BSP</a></h2>
 <ol>
 <li>Download the BSP corresponding to the Petalinux version, in the example it is <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">ZCU102 BSP 2024.1</a></li>
-<li>Activate the Petalinux environment, i.e., <code>source settings.sh</code> in the Petalinux installation directory.</li>
-<li>Create a Petalinux Project based on BSP: <code>petalinux-create -t project -s xilinx-zcu102-v2024.1-05230256.bsp</code></li>
-<li>This will create a <code>xilinx-zcu102-2024.1</code> folder, which contains the parameters needed for QEMU to simulate ZCU102 (device tree), as well as pre-compiled Linux images, device trees, Uboot, etc. that can be directly uploaded to the board.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, run <code>source settings.sh</code>.</li>
+<li>Create a Petalinux Project based on the BSP: <code>petalinux-create -t project -s xilinx-zcu102-v2024.1-05230256.bsp</code></li>
+<li>This will create a <code>xilinx-zcu102-2024.1</code> folder, which contains the parameters required for QEMU to simulate ZCU102 (device tree), as well as precompiled Linux images, device trees, Uboot, etc., that can be directly loaded onto the board.</li>
 </ol>
 <h2 id="compile-hvisor"><a class="header" href="#compile-hvisor">Compile Hvisor</a></h2>
 <p>Refer to "Running Hvisor on Qemu" for setting up the environment required to compile Hvisor, then in the hvisor directory, execute:</p>
 <pre><code>make ARCH=aarch64 LOG=info FEATURES=platform_zcu102,gicv2 cp
 </code></pre>
-<p>to compile. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> is the required hvisor image.</p>
+<p>to compile. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> contains the required hvisor image.</p>
 <h2 id="prepare-device-tree"><a class="header" href="#prepare-device-tree">Prepare Device Tree</a></h2>
 <h3 id="use-existing-device-tree"><a class="header" href="#use-existing-device-tree">Use Existing Device Tree</a></h3>
-<p>In the image/devicetree directory of Hvisor, there is zcu102-root-aarch64.dts, which is a device tree file that has been tested to boot RootLinux, compile it.</p>
+<p>In the image/devicetree directory of Hvisor, there is zcu102-root-aarch64.dts, which is a device tree file tested for booting RootLinux, compile it as follows:</p>
 <pre><code>dtc -I dts -O dtb -o zcu102-root-aarch64.dtb zcu102-root-aarch64.dts
 </code></pre>
 <p>If the dtc command is invalid, install device-tree-compiler.</p>
 <pre><code>sudo apt-get install device-tree-compiler
 </code></pre>
 <h3 id="prepare-device-tree-yourself"><a class="header" href="#prepare-device-tree-yourself">Prepare Device Tree Yourself</a></h3>
-<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get the complete device tree, based on <code>zcu102-root-aarch64.dts</code> for additions and deletions.</p>
+<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get a complete device tree, based on <code>zcu102-root-aarch64.dts</code> for modifications.</p>
 <h2 id="prepare-image"><a class="header" href="#prepare-image">Prepare Image</a></h2>
 <h3 id="use-existing-image"><a class="header" href="#use-existing-image">Use Existing Image</a></h3>
 <p>It is recommended to use the <code>pre-built/linux/images/Image</code> from the ZCU102 BSP as the Linux kernel to boot on ZCU102, as its driver configuration is complete.</p>
 <h3 id="compile-yourself"><a class="header" href="#compile-yourself">Compile Yourself</a></h3>
-<p>After testing, the support for ZYNQMP in the Linux source code before version 5.15 is not comprehensive, it is not recommended to use versions before this for compilation, you can compile directly according to the general compilation process in later versions, as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
+<p>After testing, the support for ZYNQMP in the Linux source code before 5.15 is not comprehensive, it is not recommended to use versions before this for compilation. For later versions, you can compile directly according to the general compilation process, as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
 <ol>
 <li>Visit the <a href="https://github.com/Xilinx/linux-xlnx/tags?after=xilinx-v2023.1">linux-xlnx</a> official website to download the Linux source code, it is best to download <code>zynqmp-soc-for-v6.3</code>.</li>
-<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to unzip the source code</li>
-<li>Enter the unzipped directory, execute the following command to use the default configuration, <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</code></li>
+<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to extract the source code</li>
+<li>Enter the extracted directory, execute the following command using the default configuration, <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</code></li>
 <li>Compile: <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image -j$(nproc)</code></li>
-<li>After compilation, the directory <code>arch/arm64/boot/Image</code> is the required image.</li>
+<li>After compilation, the directory <code>arch/arm64/boot/Image</code> contains the required image.</li>
 </ol>
 <h2 id="enable-qemu-simulation"><a class="header" href="#enable-qemu-simulation">Enable QEMU Simulation</a></h2>
 <ol>
-<li>Activate the Petalinux environment, i.e., <code>source settings.sh</code> in the Petalinux installation directory.</li>
-<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, the file paths need to be modified according to your actual situation.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, run <code>source settings.sh</code>.</li>
+<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, where the file paths need to be modified according to your actual situation.</li>
 </ol>
 <pre><code># QEMU parameter passing
 petalinux-boot --qemu --prebuilt 2 --qemu-args '-device loader,file=hvisor,addr=0x40400000,force-raw=on -device loader,
@@ -776,62 +1043,62 @@ file=rootfs.ext4'
 # Start hvisor
 bootm 0x40400000 - 0x40000000
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="zcu102-hvisor-multi-mode-boot"><a class="header" href="#zcu102-hvisor-multi-mode-boot">ZCU102 hvisor Multi-mode Boot</a></h1>
-<h2 id="booting-hvisor-on-zcu102-development-board-in-sd-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-sd-mode">Booting Hvisor on ZCU102 Development Board in SD Mode</a></h2>
-<h3 id="preparing-the-sd-card"><a class="header" href="#preparing-the-sd-card">Preparing the SD Card</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="zcu102-board-hvisor-multi-mode-boot"><a class="header" href="#zcu102-board-hvisor-multi-mode-boot">ZCU102 Board hvisor Multi-mode Boot</a></h1>
+<h2 id="booting-hvisor-on-zcu102-development-board-in-sd-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-sd-mode">Booting Hvisor on ZCU102 Development Board in SD mode</a></h2>
+<h3 id="prepare-sd-card"><a class="header" href="#prepare-sd-card">Prepare SD Card</a></h3>
 <ol>
-<li>Prepare a standard SD card, partition it into a Boot partition (FAT32) and the rest as filesystem partitions (EXT4). For Windows partitions, you can use <a href="https://www.diskgenius.cn/download.php">DiskGenius</a>, and for Linux partitions, you can use <a href="https://www.cnblogs.com/renshengdezheli/p/13941563.html">fdisk</a> or <a href="https://blog.csdn.net/linkedin_35878439/article/details/82020925">mkfs</a>.</li>
-<li>Prepare a filesystem and copy its contents to any filesystem partition. You can refer to "NXPIMX8" for creating an Ubuntu filesystem or directly use the filesystem from the ZCU102 BSP.</li>
+<li>Prepare a standard SD card, partition it into a Boot partition (FAT32) and the rest as file system partitions (EXT4). For partitioning in Windows, you can use <a href="https://www.diskgenius.cn/download.php">DiskGenius</a>, and for Linux, you can use <a href="https://www.cnblogs.com/renshengdezheli/p/13941563.html">fdisk</a> or <a href="https://blog.csdn.net/linkedin_35878439/article/details/82020925">mkfs</a>.</li>
+<li>Prepare a file system and copy its contents into any file system partition. You can refer to "NXPIMX8" for creating an Ubuntu file system or directly use the file system from the ZCU102 BSP.</li>
 <li>Copy <code>zcu102-root-aarch64.dtb</code>, <code>Image</code>, and <code>hvisor</code> to the Boot partition.</li>
-<li>In SD mode, it is necessary to provide ATF and Uboot from the SD card, so copy <code>boot.scr</code> and <code>BOOT.BIN</code> from the ZCU102 BSP to the BOOT partition.</li>
+<li>In SD mode, it is necessary to provide ATF and Uboot from the SD card, therefore copy <code>pre-built/linux/images/boot.scr</code> and <code>BOOT.BIN</code> from the ZCU102 BSP to the BOOT partition.</li>
 </ol>
 <h4 id="booting-zcu102"><a class="header" href="#booting-zcu102">Booting ZCU102</a></h4>
 <ol>
-<li>Set ZCU102 to SD mode, insert the SD card, connect the serial port, and power on.</li>
-<li>Press any key to interrupt the Uboot auto script and run the following commands to boot hvisor and root Linux:</li>
+<li>Set the ZCU102 to SD mode, insert the SD card, connect the serial port, and power on.</li>
+<li>Press any key to interrupt the Uboot auto script execution and run the following commands to boot hvisor and root linux:</li>
 </ol>
 <pre><code>fatload mmc 0:1 0x40400000 hvisor;fatload mmc 0:1 0x40000000 zcu102-root-aarch64.dtb
 fatload mmc 0:1 0x04000000 zcu102-root-aarch64.dtb;fatload mmc 0:1 0x00200000 Image;bootm 0x40400000 - 0x40000000
 </code></pre>
 <ol start="3">
-<li>If successful, you will see hvisor and Linux information on the serial port and finally enter the filesystem.</li>
+<li>If successfully booted, you will see hvisor and linux information on the serial port and eventually enter the file system.</li>
 </ol>
-<h2 id="booting-hvisor-on-zcu102-development-board-in-jtag-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-jtag-mode">Booting Hvisor on ZCU102 Development Board in Jtag Mode</a></h2>
-<p>First, connect the two cables that come with the board to the JTAG and UART interfaces of the board, and connect the other end to the PC via USB.</p>
-<p>Then open a petalinux project in the command line, ensure the project has been compiled and generated the corresponding boot files (vmlinux, BOOT.BIN, etc.), and then enter the project root directory and run:</p>
+<h2 id="booting-hvisor-on-zcu102-development-board-in-jtag-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-jtag-mode">Booting Hvisor on ZCU102 Development Board in Jtag mode</a></h2>
+<p>First, connect the two cables that come with the board to the JTAG and UART interfaces of the board, and the other end to the PC via USB.</p>
+<p>Then, open a petalinux project in the command line, ensure the project has been compiled and has generated the corresponding boot files (vmlinux, BOOT.BIN, etc.), and then run from the project root directory:</p>
 <pre><code class="language-bash">petalinux-boot --jtag --prebuilt 2
 </code></pre>
 <p>Where prebuilt represents the boot level:</p>
 <ul>
 <li><strong>Level 1</strong>: Only download the FPGA bitstream, boot FSBL and PMUFW</li>
 <li><strong>Level 2</strong>: Download FPGA bitstream and boot UBOOT, and start FSBL, PMUFW, and TF-A (Trusted Firmware-A)</li>
-<li><strong>Level 3</strong>: Download and boot Linux, and load or boot FPGA bitstream, FSBL, PMUFW, TF-A, UBOOT</li>
+<li><strong>Level 3</strong>: Download and boot linux, and load or boot FPGA bitstream, FSBL, PMUFW, TF-A, UBOOT</li>
 </ul>
-<p>Afterward, JTAG will download the corresponding files to the board (saving to the specified memory address) and start the corresponding bootloader. For the specific official UBOOT default script, see the boot.scr file in the project image directory.</p>
-<p>Since hvisor requires separate UBOOT commands and a custom-made fitImage to boot, please refer to <a href="chap02/subchap01/../../chap02/subchap01/UbootFitImage-ZCU102.html">UBOOT FIT Image Creation, Loading, and Booting</a>.</p>
-<p>After making the fitImage, replace the files in the petalinux images generation directory (Image.ub), so that JTAG loads our custom-made fitImage to the default FIT image load address configured in the petalinux project. This way, when JTAG starts, it will load our fitImage via the JTAG line to the corresponding address in the board memory, and then extract and bootm through the uboot command line.</p>
-<p>Another UART line can be used to observe the output of the ZCU102 board (including FSBL, UBOOT, Linux, etc.), which can be viewed through serial port tools such as <code>screen</code>, <code>gtkterm</code>, <code>termius</code>, <code>minicom</code>.</p>
+<p>Afterwards, JTAG will download the corresponding files to the board (save to the designated memory address) and boot the corresponding bootloader. For the default UBOOT script by the official, refer to the boot.scr file in the project image directory.</p>
+<p>Since hvisor requires a separate UBOOT command and a custom-made fitImage to boot, please refer to <a href="chap02/subchap01/../../chap02/subchap01/UbootFitImage-ZCU102.html">UBOOT FIT Image Creation, Loading, and Booting</a>.</p>
+<p>After creating the fitImage, replace the files in the petalinux images generation directory (Image.ub), so that JTAG loads our custom-made fitImage to the default FIT image load address configured in the petalinux project. This way, when JTAG boots, our fitImage will be loaded through the JTAG line to the corresponding address in the board memory, then extracted and booted through the uboot command line.</p>
+<p>Another UART cable can be used to observe the output from the ZCU102 board (including FSBL, UBOOT, linux, etc.), which can be viewed through serial port tools such as <code>screen</code>, <code>gtkterm</code>, <code>termius</code>, or <code>minicom</code>.</p>
 <div class="warning">
     <h3 id="please-note"><a class="header" href="#please-note">Please Note</a></h3>
-    <p> Since petalinux specifies some fixed memory addresses, such as the default loading addresses for the Linux kernel, fitImage, and DTB (configurable during petalinux project compilation), there is an issue where if the root Linux dtb in its has the same loading address as during petalinux compilation, it will cause the dtb to be overwritten with the default petalinux dtb, preventing root Linux from booting correctly. Therefore, it is necessary to specify different addresses from the default petalinux dtb/fitImage loading addresses during compilation to prevent other issues.
+    <p> Since petalinux has designated some fixed memory addresses, such as the default loading addresses for the linux kernel, fitImage, and DTB (configurable during petalinux project compilation), because we need to load and boot a custom-made fitImage, a problem currently identified is if the root linux dtb's load address in its matches the petalinux compilation load address, it will cause the dtb to be overwritten by the default petalinux dtb, leading to the root linux receiving an incorrect dtb and failing to boot. Therefore, it is necessary to specify a different address from the petalinux default dtb/fitImage load address during compilation to prevent other issues.
 </div>
 <h1 id="references"><a class="header" href="#references">References</a></h1>
 <p>[1] PetaLinux Tools Documentation: Reference Guide (UG1144).<a href="https://docs.amd.com/r/2023.1-English/ug1144-petalinux-tools-reference-guide/Booting-a-PetaLinux-Image-on-Hardware-with-JTAG">https://docs.amd.com/r/2023.1-English/ug1144-petalinux-tools-reference-guide/Booting-a-PetaLinux-Image-on-Hardware-with-JTAG</a>
 [2] Trusted Firmware-A Documentation.<a href="https://trustedfirmware-a.readthedocs.io/en/latest/">https://trustedfirmware-a.readthedocs.io/en/latest/</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="zcu102-nonroot-boot"><a class="header" href="#zcu102-nonroot-boot">ZCU102 NonRoot Boot</a></h2>
 <ol>
-<li>Compile <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a> using the Linux kernel source code used during the Root boot. The detailed compilation process can be referred to in <a href="https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md">Readme</a>.</li>
-<li>Prepare the required <code>virtio_cfg.json</code> and <code>zone1_linux.json</code> for NonRoot boot. You can directly use the <code>example/zcu102-aarch64</code> in the hvisor-tool directory, which has been verified to ensure it can boot.</li>
-<li>Prepare the Linux kernel Image, filesystem rootfs, and device tree linux1.dtb needed for NonRoot. The kernel and filesystem can be the same as Root, while Linux1.dtb should be configured as needed, or you can use <code>images/aarch64/devicetree/zcu102-nonroot-aarch64.dts</code> from the hvisor directory.</li>
-<li>Copy <code>hvisor.ko, hvisor, virtio_cfg, zone1_linux.json, linux1.dtb, Image, rootfs.ext4</code> to the filesystem used by Root Linux.</li>
+<li>Use the Linux kernel source code used during the Root boot to compile <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, and the detailed compilation process can be found in <a href="https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md">Readme</a>.</li>
+<li>Prepare the <code>virtio_cfg.json</code> and <code>zone1_linux.json</code> needed to boot NonRoot. You can directly use the <code>example/zcu102-aarch64</code> in the hvisor-tool directory, which has been verified to ensure it can boot.</li>
+<li>Prepare the Linux kernel Image, file system rootfs, and device tree linux1.dtb needed for NonRoot. The kernel and file system can be the same as Root, and Linux1.dtb can be configured as needed, or you can use the <code>images/aarch64/devicetree/zcu102-nonroot-aarch64.dts</code> in the hvisor directory.</li>
+<li>Copy <code>hvisor.ko, hvisor, virtio_cfg, zone1_linux.json, linux1.dtb, Image, rootfs.ext4</code> to the file system used by Root Linux.</li>
 <li>Enter the following commands in RootLinux to start NonRoot:</li>
 </ol>
-<pre><code># Load kernel module
+<pre><code># Load the kernel module
 insmod hvisor.ko
 # Create virtio device
 nohup ./hvisor virtio start virtio_cfg.json &amp;
 # Start NonRoot based on the json configuration file
-./hvisor zone start zone1_linux.json
+./hvisor zone start zone1_linux.json 
 # View the output of NonRoot and interact.
 screen /dev/pts/0
 </code></pre>
@@ -840,8 +1107,8 @@ screen /dev/pts/0
 <p>wheatfox (enkerewpo@hotmail.com)</p>
 <p>This article introduces the basic knowledge related to FIT images, as well as how to create, load, and boot FIT images.</p>
 <h2 id="its-source-file"><a class="header" href="#its-source-file">ITS Source File</a></h2>
-<p>ITS is the source code for generating FIT images (FIT Image) in uboot, namely Image Tree Source, which uses the Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
-In the ZCU102 port of hvisor, a FIT image is used to package hvisor, root linux, root dtb, and other files into one fitImage, facilitating booting on QEMU and actual hardware.
+<p>ITS is the source code used by uboot to generate FIT images (FIT Image), i.e., Image Tree Source, which uses the Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
+In the ZCU102 port of hvisor, FIT images are used to package hvisor, root linux, root dtb, and other files into one fitImage, facilitating booting on QEMU and actual hardware.
 The ITS file for the ZCU102 platform is located at <code>scripts/zcu102-aarch64-fit.its</code>:</p>
 <pre><code class="language-c">/dts-v1/;
 / {
@@ -881,8 +1148,8 @@ The ITS file for the ZCU102 platform is located at <code>scripts/zcu102-aarch64-
     };
 };
 </code></pre>
-<p>Here, <code>__ROOT_LINUX_IMAGE__</code>, <code>__ROOT_LINUX_DTB__</code>, and <code>__HVISOR_TMP_PATH__</code> will be replaced with actual paths by the <code>sed</code> command in the Makefile. In the ITS source code, it is mainly divided into images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. During UBOOT boot, it will automatically load the corresponding files to the specified address according to the default configuration in configurations, and multiple configurations can be set to support loading different configuration images at boot time.</p>
-<p>Makefile corresponding command for mkimage:</p>
+<p>Here, <code>__ROOT_LINUX_IMAGE__</code>, <code>__ROOT_LINUX_DTB__</code>, <code>__HVISOR_TMP_PATH__</code> will be replaced with actual paths by the <code>sed</code> command in the Makefile. In the ITS source code, it mainly consists of images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. During UBOOT booting, the files specified in the default configuration in configurations will be automatically loaded to the specified address. Multiple configurations can be set to support the loading of different image configurations at boot time.</p>
+<p>The corresponding mkimage command in the Makefile:</p>
 <pre><code class="language-Makefile">.PHONY: gen-fit
 gen-fit: $(hvisor_bin) dtb
 	@if [ ! -f scripts/zcu102-aarch64-fit.its ]; then \
@@ -901,29 +1168,25 @@ gen-fit: $(hvisor_bin) dtb
 	@mkimage -f temp-fit.its $(TARGET_FIT_IMAGE)
 	@echo "Generated FIT image: $(TARGET_FIT_IMAGE)"
 </code></pre>
-<div class="warning">
-    <h3 id="please-note-1"><a class="header" href="#please-note-1">Please Note</a></h3>
-    <p> Do not input an Image already packaged by UBOOT into the ITS source file, otherwise it will lead to <b>repackaging</b>! The files pointed to in ITS should be original files (vmlinux, etc.), and mkimage processes each file individually when importing ITS (vmlinux->"Image", then embedded into fitImage)
-</div>
 <h2 id="booting-hvisor-and-root-linux-through-fit-image-in-petalinux-qemu"><a class="header" href="#booting-hvisor-and-root-linux-through-fit-image-in-petalinux-qemu">Booting hvisor and root linux through FIT image in petalinux qemu</a></h2>
-<p>Since a fitImage includes all the necessary files, for qemu, you only need to load this file into an appropriate position in memory through the loader.</p>
-<p>Then, when qemu starts and enters UBOOT, you can use the following command to boot (modify the specific address according to the actual situation, you can write all lines into one line and copy to UBOOT for booting, or save it to the environment variable <code>bootcmd</code>, UBOOT needs to mount a persistent flash for environment variable storage):</p>
+<p>Since a fitImage includes all the necessary files, for qemu, it only needs to load this file into a suitable position in memory through the loader.</p>
+<p>Then, qemu boots and enters UBOOT, where the following command can be used to boot (please modify the specific addresses according to the actual situation, and during actual use, all lines can be copied into one line and pasted into UBOOT for booting, or saved to the environment variable <code>bootcmd</code>, which requires UBOOT to mount a persistent flash for environment variable storage):</p>
 <pre><code class="language-bash">setenv fit_addr 0x10000000; setenv root_linux_load 0x200000;
 imxtract ${fit_addr} root_linux ${root_linux_load}; bootm ${fit_addr};
 </code></pre>
 <h1 id="references-1"><a class="header" href="#references-1">References</a></h1>
 <p>[1] Flat Image Tree (FIT). <a href="https://docs.u-boot.org/en/stable/usage/fit/">https://docs.u-boot.org/en/stable/usage/fit/</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h1>
-<h2 id="compiling-with-docker"><a class="header" href="#compiling-with-docker">Compiling with Docker</a></h2>
+<h2 id="compile-using-docker"><a class="header" href="#compile-using-docker">Compile using Docker</a></h2>
 <h3 id="1-install-docker"><a class="header" href="#1-install-docker">1. Install Docker</a></h3>
 <pre><code class="language-bash">sudo snap install docker
 </code></pre>
-<p>You can also refer to the <a href="https://docs.docker.com/install/">Docker official documentation</a> to install Docker.</p>
-<h3 id="2-build-the-image"><a class="header" href="#2-build-the-image">2. Build the image</a></h3>
+<p>You can also refer to the <a href="https://docs.docker.com/install/">Docker Official Documentation</a> to install Docker.</p>
+<h3 id="2-build-the-image"><a class="header" href="#2-build-the-image">2. Build the Image</a></h3>
 <pre><code class="language-bash">make build_docker
 </code></pre>
-<p>This step builds a Docker image, automatically creating all the dependencies required for compilation.</p>
-<h3 id="3-run-the-container"><a class="header" href="#3-run-the-container">3. Run the container</a></h3>
+<p>This step builds a Docker image, automatically compiling all required dependencies.</p>
+<h3 id="3-run-the-container"><a class="header" href="#3-run-the-container">3. Run the Container</a></h3>
 <pre><code class="language-bash">make docker
 </code></pre>
 <p>This step starts a container, mounts the current directory into the container, and enters the container's shell.</p>
@@ -931,13 +1194,13 @@ imxtract ${fit_addr} root_linux ${root_linux_load}; bootm ${fit_addr};
 <p>Execute the following command in the container to compile.</p>
 <pre><code class="language-bash">make all
 </code></pre>
-<h2 id="compiling-with-local-environment"><a class="header" href="#compiling-with-local-environment">Compiling with Local Environment</a></h2>
+<h2 id="compile-using-the-local-environment"><a class="header" href="#compile-using-the-local-environment">Compile using the local environment</a></h2>
 <h3 id="1-install-rustup-and-cargo"><a class="header" href="#1-install-rustup-and-cargo">1. Install RustUp and Cargo</a></h3>
 <pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
 </code></pre>
-<h3 id="2-install-the-toolchain"><a class="header" href="#2-install-the-toolchain">2. Install the toolchain</a></h3>
-<p>The toolchain currently used by the project is as follows:</p>
+<h3 id="2-install-the-toolchain"><a class="header" href="#2-install-the-toolchain">2. Install the Toolchain</a></h3>
+<p>The toolchain currently used by the project includes:</p>
 <ul>
 <li>Rust nightly 2023-07-12</li>
 <li><a href="https://crates.io/crates/rustfmt">rustfmt</a></li>
@@ -947,11 +1210,11 @@ imxtract ${fit_addr} root_linux ${root_linux_load}; bootm ${fit_addr};
 <li>llvm-tools-preview</li>
 <li>target: aarch64-unknown-none</li>
 </ul>
-<p>You can check if these tools are installed on your own, or use the following commands to install:</p>
+<p>You can check if these tools are installed yourself, or use the following commands to install them:</p>
 <h4 id="1-install-toml-cli-and-cargo-binutils"><a class="header" href="#1-install-toml-cli-and-cargo-binutils">(1) Install toml-cli and cargo-binutils</a></h4>
 <pre><code class="language-bash">cargo install toml-cli cargo-binutils
 </code></pre>
-<h4 id="2-install-the-target-platform-cross-compilation-toolchain"><a class="header" href="#2-install-the-target-platform-cross-compilation-toolchain">(2) Install the target platform cross-compilation toolchain</a></h4>
+<h4 id="2-install-the-cross-compilation-toolchain-for-the-target-platform"><a class="header" href="#2-install-the-cross-compilation-toolchain-for-the-target-platform">(2) Install the cross-compilation toolchain for the target platform</a></h4>
 <pre><code class="language-bash">rustup target add aarch64-unknown-none
 </code></pre>
 <h4 id="3-parse-rust-toolchaintoml-to-install-the-rust-toolchain"><a class="header" href="#3-parse-rust-toolchaintoml-to-install-the-rust-toolchain">(3) Parse rust-toolchain.toml to install the Rust toolchain</a></h4>
@@ -977,7 +1240,7 @@ rustup component add --toolchain $RUST_VERSION $Components
 tar -xvf qemu-${QEMU_VERSION}.tar.xz
 </code></pre>
 <h4 id="2-conditionally-compile-and-install-qemu"><a class="header" href="#2-conditionally-compile-and-install-qemu">2. Conditionally Compile and Install QEMU</a></h4>
-<p>Here we only compile QEMU for simulating aarch64. If you need QEMU for other architectures, you can refer to <a href="https://wiki.qemu.org/Hosts/Linux">QEMU Official Documentation</a>.</p>
+<p>Here we only compile QEMU for emulating aarch64, if you need QEMU for other architectures, refer to <a href="https://wiki.qemu.org/Hosts/Linux">QEMU Official Documentation</a>.</p>
 <pre><code class="language-bash">cd qemu-7.0.0 &amp;&amp; \
 ./configure --target-list=aarch64-softmmu,aarch64-linux-user &amp;&amp; \
 make -j$(nproc) &amp;&amp; \
@@ -995,15 +1258,15 @@ make install
 <pre><code class="language-bash">make run
 </code></pre>
 <h4 id="3-enter-qemu"><a class="header" href="#3-enter-qemu">3. Enter QEMU</a></h4>
-<p>It will automatically load uboot. After uboot loading is complete, enter <code>bootm 0x40400000 - 0x40000000</code> to enter Root Linux.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-boot-nonroot-linux"><a class="header" href="#how-to-boot-nonroot-linux">How to Boot NonRoot Linux</a></h1>
-<p>Hvisor has properly handled the booting of NonRoot, making it relatively simple to do so, as follows:</p>
+<p>It will automatically load uboot, wait for uboot to finish loading, then enter <code>bootm 0x40400000 - 0x40000000</code> to enter Root Linux.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-start-nonroot-linux"><a class="header" href="#how-to-start-nonroot-linux">How to Start NonRoot Linux</a></h1>
+<p>Hvisor has properly handled the startup of NonRoot, making it relatively simple, as follows:</p>
 <ol>
 <li>
 <p>Prepare the kernel image, device tree, and file system for NonRoot Linux. Place the kernel and device tree in the file system of Root Linux.</p>
 </li>
 <li>
-<p>Specify the serial port and file system to be mounted for NonRoot Linux in the device tree file, as shown below:</p>
+<p>Specify the serial port used by this NonRoot Linux and the file system to be mounted in the device tree file for NonRoot Linux, as shown in the example below:</p>
 </li>
 </ol>
 <pre><code>	chosen {
@@ -1013,30 +1276,30 @@ make install
 </code></pre>
 <ol start="3">
 <li>
-<p>Compile the <a href="https://github.com/syswonder/hvisor-tool?tab=readme-ov-file">kernel module and command line tool</a> for Hvisor and place it in the file system of Root Linux.</p>
+<p>Compile the <a href="https://github.com/syswonder/hvisor-tool?tab=readme-ov-file">kernel module and command line tools</a> for Hvisor and place them in the file system of Root Linux.</p>
 </li>
 <li>
-<p>Boot Hvisor's Root Linux and inject the kernel module that was just compiled:</p>
+<p>Start Hvisor's Root Linux and inject the kernel module that was just compiled:</p>
 </li>
 </ol>
 <pre><code>insmod hvisor.ko
 </code></pre>
 <ol start="5">
-<li>Use the command line tool, here assumed to be named <code>hvisor</code>, to boot NonRoot Linux.</li>
+<li>Use the command line tool, here assumed to be named <code>hvisor</code>, to start NonRoot Linux.</li>
 </ol>
 <pre><code>./hvisor zone start --kernel kernel image,addr=0x70000000 --dtb device tree file,addr=0x91000000 --id virtual machine number (starting from 1)
 </code></pre>
 <ol start="6">
-<li>Once NonRoot Linux has booted, open the specified serial port to use it.</li>
+<li>After NonRoot Linux has started, open the specified serial port to use it.</li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="configuration-and-management-of-zones"><a class="header" href="#configuration-and-management-of-zones">Configuration and Management of Zones</a></h1>
-<p>The hvisor project, as a lightweight hypervisor, uses a Type-1 architecture that allows multiple virtual machines (zones) to run directly on top of hardware. Below is a detailed explanation of the key points of zone configuration and management:</p>
+<p>The hvisor project, as a lightweight hypervisor, uses a Type-1 architecture that allows multiple virtual machines (zones) to run directly on top of hardware. Below is a detailed explanation of the key points for zone configuration and management:</p>
 <h2 id="resource-allocation"><a class="header" href="#resource-allocation">Resource Allocation</a></h2>
-<p>Resources such as CPU, memory, devices, and interrupts are statically allocated to each zone, meaning that once allocated, these resources will not be dynamically scheduled between zones.</p>
+<p>Resources such as CPU, memory, devices, and interrupts are statically allocated to each zone, meaning that once allocated, these resources are not dynamically scheduled between zones.</p>
 <h2 id="root-zone-configuration"><a class="header" href="#root-zone-configuration">Root Zone Configuration</a></h2>
-<p>The configuration of the root zone is hardcoded inside hvisor, written in Rust language, and presented as a C-style structure HvZoneConfig. This structure contains key information such as zone ID, number of CPUs, memory regions, interrupt information, physical addresses and sizes of the kernel and device tree binaries (DTB).</p>
+<p>The configuration of the root zone is hardcoded within hvisor, written in Rust, and represented as a C-style structure HvZoneConfig. This structure contains key information such as zone ID, number of CPUs, memory regions, interrupt information, physical addresses and sizes of the kernel and device tree binary (DTB).</p>
 <h2 id="non-root-zones-configuration"><a class="header" href="#non-root-zones-configuration">Non-root Zones Configuration</a></h2>
-<p>The configuration of non-root zones is stored in the file system of root Linux, usually represented in JSON format. For example:</p>
+<p>The configuration of non-root zones is stored in the root Linux file system, usually represented in JSON format. For example:</p>
 <pre><code class="language-json">    {
         "arch": "arm64",
         "zone_id": 1,
@@ -1071,25 +1334,25 @@ make install
 </code></pre>
 <ul>
 <li>The <code>arch</code> field specifies the target architecture (e.g., arm64).</li>
-<li><code>cpus</code> is a list indicating the CPU core IDs allocated to the zone.</li>
-<li><code>memory_regions</code> describes different types of memory regions along with their physical and virtual start addresses and sizes.</li>
-<li><code>interrupts</code> lists the interrupt numbers allocated to the zone.</li>
-<li><code>kernel_filepath</code> and <code>dtb_filepath</code> indicate the paths of the kernel and device tree binary files.</li>
-<li><code>kernel_load_paddr</code> and <code>dtb_load_paddr</code> are the physical memory load addresses for the kernel and device tree binaries.</li>
-<li><code>entry_point</code> specifies the entry point address of the kernel.</li>
+<li><code>cpus</code> is a list that indicates the CPU core IDs allocated to the zone.</li>
+<li><code>memory_regions</code> describe different types of memory regions and their physical and virtual start addresses and sizes.</li>
+<li><code>interrupts</code> list the interrupt numbers allocated to the zone.</li>
+<li><code>kernel_filepath</code> and <code>dtb_filepath</code> indicate the paths of the kernel and device tree binary files, respectively.</li>
+<li><code>kernel_load_paddr</code> and <code>dtb_load_paddr</code> are the physical memory load addresses for the kernel and device tree binary.</li>
+<li><code>entry_point</code> specifies the kernel's entry point address.</li>
 </ul>
-<p>The management tool of root Linux is responsible for reading the JSON configuration file and converting it into a C-style structure, which is then passed to hvisor to start non-root zones.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="command-line-tools"><a class="header" href="#command-line-tools">Command Line Tools</a></h1>
-<p>Command line tools are management tools affiliated with hvisor, used to create and close other virtual machines on the management virtual machine Root Linux, and are responsible for starting the Virtio daemon, providing Virtio device emulation. The repository address is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
+<p>The management tool of root Linux is responsible for reading the JSON configuration file and converting it into a C-style structure, which is then passed to hvisor to start the non-root zones.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="command-line-tool"><a class="header" href="#command-line-tool">Command Line Tool</a></h1>
+<p>The command line tool is a management tool affiliated with hvisor, used to create and shut down other virtual machines on the Root Linux of the virtual machine manager, and is responsible for starting the Virtio daemon to provide Virtio device emulation. The repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
 <h2 id="how-to-compile-1"><a class="header" href="#how-to-compile-1">How to Compile</a></h2>
-<p>The command line tool currently supports two architectures: arm64 and riscv, and requires a kernel module to be used. Cross-compilation on an x86 host can be used to compile for different architectures.</p>
+<p>The command line tool currently supports two architectures: arm64 and riscv, and needs to be used in conjunction with a kernel module. Cross-compilation on an x86 host can be done for different architectures.</p>
 <ul>
 <li>arm64 compilation</li>
 </ul>
 <p>Execute the following command in the hvisor-tool directory to obtain the command line tool hvisor and kernel module hvisorl.ko for the arm64 architecture.</p>
 <pre><code>make all ARCH=arm64 KDIR=xxx
 </code></pre>
-<p>Where KDIR is the source path of Root Linux, used for the compilation of the kernel module.</p>
+<p>Where KDIR is the Root Linux source path, used for compiling the kernel module.</p>
 <ul>
 <li>riscv compilation</li>
 </ul>
@@ -1097,38 +1360,38 @@ make install
 <pre><code>make all ARCH=riscv KDIR=xxx
 </code></pre>
 <h2 id="managing-virtual-machines"><a class="header" href="#managing-virtual-machines">Managing Virtual Machines</a></h2>
-<h3 id="loading-the-kernel-module"><a class="header" href="#loading-the-kernel-module">Loading the Kernel Module</a></h3>
-<p>Before using the command line tool, you need to load the kernel module to facilitate interaction between the user-mode program and Hypervisor:</p>
+<h3 id="load-the-kernel-module"><a class="header" href="#load-the-kernel-module">Load the Kernel Module</a></h3>
+<p>Before using the command line tool, you need to load the kernel module to facilitate user-space programs to interact with Hypervisor:</p>
 <pre><code>insmod hvisor.ko
 </code></pre>
 <p>The operation to unload the kernel module is:</p>
 <pre><code>rmmod hvisor.ko
 </code></pre>
 <p>Where hvisor.ko is located in the hvisor-tool/driver directory.</p>
-<h3 id="starting-a-virtual-machine"><a class="header" href="#starting-a-virtual-machine">Starting a Virtual Machine</a></h3>
-<p>On Root Linux, you can create a virtual machine with id 1 using the following command. This command will load the virtual machine's operating system image file <code>Image</code> into the real physical address <code>xxxa</code>, load the virtual machine's device tree file <code>linux2.dtb</code> into the real physical address <code>xxxb</code>, and start it.</p>
+<h3 id="start-a-virtual-machine"><a class="header" href="#start-a-virtual-machine">Start a Virtual Machine</a></h3>
+<p>On Root Linux, you can create a virtual machine with id 1 by the following command. This command will load the virtual machine's operating system image file <code>Image</code> to the real physical address <code>xxxa</code>, load the virtual machine's device tree file <code>linux2.dtb</code> to the real physical address <code>xxxb</code>, and start it.</p>
 <pre><code>./hvisor zone start --kernel Image,addr=xxxa --dtb linux2.dtb,addr=xxxb --id 1
 </code></pre>
-<h3 id="shutting-down-a-virtual-machine"><a class="header" href="#shutting-down-a-virtual-machine">Shutting Down a Virtual Machine</a></h3>
+<h3 id="shut-down-a-virtual-machine"><a class="header" href="#shut-down-a-virtual-machine">Shut Down a Virtual Machine</a></h3>
 <p>Shut down the virtual machine with id 1:</p>
 <pre><code>./hvisor zone shutdown -id 1
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="use-of-virtio-devices"><a class="header" href="#use-of-virtio-devices">Use of VirtIO Devices</a></h1>
-<p>Currently, hvisor supports three types of Virtio devices: Virtio block, Virtio net, and Virtio Console, presented to virtual machines other than Root Linux via MMIO. The Virtio device source repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, compiled and used together with the command line tool. After creating Virtio devices through the command line tool, the Virtio device will become a daemon on Root Linux, and its log information will be output to the nohup.out file.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="using-virtio-devices"><a class="header" href="#using-virtio-devices">Using VirtIO Devices</a></h1>
+<p>Currently, hvisor supports three types of Virtio devices: Virtio block, Virtio net, and Virtio Console, which are presented to virtual machines other than Root Linux via MMIO. The Virtio device source code repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, compiled and used together with the command-line tool. After creating a Virtio device through the command-line tool, the Virtio device becomes a daemon on Root Linux, and its log information is output to the nohup.out file.</p>
 <h2 id="creating-and-starting-virtio-devices"><a class="header" href="#creating-and-starting-virtio-devices">Creating and Starting Virtio Devices</a></h2>
-<p>Before creating Virtio devices through the command line, execute <code>insmod hvisor.ko</code> to load the kernel module.</p>
+<p>Before creating a Virtio device through the command line, execute <code>insmod hvisor.ko</code> to load the kernel module.</p>
 <h3 id="virtio-blk-device"><a class="header" href="#virtio-blk-device">Virtio blk Device</a></h3>
 <p>Execute the following example command on the Root Linux console to create a Virtio blk device:</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 &amp;
 </code></pre>
-<p>Here <code>--device blk</code> indicates creating a Virtio disk device for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>, and the corresponding disk image path is <code>img</code>.</p>
+<p><code>--device blk</code> indicates creating a Virtio disk device for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>, and corresponding disk image path <code>img</code>.</p>
 <blockquote>
 <p>Virtual machines using Virtio devices need to add information about the Virtio mmio node in the device tree.</p>
 </blockquote>
 <h3 id="virtio-net-device"><a class="header" href="#virtio-net-device">Virtio net Device</a></h3>
 <h4 id="creating-network-topology"><a class="header" href="#creating-network-topology">Creating Network Topology</a></h4>
-<p>Before using the Virtio net device, a network topology needs to be created in root Linux so that the Virtio net device can connect to the real network card through the Tap device and bridge device. Execute the following commands in root Linux:</p>
+<p>Before using a Virtio net device, a network topology needs to be created in Root Linux to connect the Virtio net device with the real network card through a Tap device and bridge device. Execute the following commands in Root Linux:</p>
 <pre><code class="language-shell">mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 ip link set eth0 up
@@ -1141,25 +1404,25 @@ ip tuntap add dev tap0 mode tap
 brctl addif br0 tap0
 ip link set dev tap0 up
 </code></pre>
-<p>This will create a network topology of <code>tap0 device&lt;--&gt;bridge device&lt;--&gt;real network card</code>.</p>
+<p>This creates a <code>tap0 device&lt;--&gt;bridge device&lt;--&gt;real network card</code> network topology.</p>
 <h4 id="starting-virtio-net"><a class="header" href="#starting-virtio-net">Starting Virtio net</a></h4>
 <p>Execute the following example command on the Root Linux console to create a Virtio net device:</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 &amp;
 </code></pre>
-<p><code>--device net</code> indicates creating a Virtio network device for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>, and it connects to the Tap device named <code>tap</code>.</p>
-<h3 id="virtio-console-device"><a class="header" href="#virtio-console-device">Virtio console Device</a></h3>
+<p><code>--device net</code> indicates creating a Virtio network device for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>, and connected to a Tap device named <code>tap</code>.</p>
+<h3 id="virtio-console-device"><a class="header" href="#virtio-console-device">Virtio Console Device</a></h3>
 <p>Execute the following example command on the Root Linux console to create a Virtio console device:</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &amp;
 </code></pre>
-<p><code>--device console</code> indicates creating a Virtio console for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>.</p>
-<p>Execute <code>cat nohup.out | grep "char device"</code>, and you will observe the output <code>char device redirected to /dev/pts/xx</code>. Execute on Root Linux:</p>
+<p><code>--device console</code> indicates creating a Virtio console for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>.</p>
+<p>Execute <code>cat nohup.out | grep "char device"</code>, and you will see the output <code>char device redirected to /dev/pts/xx</code>. On Root Linux, execute:</p>
 <pre><code>screen /dev/pts/xx
 </code></pre>
-<p>This will enter the virtual console and interact with the virtual machine. Press the shortcut key <code>Ctrl +a d</code> to return to the Root Linux terminal. Execute <code>screen -r [session_id]</code> to re-enter the virtual console.</p>
+<p>to enter the virtual console and interact with the virtual machine. Press the shortcut key <code>Ctrl +a d</code> to return to the Root Linux terminal. Execute <code>screen -r [session_id]</code> to re-enter the virtual console.</p>
 <h3 id="creating-multiple-virtio-devices"><a class="header" href="#creating-multiple-virtio-devices">Creating Multiple Virtio Devices</a></h3>
-<p>Execute the following command to create Virtio blk, net, and console devices simultaneously, all devices are within one daemon process.</p>
+<p>Execute the following command to simultaneously create Virtio blk, net, and console devices, all within one daemon process.</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 \
 	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 \
@@ -1174,28 +1437,28 @@ ip link set dev tap0 up
 <li>
 <p>CPU Virtualization</p>
 <ul>
-<li>Architectural Compatibility: Supports aarch64, riscv64, and loongarch architectures, each with a dedicated CPU virtualization component.</li>
-<li>CPU Allocation: Uses static allocation, pre-determining the CPU resources for each virtual machine.</li>
+<li>Architecture Compatibility: Supports architectures such as aarch64, riscv64, and loongarch, with dedicated CPU virtualization components for each architecture.</li>
+<li>CPU Allocation: Uses static allocation method, pre-determining the CPU resources for each virtual machine.</li>
 </ul>
 </li>
 <li>
 <p>Memory Virtualization</p>
 <ul>
-<li>Two-Level Page Table: Utilizes two-level page table technology to optimize the memory virtualization process.</li>
+<li>Two-stage Page Table: Utilizes two-stage page table technology to optimize the memory virtualization process.</li>
 </ul>
 </li>
 <li>
 <p>Interrupt Virtualization</p>
 <ul>
-<li>Interrupt Controller Virtualization: Supports ARM GIC, RISC-V PLIC, and other architecture-specific interrupt controller virtualizations.</li>
-<li>Interrupt Handling: Manages the transmission and processing of interrupt signals.</li>
+<li>Interrupt Controller Virtualization: Supports virtualization of different architecture's interrupt controllers like ARM GIC and RISC-V PLIC.</li>
+<li>Interrupt Handling: Manages the transmission and processing flow of interrupt signals.</li>
 </ul>
 </li>
 <li>
 <p>I/O Virtualization</p>
 <ul>
-<li>IOMMU Integration: Supports IOMMU, enhancing the efficiency and security of DMA virtualization.</li>
-<li>VirtIO Standard: Adheres to the VirtIO specification, providing high-performance virtual devices.</li>
+<li>IOMMU Integration: Supports IOMMU to enhance the efficiency and security of DMA virtualization.</li>
+<li>VirtIO Standard: Follows the VirtIO specification, providing high-performance virtual devices.</li>
 <li>PCI Virtualization: Implements PCI virtualization, ensuring virtual machines can access physical or virtual I/O devices.</li>
 </ul>
 </li>
@@ -1583,16 +1846,16 @@ pub struct PerCpu {
 <p>[2] Loongson Zhongke Technology Co., Ltd. Loongson Architecture Reference Manual. Volume One: Basic Architecture.</p>
 <p>[3] <a href="https://github.com/torvalds/linux/blob/master/arch/loongarch/kvm/switch.S">https://github.com/torvalds/linux/blob/master/arch/loongarch/kvm/switch.S</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h1>
-<h2 id="heap-memory-allocation"><a class="header" href="#heap-memory-allocation">Heap Memory Allocation</a></h2>
-<h3 id="initializing-the-allocator"><a class="header" href="#initializing-the-allocator">Initializing the Allocator</a></h3>
-<p>When using programming languages, we often encounter dynamic memory allocation, such as allocating a block of memory in C using <code>malloc</code> or <code>new</code>, or using <code>Vec</code>, <code>String</code>, etc., in Rust, which are allocated on the heap.</p>
+<h2 id="memory-allocation-on-heap"><a class="header" href="#memory-allocation-on-heap">Memory Allocation on Heap</a></h2>
+<h3 id="allocator-initialization"><a class="header" href="#allocator-initialization">Allocator Initialization</a></h3>
+<p>When using programming languages, dynamic memory allocation is often encountered, such as allocating a block of memory through <code>malloc</code> or <code>new</code> in C, or <code>Vec</code>, <code>String</code>, etc. in Rust, which are allocated on the heap.</p>
 <p>To allocate memory on the heap, we need to do the following:</p>
 <ul>
-<li>Provide a large block of memory space at initialization</li>
+<li>Provide a large block of memory space during initialization</li>
 <li>Provide interfaces for allocation and release</li>
 <li>Manage free blocks</li>
 </ul>
-<p>In summary, we need to allocate a large space and set up an allocator to manage this space. We then inform Rust that we now have an allocator, asking it to use it, allowing us to use variables like <code>Vec</code>, <code>String</code> that allocate memory on the heap. This is what the following lines of code do.</p>
+<p>In short, we need to allocate a large space and set up an allocator to manage this space, and tell Rust that we now have an allocator, asking it to use it, allowing us to use variables like <code>Vec</code>, <code>String</code> that allocate memory on the heap. This is what the following lines do.</p>
 <pre><code>use buddy_system_allocator::LockedHeap;
 
 use crate::consts::HV_HEAP_SIZE;
@@ -1617,8 +1880,8 @@ pub fn init() {
     );
 }
 </code></pre>
-<p><code>#[cfg_attr(not(test), global_allocator)]</code> is a conditional compilation attribute, setting the <code>HEAP_ALLOCATOR</code> defined in the next line as Rust's global memory allocator when not in a test environment. Now Rust knows we can perform dynamic allocations.</p>
-<p><code>HEAP_ALLOCATOR.lock().init(heap_start, HEAP_BLOCK * MACHINE_ALIGN)</code> manages the large space we allocated with the allocator.</p>
+<p><code>#[cfg_attr(not(test), global_allocator)]</code> is a conditional compilation attribute, which sets the <code>HEAP_ALLOCATOR</code> defined in the next line as Rust's global memory allocator when not in a test environment. Now Rust knows we can do dynamic allocation.</p>
+<p><code>HEAP_ALLOCATOR.lock().init(heap_start, HEAP_BLOCK * MACHINE_ALIGN)</code> hands over the large space we applied for to the allocator for management.</p>
 <h3 id="testing"><a class="header" href="#testing">Testing</a></h3>
 <pre><code>pub fn test() {
     use alloc::boxed::Box;
@@ -1644,29 +1907,29 @@ pub fn init() {
     info!("heap_test passed!");
 }
 </code></pre>
-<p>In this test, we use <code>Box</code> and <code>Vec</code> to verify the memory we allocated is within the <code>bss</code> segment.</p>
-<p>The large uninitiated global variable we just handed over to the allocator is placed in the <code>bss</code> segment. We only need to test if the addresses of the variables we obtained are within this range.</p>
-<h2 id="armv8-memory-management-knowledge"><a class="header" href="#armv8-memory-management-knowledge">Armv8 Memory Management Knowledge</a></h2>
+<p>In this test, <code>Box</code> and <code>Vec</code> are used to verify the memory we allocated, whether it is in the <code>bss</code> segment.</p>
+<p>The large block of memory we just handed over to the allocator is an uninitialized global variable, which will be placed in the <code>bss</code> segment. We only need to test whether the address of the variable we obtained is within this range.</p>
+<h2 id="memory-management-knowledge-for-armv8"><a class="header" href="#memory-management-knowledge-for-armv8">Memory Management Knowledge for Armv8</a></h2>
 <h3 id="addressing"><a class="header" href="#addressing">Addressing</a></h3>
-<p>The address bus is default 48 bits, while the addressing request issued is 64 bits, so based on the high 16 bits, the virtual address can be divided into 2 spaces:</p>
+<p>The address bus is by default 48 bits, while the addressing request issued is 64 bits, so the virtual address can be divided into two spaces based on the high 16 bits:</p>
 <ul>
-<li>High 16 bits as 1: Kernel space</li>
-<li>High 16 bits as 0: User space</li>
+<li>High 16 bits are 1: Kernel space</li>
+<li>High 16 bits are 0: User space</li>
 </ul>
-<p>From the perspective of guestVM, when converting virtual addresses to physical addresses, the CPU selects the TTBR register based on the 63rd bit value of the virtual address. TTBR stores the base address of the level-1 page table. If it's user space, select TTBR0; if it's kernel space, select TTBR1.</p>
-<h3 id="four-level-page-table-mapping-example-with-4k-page-size"><a class="header" href="#four-level-page-table-mapping-example-with-4k-page-size">Four-Level Page Table Mapping (example with 4K page size)</a></h3>
-<p>Besides the high 16 bits used to determine which page table base register to use, the next 36 bits are divided every 9 bits as the index for each level of the page table, with the lower 12 bits as the offset within the page. As shown in the diagram below.</p>
+<p>From the perspective of guestVM, when converting a virtual address to a physical address, the CPU will select the TTBR register based on the value of the 63rd bit of the virtual address. TTBR registers store the base address of the first-level page table. If it is user space, select TTBR0; if it is kernel space, select TTBR1.</p>
+<h3 id="four-level-page-table-mapping-using-a-page-size-of-4k-as-an-example"><a class="header" href="#four-level-page-table-mapping-using-a-page-size-of-4k-as-an-example">Four-Level Page Table Mapping (using a page size of 4K as an example)</a></h3>
+<p>In addition to the high 16 bits used to determine which page table base address register to use, the following 36 bits are used as indexes for each level of the page table, with the lower 12 bits as the page offset, as shown in the diagram below.</p>
 <p><img src="chap04/./img/memory_level4_pagetable.png" alt="Level4_PageTable" /></p>
 <h3 id="stage-2-page-table-mechanism"><a class="header" href="#stage-2-page-table-mechanism">Stage-2 Page Table Mechanism</a></h3>
-<p>In a virtualized environment, there are two types of address mapping processes:</p>
+<p>In a virtualized environment, there are two types of address mapping processes in the system:</p>
 <ul>
 <li>guestVM uses Stage-1 address conversion, using <code>TTBR0_EL1</code> or <code>TTBR1_EL1</code>, to convert the accessed VA to IPA, then through Stage-2 address conversion, using <code>VTTBR0_EL2</code> to convert IPA to PA.</li>
-<li>Hypervisor may run its own applications, and the VA to PA conversion of these applications only needs one conversion, using the <code>TTBR0_EL2</code> register.</li>
+<li>Hypervisor may run its own applications, and the VA to PA conversion for these applications only requires one conversion, using the <code>TTBR0_EL2</code> register.</li>
 </ul>
 <p><img src="chap04/./img/memory_nested_translation.png" alt="Nested_Address_Translation" /></p>
-<h2 id="hvsiors-memory-management"><a class="header" href="#hvsiors-memory-management">hvsior's Memory Management</a></h2>
-<h3 id="physical-page-frame-management"><a class="header" href="#physical-page-frame-management">Physical Page Frame Management</a></h3>
-<p>Similar to the construction of the heap mentioned above, page frame allocation also requires an allocator, and then we manage the memory used for allocation with the allocator.</p>
+<h2 id="memory-management-in-hvsior"><a class="header" href="#memory-management-in-hvsior">Memory Management in hvsior</a></h2>
+<h3 id="management-of-physical-page-frames"><a class="header" href="#management-of-physical-page-frames">Management of Physical Page Frames</a></h3>
+<p>Similar to the heap construction mentioned above, page frame allocation also requires an allocator, then we hand over a block of memory we use for allocation to the allocator for management.</p>
 <p><strong>Bitmap-based Allocator</strong></p>
 <pre><code>use bitmap_allocator::BitAlloc;
 type FrameAlloc = bitmap_allocator::BitAlloc1M;
@@ -1676,7 +1939,7 @@ struct FrameAllocator {
     inner: FrameAlloc,
 }
 </code></pre>
-<p><code>BitAlloc1M</code> is a bitmap-based allocator, managing page numbers by <strong>providing information on which pages are free and which are occupied</strong>.</p>
+<p><code>BitAlloc1M</code> is a bitmap-based allocator, which manages page numbers, <strong>providing information on which pages are free and which are occupied</strong>.</p>
 <p>Then, the bitmap allocator and the starting address used for page frame allocation are encapsulated into a page frame allocator.</p>
 <p>So we see the initialization function as follows:</p>
 <pre><code>fn init(&amp;mut self, base: PhysAddr, size: usize) {
@@ -1685,8 +1948,8 @@ struct FrameAllocator {
         self.inner.insert(0..page_count);
     }
 </code></pre>
-<p>The starting address of the page frame allocation area and the size of the available space are passed in, calculating the number of page frames available for allocation in this space <code>page_size</code>, and then informing the bitmap allocator of all page frame numbers through the <code>insert</code> function.</p>
-<p><strong>Page Frame Structure</strong></p>
+<p>The starting address of the page frame allocation area and the size of the available space are passed in, the number of page frames available for allocation in this space <code>page_size</code> is calculated, and then all page frame numbers are told to the bitmap allocator through the <code>insert</code> function.</p>
+<p><strong>Structure of Page Frames</strong></p>
 <pre><code>pub struct Frame {
     start_paddr: PhysAddr,
     frame_count: usize,
@@ -1694,15 +1957,15 @@ struct FrameAllocator {
 </code></pre>
 <p>The structure of the page frame includes the starting address of this page frame and the number of page frames corresponding to this frame instance, which may be 0, 1, or more than 1.</p>
 <blockquote>
-<p>Why are there cases where the frame count is 0?</p>
-<p>When hvisor wants to access the content of the page frame through <code>Frame</code>, a temporary instance is needed, which does not involve page frame allocation or recycling, so 0 is used as a flag.</p>
+<p>Why are there cases where the number of page frames is 0?</p>
+<p>When hvisor wants to access the contents of the page frame through <code>Frame</code>, it needs a temporary instance that does not involve page frame allocation and page frame recycling, so 0 is used as a flag.</p>
 </blockquote>
 <blockquote>
-<p>Why are there cases where the frame count is more than 1?</p>
-<p>In some cases, we are required to allocate continuous memory, and the size exceeds one page, i.e., multiple continuous page frames are allocated.</p>
+<p>Why are there cases where the number of page frames is greater than 1?</p>
+<p>In some cases, we are required to allocate continuous memory, and the size exceeds one page, which means allocating multiple continuous page frames.</p>
 </blockquote>
-<p><strong>Allocation (alloc)</strong></p>
-<p>Now we know that the page frame allocator can allocate a number of a free page frame, turning the number into a <code>Frame</code> instance to complete the page frame allocation, as follows for a single page frame allocation:</p>
+<p><strong>Allocation alloc</strong></p>
+<p>Now we know that the page frame allocator can allocate a number of a free page frame, turning the number into a <code>Frame</code> instance completes the allocation of the page frame, as shown below for a single page frame allocation:</p>
 <pre><code>impl FrameAllocator {
     fn init(&amp;mut self, base: PhysAddr, size: usize) {
         self.base = align_up(base);
@@ -1727,9 +1990,9 @@ impl Frame {
     }
 }
 </code></pre>
-<p>As seen, the frame allocator helps us allocate a page frame and returns the starting physical address, then creates a <code>Frame</code> instance.</p>
-<p><strong>Page Frame Recycling</strong></p>
-<p>The <code>Frame</code> structure is tied to the actual physical page, following the RAII design standard, so when a <code>Frame</code> leaves scope, the corresponding memory area also needs to be returned to hvisor. This requires us to implement the <code>Drop Trait</code>'s <code>drop</code> method, as follows:</p>
+<p>As you can see, the frame allocator helps us allocate a page frame and returns the starting physical address, then creates a <code>Frame</code> instance.</p>
+<p><strong>Recycling of Page Frames</strong></p>
+<p>The <code>Frame</code> structure is linked to the actual physical page, following the RAII design standard, so when a <code>Frame</code> leaves the scope, the corresponding memory area also needs to be returned to hvisor. This requires us to implement the <code>drop</code> method in the <code>Drop Trait</code>, as follows:</p>
 <pre><code>impl Drop for Frame {
     fn drop(&amp;mut self) {
         unsafe {
@@ -1751,12 +2014,166 @@ impl FrameAllocator{
     }
 }
 </code></pre>
-<p>In <code>drop</code>, we can see that page frames with a frame count of 0 do not need to release the corresponding physical pages, and page frames with a frame count greater than 1 indicate continuous allocated page frames, requiring the recycling of more than one physical page.</p>
-<h3 id="page-table-related-data-structures"><a class="header" href="#page-table-related-data-structures">Page Table Related Data Structures</a></h3>
-<p>With the above knowledge about Armv8 memory management, we know that the process of building page tables is divided into two parts: the page table used by hvisor itself and the Stage-2 conversion page table. We will focus on the Stage-2 page table.</p>
+<p>In <code>drop</code>, you can see that page frames with a frame count of 0 do not need to release the corresponding physical pages, and those with a frame count greater than 1 indicate that they are continuously allocated page frames, requiring the recycling of more than one physical page.</p>
+<h3 id="data-structures-related-to-page-tables"><a class="header" href="#data-structures-related-to-page-tables">Data Structures Related to Page Tables</a></h3>
+<p>With the knowledge of Armv8 memory management mentioned above, we know that the process of building page tables is divided into two parts: the page table used by hvisor itself and the Stage-2 conversion page table. We will focus on the Stage-2 page table.</p>
 <p>Before that, we need to understand a few data structures that will be used.</p>
 <p><strong>Logical Segment MemoryRegion</strong></p>
-<p>The description of the logical segment, including the starting address, size, permission flags</p>
+<p>Description of the logical segment, including starting address, size, permission flags, and mapping method.</p>
+<pre><code>pub struct MemoryRegion&lt;VA&gt; {
+    pub start: VA,
+    pub size: usize,
+    pub flags: MemFlags,
+    pub mapper: Mapper,
+}
+</code></pre>
+<p><strong>Address Space MemorySet</strong></p>
+<p>Description of each process's address space, including a collection of logical segments and the corresponding page table for the process.</p>
+<pre><code>pub struct MemorySet&lt;PT: GenericPageTable&gt;
+where
+    PT::VA: Ord,
+{
+    regions: BTreeMap&lt;PT::VA, MemoryRegion&lt;PT::VA&gt;&gt;,
+    pt: PT,
+}
+</code></pre>
+<p><strong>4-Level Page Table Level4PageTableImmut</strong></p>
+<p><code>root</code> is the page frame where the L0 page table is located.</p>
+<pre><code>pub struct Level4PageTableImmut&lt;VA, PTE: GenericPTE&gt; {
+    /// Root table frame.
+    root: Frame,
+    /// Phantom data.
+    _phantom: PhantomData&lt;(VA, PTE)&gt;,
+}
+</code></pre>
+<h3 id="building-the-stage-2-page-table"><a class="header" href="#building-the-stage-2-page-table">Building the Stage-2 Page Table</a></h3>
+<p>We need to build a Stage-2 page table for each zone.</p>
+<h4 id="areas-to-be-mapped-by-the-stage-2-page-table"><a class="header" href="#areas-to-be-mapped-by-the-stage-2-page-table">Areas to be Mapped by the Stage-2 Page Table:</a></h4>
+<ul>
+<li>The memory area seen by guestVM</li>
+<li>The IPA of the device tree accessed by guestVM</li>
+<li>The memory area of the UART device seen by guestVM</li>
+</ul>
+<h4 id="adding-mapping-relationships-to-the-address-space"><a class="header" href="#adding-mapping-relationships-to-the-address-space">Adding Mapping Relationships to the Address Space</a></h4>
+<pre><code>/// Add a memory region to this set.
+    pub fn insert(&amp;mut self, region: MemoryRegion&lt;PT::VA&gt;) -&gt; HvResult {
+        assert!(is_aligned(region.start.into()));
+        assert!(is_aligned(region.size));
+        if region.size == 0 {
+            return Ok(());
+        }
+        if !self.test_free_area(&amp;region) {
+            warn!(
+                "MemoryRegion overlapped in MemorySet: {:#x?}\n{:#x?}",
+                region, self
+            );
+            return hv_result_err!(EINVAL);
+        }
+        self.pt.map(&amp;region)?;
+        self.regions.insert(region.start, region);
+        Ok(())
+    }
+</code></pre>
+<p>In addition to adding the mapping relationship between the virtual address and the logical segment to our <code>Map</code> structure, we also need to perform mapping in the page table, as follows:</p>
+<pre><code>fn map(&amp;mut self, region: &amp;MemoryRegion&lt;VA&gt;) -&gt; HvResult {
+        assert!(
+            is_aligned(region.start.into()),
+            "region.start = {:#x?}",
+            region.start.into()
+        );
+        assert!(is_aligned(region.size), "region.size = {:#x?}", region.size);
+        trace!(
+            "create mapping in {}: {:#x?}",
+            core::any::type_name::&lt;Self&gt;(),
+            region
+        );
+        let _lock = self.clonee_lock.lock();
+        let mut vaddr = region.start.into();
+        let mut size = region.size;
+        while size &gt; 0 {
+            let paddr = region.mapper.map_fn(vaddr);
+            let page_size = if PageSize::Size1G.is_aligned(vaddr)
+                &amp;&amp; PageSize::Size1G.is_aligned(paddr)
+                &amp;&amp; size &gt;= PageSize::Size1G as usize
+                &amp;&amp; !region.flags.contains(MemFlags::NO_HUGEPAGES)
+            {
+                PageSize::Size1G
+            } else if PageSize::Size2M.is_aligned(vaddr)
+                &amp;&amp; PageSize::Size2M.is_aligned(paddr)
+                and size &gt;= PageSize::Size2M as usize
+                &amp;&amp; !region.flags.contains(MemFlags::NO_HUGEPAGES)
+            {
+                PageSize::Size2M
+            } else {
+                PageSize::Size4K
+            };
+            let page = Page::new_aligned(vaddr.into(), page_size);
+            self.inner
+                .map_page(page, paddr, region.flags)
+                .map_err(|e: PagingError| {
+                    error!(
+                        "failed to map page: {:#x?}({:?}) -&gt; {:#x?}, {:?}",
+                        vaddr, page_size, paddr, e
+                    );
+                    e
+                })?;
+            vaddr += page_size as usize;
+            size -= page_size as usize;
+        }
+        Ok(())
+    }
+</code></pre>
+<p>Let's briefly interpret this function. For a logical segment <code>MemoryRegion</code>, we map it page by page until the entire logical segment size is covered.</p>
+<p>The specific behavior is as follows:</p>
+<p>Before mapping each page, we first determine the physical address <code>paddr</code> corresponding to this page according to the mapping method of the logical segment.</p>
+<p>Then determine the page size <code>page_size</code>. We start by checking the 1G page size. If the physical address can be aligned, the remaining unmapped page size is greater than 1G, and large page mapping is not disabled, then 1G is chosen as the page size. Otherwise, check the 2M page size, and if none of these conditions are met, use the standard 4KB page size.</p>
+<p>We now have the information needed to fill in the page table entry. We combine the page starting address and page size into a <code>Page</code> instance and perform mapping in the page table, which is modifying the page table entry:</p>
+<pre><code>fn map_page(
+        &amp;mut self,
+        page: Page&lt;VA&gt;,
+        paddr: PhysAddr,
+        flags: MemFlags,
+    ) -&gt; PagingResult&lt;&amp;mut PTE&gt; {
+        let entry: &amp;mut PTE = self.get_entry_mut_or_create(page)?;
+        if !entry.is_unused() {
+            return Err(PagingError::AlreadyMapped);
+        }
+        entry.set_addr(page.size.align_down(paddr));
+        entry.set_flags(flags, page.size.is_huge());
+        Ok(entry)
+    }
+</code></pre>
+<p>This function briefly describes the following functionality: First, we obtain the PTE according to the VA, or more precisely, according to the page number VPN corresponding to this VA. We fill in the control bit information and the physical address (actually, it should be PPN) in the PTE. Specifically, you can see in the <code>PageTableEntry</code>'s set_addr method that we did not fill in the entire physical address but only the content excluding the lower 12 bits, because our page table only cares about the mapping of page frame numbers.</p>
+<p>Let's take a closer look at how to obtain the PTE:</p>
+<pre><code>fn get_entry_mut_or_create(&amp;mut self, page: Page&lt;VA&gt;) -&gt; PagingResult&lt;&amp;mut PTE&gt; {
+        let vaddr: usize = page.vaddr.into();
+        let p4 = table_of_mut::&lt;PTE&gt;(self.inner.root_paddr());
+        let p4e = &amp;mut p4[p4_index(vaddr)];
+
+        let p3 = next_table_mut_or_create(p4e, || self.alloc_intrm_table())?;
+        let p3e = &amp;mut p3[p3_index(vaddr)];
+        if page.size == PageSize::Size1G {
+            return Ok(p3e);
+        }
+
+        let p2 = next_table_mut_or_create(p3e, || self.alloc_intrm_table())?;
+        let p2e = &amp;mut p2[p2_index(vaddr)];
+        if page.size == PageSize::Size2M {
+            return Ok(p2e);
+        }
+
+        let p1 = next_table_mut_or_create(p2e, || self.alloc_intrm_table())?;
+        let p1e = &amp;mut p1[p1_index(vaddr)];
+        Ok(p1e)
+    }
+</code></pre>
+<p>First, we find the starting address of the L0 page table, then obtain the corresponding page table entry <code>p4e</code> according to the L0 index in the VA. However, we cannot directly obtain the starting address of the next level page table from <code>p4e</code>, as the corresponding page table may not have been created yet. If it has not been created, we create a new page table (this process also requires page frame allocation), then return the starting address of the page table, and so forth, until we obtain the page table entry PTE corresponding to the L4 index in the L4 page table.</p>
+<p><strong>After mapping the memory (the same applies to UART devices) through the process described above, we also need to fill the L0 page table base address into the VTTBR_EL2 register. This process can be seen in the activate function of the Zone's MemorySet's Level4PageTable.</strong></p>
+<blockquote>
+<p>In a non-virtualized environment, why isn't guestVM allowed to access memory areas related to MMIO and GIC devices?</p>
+<p>This is because, in a virtualized environment, hvisor is the manager of resources and cannot arbitrarily allow guestVM to access areas related to devices. In the previous exception handling, we mentioned access to MMIO/GIC, which actually results in falling into EL2 due to the lack of address mapping, and EL2 accesses the resources and returns the results. If mapping was performed in the page table, it would directly access the resources through the second-stage address conversion without passing through EL2's control.</p>
+<p>Therefore, in our design, only MMIOs that are allowed to be accessed by the Zone are registered in the Zone, and when related exceptions occur, they are used to determine whether a certain MMIO resource is allowed to be accessed by the Zone.</p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="arm-gicv3-module"><a class="header" href="#arm-gicv3-module">ARM GICv3 Module</a></h1>
 <h2 id="1-gicv3-module"><a class="header" href="#1-gicv3-module">1. GICv3 Module</a></h2>
 <h3 id="gicv3-initialization-process"><a class="header" href="#gicv3-initialization-process">GICv3 Initialization Process</a></h3>
@@ -2488,14 +2905,14 @@ struct hvisor_event {
 <p>To facilitate testing PCI virtualization in QEMU, we wrote a PCI device.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="hvisor-management-tool"><a class="header" href="#hvisor-management-tool">hvisor Management Tool</a></h1>
 <p>hvisor manages the entire system through a Root Linux managing virtual machines. Root Linux provides services for users to start and shut down virtual machines, and to start and shut down Virtio daemons through a set of management tools. The management tools include a command-line tool and a kernel module. The command-line tool is used to parse and execute commands entered by the user, while the kernel module is used for communication between the command-line tool, Virtio daemon, and Hypervisor. The repository for the management tool is: <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
-<h2 id="starting-a-virtual-machine-1"><a class="header" href="#starting-a-virtual-machine-1">Starting a Virtual Machine</a></h2>
+<h2 id="starting-a-virtual-machine"><a class="header" href="#starting-a-virtual-machine">Starting a Virtual Machine</a></h2>
 <p>Users can create a new virtual machine on Root Linux for hvisor by entering the following command:</p>
 <pre><code>./hvisor zone start [vm_name].json
 </code></pre>
 <p>The command-line tool first parses the contents of the <code>[vm_name].json</code> file, writes the virtual machine configuration into the <code>zone_config</code> structure, and reads the contents of the image and dtb files specified in the file into temporary memory through the <code>read</code> function. To load the image and dtb files into the specified physical memory address, the <code>hvisor.ko</code> kernel module provides the <code>hvisor_map</code> function, which can map a physical memory region to the user-space virtual address space.</p>
 <p>When the command-line tool executes the <code>mmap</code> function on <code>/dev/hvisor</code>, the kernel calls the <code>hvisor_map</code> function to map the user virtual memory to the specified physical memory. Afterwards, the image and dtb file contents can be moved from temporary memory to the user-specified physical memory area through the memory copy function.</p>
 <p>After the image is loaded, the command-line tool calls <code>ioctl</code> on <code>/dev/hvisor</code>, specifying the operation code as <code>HVISOR_ZONE_START</code>. The kernel module then notifies the Hypervisor through a Hypercall and passes the address of the <code>zone_config</code> structure object, informing the Hypervisor to start the virtual machine.</p>
-<h2 id="shutting-down-a-virtual-machine-1"><a class="header" href="#shutting-down-a-virtual-machine-1">Shutting Down a Virtual Machine</a></h2>
+<h2 id="shutting-down-a-virtual-machine"><a class="header" href="#shutting-down-a-virtual-machine">Shutting Down a Virtual Machine</a></h2>
 <p>Users can shut down a virtual machine with the ID <code>vm_id</code> by entering the command:</p>
 <pre><code>./hvisor shutdown -id [vm_id]
 </code></pre>

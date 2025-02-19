@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Starting hvisor on Qemu ZCU102 - hvisor Manual</title>
+        <title>Qemu ZCU102 hvisor Boot - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -155,53 +155,53 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="qemu-zcu102-hvisor-startup"><a class="header" href="#qemu-zcu102-hvisor-startup">Qemu ZCU102 hvisor Startup</a></h1>
+                        <h1 id="qemu-zcu102-hvisor-boot"><a class="header" href="#qemu-zcu102-hvisor-boot">Qemu ZCU102 hvisor Boot</a></h1>
 <h2 id="install-petalinux"><a class="header" href="#install-petalinux">Install Petalinux</a></h2>
 <ol>
 <li>Install <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">Petalinux 2024.1</a>
-Please note that this article uses version 2024.1 as an example, which does not mean that other versions are not possible, but other versions have not been verified, and tests have found that Petalinux has a strong dependency on the operating system, so please install the version of Petalinux suitable for your operating system.</li>
-<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions to it, and then run the installer directly with <code>./petalinux.run</code>.</li>
-<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, just need to <code>apt install</code> one by one.</li>
-<li>After installation, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables before using Petalinux each time. If it is too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
+Please note that this article uses 2024.1 as an example, which does not mean that other versions are not possible, but other versions have not been verified, and it has been found that Petalinux has a strong dependency on the operating system. Please install the version of Petalinux suitable for your operating system.</li>
+<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions to it, and then directly run the installer with <code>./petalinux.run</code>.</li>
+<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, which can be installed one by one with <code>apt install</code>.</li>
+<li>After installation, before using Petalinux each time, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables. If it's too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
 </ol>
 <h2 id="install-zcu102-bsp"><a class="header" href="#install-zcu102-bsp">Install ZCU102 BSP</a></h2>
 <ol>
 <li>Download the BSP corresponding to the Petalinux version, in the example it is <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">ZCU102 BSP 2024.1</a></li>
-<li>Activate the Petalinux environment, i.e., <code>source settings.sh</code> in the Petalinux installation directory.</li>
-<li>Create a Petalinux Project based on BSP: <code>petalinux-create -t project -s xilinx-zcu102-v2024.1-05230256.bsp</code></li>
-<li>This will create a <code>xilinx-zcu102-2024.1</code> folder, which contains the parameters needed for QEMU to simulate ZCU102 (device tree), as well as pre-compiled Linux images, device trees, Uboot, etc. that can be directly uploaded to the board.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, run <code>source settings.sh</code>.</li>
+<li>Create a Petalinux Project based on the BSP: <code>petalinux-create -t project -s xilinx-zcu102-v2024.1-05230256.bsp</code></li>
+<li>This will create a <code>xilinx-zcu102-2024.1</code> folder, which contains the parameters required for QEMU to simulate ZCU102 (device tree), as well as precompiled Linux images, device trees, Uboot, etc., that can be directly loaded onto the board.</li>
 </ol>
 <h2 id="compile-hvisor"><a class="header" href="#compile-hvisor">Compile Hvisor</a></h2>
 <p>Refer to "Running Hvisor on Qemu" for setting up the environment required to compile Hvisor, then in the hvisor directory, execute:</p>
 <pre><code>make ARCH=aarch64 LOG=info FEATURES=platform_zcu102,gicv2 cp
 </code></pre>
-<p>to compile. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> is the required hvisor image.</p>
+<p>to compile. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> contains the required hvisor image.</p>
 <h2 id="prepare-device-tree"><a class="header" href="#prepare-device-tree">Prepare Device Tree</a></h2>
 <h3 id="use-existing-device-tree"><a class="header" href="#use-existing-device-tree">Use Existing Device Tree</a></h3>
-<p>In the image/devicetree directory of Hvisor, there is zcu102-root-aarch64.dts, which is a device tree file that has been tested to boot RootLinux, compile it.</p>
+<p>In the image/devicetree directory of Hvisor, there is zcu102-root-aarch64.dts, which is a device tree file tested for booting RootLinux, compile it as follows:</p>
 <pre><code>dtc -I dts -O dtb -o zcu102-root-aarch64.dtb zcu102-root-aarch64.dts
 </code></pre>
 <p>If the dtc command is invalid, install device-tree-compiler.</p>
 <pre><code>sudo apt-get install device-tree-compiler
 </code></pre>
 <h3 id="prepare-device-tree-yourself"><a class="header" href="#prepare-device-tree-yourself">Prepare Device Tree Yourself</a></h3>
-<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get the complete device tree, based on <code>zcu102-root-aarch64.dts</code> for additions and deletions.</p>
+<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get a complete device tree, based on <code>zcu102-root-aarch64.dts</code> for modifications.</p>
 <h2 id="prepare-image"><a class="header" href="#prepare-image">Prepare Image</a></h2>
 <h3 id="use-existing-image"><a class="header" href="#use-existing-image">Use Existing Image</a></h3>
 <p>It is recommended to use the <code>pre-built/linux/images/Image</code> from the ZCU102 BSP as the Linux kernel to boot on ZCU102, as its driver configuration is complete.</p>
 <h3 id="compile-yourself"><a class="header" href="#compile-yourself">Compile Yourself</a></h3>
-<p>After testing, the support for ZYNQMP in the Linux source code before version 5.15 is not comprehensive, it is not recommended to use versions before this for compilation, you can compile directly according to the general compilation process in later versions, as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
+<p>After testing, the support for ZYNQMP in the Linux source code before 5.15 is not comprehensive, it is not recommended to use versions before this for compilation. For later versions, you can compile directly according to the general compilation process, as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
 <ol>
 <li>Visit the <a href="https://github.com/Xilinx/linux-xlnx/tags?after=xilinx-v2023.1">linux-xlnx</a> official website to download the Linux source code, it is best to download <code>zynqmp-soc-for-v6.3</code>.</li>
-<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to unzip the source code</li>
-<li>Enter the unzipped directory, execute the following command to use the default configuration, <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</code></li>
+<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to extract the source code</li>
+<li>Enter the extracted directory, execute the following command using the default configuration, <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</code></li>
 <li>Compile: <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image -j$(nproc)</code></li>
-<li>After compilation, the directory <code>arch/arm64/boot/Image</code> is the required image.</li>
+<li>After compilation, the directory <code>arch/arm64/boot/Image</code> contains the required image.</li>
 </ol>
 <h2 id="enable-qemu-simulation"><a class="header" href="#enable-qemu-simulation">Enable QEMU Simulation</a></h2>
 <ol>
-<li>Activate the Petalinux environment, i.e., <code>source settings.sh</code> in the Petalinux installation directory.</li>
-<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, the file paths need to be modified according to your actual situation.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, run <code>source settings.sh</code>.</li>
+<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, where the file paths need to be modified according to your actual situation.</li>
 </ol>
 <pre><code># QEMU parameter passing
 petalinux-boot --qemu --prebuilt 2 --qemu-args '-device loader,file=hvisor,addr=0x40400000,force-raw=on -device loader,

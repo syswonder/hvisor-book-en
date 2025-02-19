@@ -3,7 +3,7 @@ In hvisor, there are three types of interrupts: timer interrupts, software inter
 
 Timer Interrupt: A timer interrupt is generated when the time register becomes greater than the timecmp register.
 
-Software Interrupt: In a multi-core system, one hart sends an inter-hart interrupt to another hart, which is implemented through an SBI call.
+Software Interrupt: In a multi-core system, one hart sends an inter-core interrupt to another hart, implemented through an SBI call.
 
 External Interrupt: External devices send interrupt signals to the processor through interrupt lines.
 
@@ -29,7 +29,7 @@ pub fn sbi_vs_handler(current_cpu: &mut ArchCpu) {
     }
 }
 ```
-If the sstc extension is not enabled, it is necessary to trap into machine mode through an SBI call, set the mtimecmp register, clear the virtual machine's timer interrupt pending bit, and enable the hvisor's timer interrupt enable bit; if the sstc extension is enabled, stimecmp can be set directly.
+If the sstc extension is not enabled, it is necessary to trap into machine mode through an SBI call, set the mtimecmp register, clear the virtual machine's timer interrupt pending bit, and enable hvisor's timer interrupt; if the sstc extension is enabled, stimecmp can be set directly.
 ```rs
 pub fn sbi_time_handler(fid: usize, current_cpu: &mut ArchCpu) -> SbiRet {
 ...
@@ -49,7 +49,7 @@ pub fn sbi_time_handler(fid: usize, current_cpu: &mut ArchCpu) -> SbiRet {
 ```
 When the time register becomes greater than the timecmp register, a timer interrupt is generated.
 
-After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handler function.
+After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handling function.
 ```rs
         InterruptType::STI => {
             unsafe {
@@ -58,7 +58,7 @@ After the interrupt is triggered, the trap context is saved, and dispatched to t
             }
         }
 ```
-Set the virtual machine's timer interrupt pending bit to 1, inject a timer interrupt into the virtual machine, and clear hvisor's timer interrupt enable bit to complete the interrupt handling.
+Set the virtual machine's timer interrupt pending bit to 1, injecting a timer interrupt into the virtual machine, and clear hvisor's timer interrupt enable bit to complete the interrupt handling.
 
 # Software Interrupt
 When a virtual machine needs to send an IPI, it traps into hvisor through the ecall instruction.
@@ -76,9 +76,9 @@ When a virtual machine needs to send an IPI, it traps into hvisor through the ec
             );
         }
 ```
-Then, through an SBI call, trap into machine mode to send an IPI to the specified hart by setting the SSIP bit of the mip register to 1 to inject an inter-hart interrupt into hvisor.
+Then through an SBI call, trap into machine mode to send an IPI to the specified hart, setting the SSIP bit in the mip register to inject an inter-core interrupt into hvisor.
 
-After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handler function.
+After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handling function.
 ```rs
 pub fn handle_ssi(current_cpu: &mut ArchCpu) {
     ...
@@ -87,27 +87,27 @@ pub fn handle_ssi(current_cpu: &mut ArchCpu) {
     check_events();
 }
 ```
-Set the virtual machine's software interrupt pending bit to 1, injecting a software interrupt into the virtual machine. Then determine the type of inter-hart interrupt, wake up or block the CPU, or handle VIRTIO-related interrupt requests.
+Set the virtual machine's software interrupt pending bit to 1, injecting a software interrupt into the virtual machine. Then determine the type of inter-core interrupt, wake or block the CPU, or handle VIRTIO-related interrupt requests.
 
 # External Interrupt
 ## PLIC
-RISC-V implements external interrupt handling through PLIC, which does not support virtualization and does not support MSI.
+RISC-V implements external interrupt handling through PLIC, which does not support virtualization or MSI.
 
-PLIC architecture diagram
+The architectural diagram of PLIC.
 
-The interrupt process of PLIC is shown in the diagram below.
+The interrupt process of PLIC is shown in the following diagram.
 
-Interrupt sources send an interrupt signal to PLIC through the interrupt line, and only when the interrupt priority is greater than the threshold, it can pass through the threshold register filter.
+The interrupt source sends an interrupt signal to the PLIC through the interrupt line, and only when the interrupt priority is greater than the threshold, it can pass through the threshold register's filter.
 
 Then read the claim register to get the pending highest priority interrupt, then clear the corresponding pending bit. Pass it to the target hart for interrupt handling.
 
 After handling, write the interrupt number to the complete register to receive the next interrupt request.
 ## Initialization
 The initialization process is similar to AIA.
-## Processing
-When an external interrupt is triggered in the virtual machine, it accesses the vPLIC address space, but since PLIC does not support virtualization, this address space is unmapped. Therefore, a page fault exception is triggered, and it traps into hvisor for handling.
+## Handling Process
+When an external interrupt is triggered in the virtual machine, it will access the vPLIC address space, however, PLIC does not support virtualization, and this address space is unmapped. Therefore, a page fault exception will be triggered, trapping into hvisor for handling.
 
-After the exception is triggered, the trap context is saved, and enters the page fault exception handler function.
+After the exception is triggered, the trap context is saved, and enters the page fault exception handling function.
 
 ```rs
 pub fn guest_page_fault_handler(current_cpu: &mut ArchCpu) {
@@ -127,7 +127,7 @@ pub fn guest_page_fault_handler(current_cpu: &mut ArchCpu) {
     }
 }
 ```
-Determine whether the address where the page fault occurred is within the PLIC address space, then parse the instruction that caused the exception, and modify the PLIC address space based on the access address and instruction to implement the simulation configuration for vPLIC.
+Determine if the address where the page fault occurred is within the PLIC's address space, then parse the instruction that caused the exception, and modify the PLIC's address space based on the access address and instruction to emulate the configuration for vPLIC.
 ```rs
 pub fn vplic_hart_emul_handler(current_cpu: &mut ArchCpu, addr: GuestPhysAddr, inst: Instruction) {
     ...

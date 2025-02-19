@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Configuration and Management of ZONE - hvisor Manual</title>
+        <title>ZONE Configuration and Management - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -156,13 +156,13 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="configuration-and-management-of-zones"><a class="header" href="#configuration-and-management-of-zones">Configuration and Management of Zones</a></h1>
-<p>The hvisor project, as a lightweight hypervisor, uses a Type-1 architecture that allows multiple virtual machines (zones) to run directly on top of hardware. Below is a detailed explanation of the key points of zone configuration and management:</p>
+<p>The hvisor project, as a lightweight hypervisor, uses a Type-1 architecture that allows multiple virtual machines (zones) to run directly on top of hardware. Below is a detailed explanation of the key points for zone configuration and management:</p>
 <h2 id="resource-allocation"><a class="header" href="#resource-allocation">Resource Allocation</a></h2>
-<p>Resources such as CPU, memory, devices, and interrupts are statically allocated to each zone, meaning that once allocated, these resources will not be dynamically scheduled between zones.</p>
+<p>Resources such as CPU, memory, devices, and interrupts are statically allocated to each zone, meaning that once allocated, these resources are not dynamically scheduled between zones.</p>
 <h2 id="root-zone-configuration"><a class="header" href="#root-zone-configuration">Root Zone Configuration</a></h2>
-<p>The configuration of the root zone is hardcoded inside hvisor, written in Rust language, and presented as a C-style structure HvZoneConfig. This structure contains key information such as zone ID, number of CPUs, memory regions, interrupt information, physical addresses and sizes of the kernel and device tree binaries (DTB).</p>
+<p>The configuration of the root zone is hardcoded within hvisor, written in Rust, and represented as a C-style structure HvZoneConfig. This structure contains key information such as zone ID, number of CPUs, memory regions, interrupt information, physical addresses and sizes of the kernel and device tree binary (DTB).</p>
 <h2 id="non-root-zones-configuration"><a class="header" href="#non-root-zones-configuration">Non-root Zones Configuration</a></h2>
-<p>The configuration of non-root zones is stored in the file system of root Linux, usually represented in JSON format. For example:</p>
+<p>The configuration of non-root zones is stored in the root Linux file system, usually represented in JSON format. For example:</p>
 <pre><code class="language-json">    {
         "arch": "arm64",
         "zone_id": 1,
@@ -197,14 +197,14 @@
 </code></pre>
 <ul>
 <li>The <code>arch</code> field specifies the target architecture (e.g., arm64).</li>
-<li><code>cpus</code> is a list indicating the CPU core IDs allocated to the zone.</li>
-<li><code>memory_regions</code> describes different types of memory regions along with their physical and virtual start addresses and sizes.</li>
-<li><code>interrupts</code> lists the interrupt numbers allocated to the zone.</li>
-<li><code>kernel_filepath</code> and <code>dtb_filepath</code> indicate the paths of the kernel and device tree binary files.</li>
-<li><code>kernel_load_paddr</code> and <code>dtb_load_paddr</code> are the physical memory load addresses for the kernel and device tree binaries.</li>
-<li><code>entry_point</code> specifies the entry point address of the kernel.</li>
+<li><code>cpus</code> is a list that indicates the CPU core IDs allocated to the zone.</li>
+<li><code>memory_regions</code> describe different types of memory regions and their physical and virtual start addresses and sizes.</li>
+<li><code>interrupts</code> list the interrupt numbers allocated to the zone.</li>
+<li><code>kernel_filepath</code> and <code>dtb_filepath</code> indicate the paths of the kernel and device tree binary files, respectively.</li>
+<li><code>kernel_load_paddr</code> and <code>dtb_load_paddr</code> are the physical memory load addresses for the kernel and device tree binary.</li>
+<li><code>entry_point</code> specifies the kernel's entry point address.</li>
 </ul>
-<p>The management tool of root Linux is responsible for reading the JSON configuration file and converting it into a C-style structure, which is then passed to hvisor to start non-root zones.</p>
+<p>The management tool of root Linux is responsible for reading the JSON configuration file and converting it into a C-style structure, which is then passed to hvisor to start the non-root zones.</p>
 
                     </main>
 

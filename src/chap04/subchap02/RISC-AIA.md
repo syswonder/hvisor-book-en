@@ -1,13 +1,13 @@
 # Overall Structure
-AIA mainly includes two parts, the Interrupt Message Service Controller (IMSIC) and the Advanced Platform-Level Interrupt Controller (APLIC), with the overall structure shown in the figure below.
+AIA mainly includes two parts, the Interrupt Message Controller IMSIC and the Advanced Platform Level Interrupt Controller APLIC, with the overall structure shown in the diagram below.
 
 <img src="../img/riscv_aia_struct.jpg"  style="zoom: 50%;" />
 
-Peripherals can choose to send message interrupts or send wired interrupts via line connections.
+Peripherals can choose to send message interrupts or send wired interrupts via a connected line.
 
-If peripheral A supports MSI, it only needs to write the specified data to the interrupt file of the designated hart, and then IMSIC will deliver an interrupt to the target processor.
+If peripheral A supports MSI, it only needs to write the specified data into the interrupt file of the designated hart, after which IMSIC will deliver an interrupt to the target processor.
 
-For all devices, they can connect to APLIC via an interrupt line, and APLIC will choose the interrupt delivery mode according to the configuration:
+For all devices, they can connect to APLIC via an interrupt line, and APLIC will choose the interrupt delivery mode based on the configuration:
 * Wired interrupt
 * MSI
 
@@ -15,16 +15,16 @@ In hvisor, the interrupt delivery mode is MSI.
 
 After enabling the AIA specification with `IRQ=aia` in hvisor, the handling of clock interrupts remains consistent, while the handling of software interrupts and external interrupts changes.
 
-# External Interrupt
+# External Interrupts
 ## IMSIC
 
-In hvisor, a physical CPU corresponds to a virtual CPU, and they both have their own interrupt files.
+In hvisor, a physical CPU corresponds to a virtual CPU, each having their own interrupt file.
 
 <img src="../img/riscv_aia_intfile.png"  style="zoom: 80%;" />
 
-Writing to an interrupt file can trigger an external interrupt of the specified privilege level for the specified hart.
+Writing to an interrupt file can trigger an external interrupt for a specified hart at a specified privilege level.
 
-Provide a two-stage address mapping table for IMSIC:
+Provide a two-stage address mapping table for IMSIC.
 ```rs
         let paddr = 0x2800_0000 as HostPhysAddr;
         let size = PAGE_SIZE;
@@ -41,11 +41,11 @@ Provide a two-stage address mapping table for IMSIC:
 ### Structure
 There is only one global APLIC.
 
-When a wired interrupt arrives, it first reaches the root interrupt domain in machine mode (OpenSBI), and then the interrupt is routed to the sub-interrupt domain (hvisor). Hvisor sends the interrupt signal to the virtual machine's corresponding CPU in MSI mode according to the target registers configured in APLIC.
+When a wired interrupt arrives, it first reaches the root interrupt domain in machine mode (OpenSBI), then the interrupt is routed to the sub-interrupt domain (hvisor), and hvisor sends the interrupt signal to the corresponding CPU of the virtual machine in MSI mode according to the target registers configured by APLIC.
 
 <img src="../img/riscv_aia_aplicdomain.png"  style="zoom: 70%;" />
 
-The APLIC specification manual specifies the byte offsets for various fields of APLIC. Define the APLIC structure as follows, and implement reading and writing of APLIC fields through the following methods:
+The AIA specification manual specifies the byte offsets for various fields of APLIC. Define the APLIC structure as follows, and implement read and write operations for APLIC fields using the following methods:
 ```rs
 #[repr(C)]
 pub struct Aplic {
@@ -76,7 +76,7 @@ impl Aplic {
 ```
 
 ### Initialization
-Initialize APLIC based on the base address and size in the device tree:
+Initialize APLIC based on the base address and size in the device tree.
 ```rs
 pub fn primary_init_early(host_fdt: &Fdt) {
     let aplic_info = host_fdt.find_node("/soc/aplic").unwrap();
@@ -94,9 +94,9 @@ pub fn host_aplic<'a>() -> &'a RwLock<Aplic> {
     APLIC.get().expect("Uninitialized hypervisor aplic!")
 }
 ```
-Since there is only one global APLIC, locking is used to avoid read-write conflicts, and the host_aplic() method is used for access.
+There is only one global APLIC, so locking is used to avoid read-write conflicts, and the host_aplic() method is used for access.
 
-When the virtual machine starts, the address space accessing APLIC is initialized, which is unmapped. Therefore, a page fault is triggered, falling into hvisor for handling:
+When the virtual machine starts, the address space of APLIC is initialized, which is unmapped. This triggers a page fault, trapping into hvisor for handling.
 ```rs
 pub fn guest_page_fault_handler(current_cpu: &mut ArchCpu) {
     ...
@@ -138,13 +138,13 @@ pub fn vaplic_emul_handler(
 }
 ```
 ## Interrupt Process
-After hvisor completes the simulation of APLIC initialization through a page fault, it enters the virtual machine. Taking the interrupt generated by a keyboard press as an example: the interrupt signal first arrives at OpenSBI, then is routed to hvisor, and according to the configuration of the target register, it writes to the virtual interrupt file to trigger the external interrupt of the virtual machine.
+After hvisor completes the simulation of APLIC initialization for the virtual machine through a page fault, it enters the virtual machine. Taking the interrupt generated by a keyboard press as an example: the interrupt signal first arrives at OpenSBI, then is routed to hvisor, and based on the configuration of the target register, it writes to the virtual interrupt file to trigger an external interrupt in the virtual machine.
 
-# Software Interrupt
-After enabling the AIA specification, the Linux kernel of the virtual machine sends IPIs via MSI mode, eliminating the need to use the ecall instruction to fall into hvisor.
+# Software Interrupts
+After enabling the AIA specification, the Linux kernel of the virtual machine sends IPIs through MSI, eliminating the need to trap into hvisor using the ecall instruction.
 
 <img src="../img/riscv_aia_ipi.jpg"  style="zoom:40%;" />
 
-As shown in the figure, in hvisor, writing to the specified hart's interrupt file can trigger an IPI.
+As shown in the diagram, in hvisor, writing to the interrupt file of a specified hart can trigger an IPI.
 
-In the virtual machine, writing to the specified virtual interrupt file can implement IPIs within the virtual machine without the need for hvisor's simulation support.
+In the virtual machine, writing to a specified virtual interrupt file can achieve IPIs within the virtual machine, without the need for simulation support from hvisor.

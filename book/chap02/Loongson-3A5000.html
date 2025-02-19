@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Quick Start with Loongson 3A5000 hvisor - hvisor Manual</title>
+        <title>Loongson 3A5000 hvisor Quick Start - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -155,42 +155,42 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="booting-hvisor-on-loongson-3a5000-motherboard-7a2000"><a class="header" href="#booting-hvisor-on-loongson-3a5000-motherboard-7a2000">Booting hvisor on Loongson 3A5000 Motherboard (7A2000)</a></h1>
+                        <h1 id="starting-hvisor-on-loongson-3a5000-motherboard-7a2000"><a class="header" href="#starting-hvisor-on-loongson-3a5000-motherboard-7a2000">Starting hvisor on Loongson 3A5000 motherboard (7A2000)</a></h1>
 <p>Han Yulu <a href="mailto:enkerewpo@hotmail.com">enkerewpo@hotmail.com</a></p>
-<p>Updated: December 4, 2024</p>
-<h2 id="step-1-obtain-and-compile-the-hvisor-source-code"><a class="header" href="#step-1-obtain-and-compile-the-hvisor-source-code">Step 1: Obtain and compile the hvisor source code</a></h2>
+<p>Updated: 2024.12.4</p>
+<h2 id="step-1-obtain-hvisor-source-code-and-compile"><a class="header" href="#step-1-obtain-hvisor-source-code-and-compile">Step 1: Obtain hvisor source code and compile</a></h2>
 <p>Clone the code locally:</p>
 <pre><code class="language-bash">git clone -b dev-loongarch https://github.com/syswonder/hvisor # dev-loongarch branch
 make ARCH=loongarch64
 </code></pre>
-<p>After compilation, you can find the stripped hvisor.bin in the target directory (the file path will be displayed in the last line of the compilation output).</p>
-<h2 id="obtain-the-vmlinuxbin-image"><a class="header" href="#obtain-the-vmlinuxbin-image">Obtain the vmlinux.bin image</a></h2>
-<p>Please download the latest released hvisor default Loongson Linux image from <a href="https://github.com/enkerewpo/linux-hvisor-loongarch64/releases">https://github.com/enkerewpo/linux-hvisor-loongarch64/releases</a> (including root Linux kernel + root Linux dtb + root Linux rootfs, where root Linux rootfs includes non-root Linux + non-root Linux dtb + non-root Linux rootfs). If you need to compile the Linux kernel and rootfs yourself, refer to the <code>arch/loongarch</code> directory in the repository for hvisor-related device trees and the buildroot environment I ported for 3A5000 (<a href="https://github.com/enkerewpo/buildroot-loongarch64">https://github.com/enkerewpo/buildroot-loongarch64</a>). If you need to manually compile hvisor-tool, refer to <a href="https://github.com/enkerewpo/hvisor-tool">https://github.com/enkerewpo/hvisor-tool</a>. For the compilation order and script invocation process of all environments, refer to the code inside the <code>world</code> target in the <code>Makefile.1</code> file (<a href="https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1">https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1</a>), and compile everything by running the <code>./make_world</code> script. If you need to manually compile these, you need to modify the corresponding code path variables in Makefile.1, including:</p>
+<p>After compiling, you can find the stripped hvisor.bin in the target directory (the file path will be displayed in the last line of the compilation output).</p>
+<h2 id="obtain-vmlinuxbin-image"><a class="header" href="#obtain-vmlinuxbin-image">Obtain vmlinux.bin image</a></h2>
+<p>Please download the latest released hvisor default Loongson Linux image from <a href="https://github.com/enkerewpo/linux-hvisor-loongarch64/releases">https://github.com/enkerewpo/linux-hvisor-loongarch64/releases</a> (including root linux kernel + root linux dtb + root linux rootfs, where root linux rootfs includes non-root linux + nonroot linux dtb + nonroot linux rootfs). If you need to compile the Linux kernel and rootfs yourself, refer to the <code>arch/loongarch</code> directory in the repository for hvisor-related device trees and the buildroot environment I ported for 3A5000 (<a href="https://github.com/enkerewpo/buildroot-loongarch64">https://github.com/enkerewpo/buildroot-loongarch64</a>). If you need to manually compile hvisor-tool, please refer to <a href="https://github.com/enkerewpo/hvisor-tool">https://github.com/enkerewpo/hvisor-tool</a>, for the compilation order and script invocation process of all environments, refer to the code within the <code>world</code> target in the <code>Makefile.1</code> file (<a href="https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1">https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1</a>), and compile everything by running the <code>./make_world</code> script. If you need to manually compile these, you need to modify the corresponding code path variables in Makefile.1, including:</p>
 <pre><code>HVISOR_LA64_LINUX_DIR = ../hvisor-la64-linux
 BUILDROOT_DIR = ../buildroot-loongarch64
 HVISOR_TOOL_DIR = ../hvisor-tool
 </code></pre>
-<p>Then run <code>./make_world</code>. Please note that the first compilation of Linux and buildroot may take a long time (possibly up to several tens of minutes, depending on your machine performance).</p>
+<p>Then run <code>./make_world</code>, please note that the first time compiling Linux and buildroot may take quite a long time (possibly up to several tens of minutes, depending on your machine performance).</p>
 <h2 id="obtain-hvisor-uefi-image-packer"><a class="header" href="#obtain-hvisor-uefi-image-packer">Obtain hvisor UEFI Image Packer</a></h2>
-<p>Since the 3A5000 and subsequent Series 3 CPUs' motherboards use UEFI boot, hvisor can only be booted via an EFI image method. Clone the repository <a href="https://github.com/enkerewpo/hvisor_uefi_packer">https://github.com/enkerewpo/hvisor_uefi_packer</a> locally:</p>
+<p>Since the 3A5000 and subsequent 3 series CPUs' motherboards all use UEFI boot, hvisor can only be started through the efi image method, clone the repository <a href="https://github.com/enkerewpo/hvisor_uefi_packer">https://github.com/enkerewpo/hvisor_uefi_packer</a> locally:</p>
 <pre><code class="language-bash">make menuconfig # Configure for your local loongarch64 gcc toolchain prefix, hvisor.bin path, vmlinux.bin path
-# Modify make_image's HVISOR_SRC_DIR=../hvisor to your actual hvisor source code path, then run the script
+# Modify make_image in HVISOR_SRC_DIR=../hvisor to your actual saved hvisor source code path, then run the script
 ./make_image
-# You will get the BOOTLOONGARCH64.EFI file
+# Get BOOTLOONGARCH64.EFI file
 </code></pre>
-<p>The obtained <code>BOOTLOONGARCH64.EFI</code> must be placed in the first FAT32 partition of the USB drive at <code>/EFI/BOOT/BOOTLOONGARCH64.EFI</code>. Then insert the USB drive to boot and enter hvisor, which will automatically start root Linux.</p>
-<p>Since the metadata related to root Linux (loading address, memory area, etc.) is hardcoded in the hvisor source code (<code>src/platform/ls3a5000_loongarch64.rs</code>), if you are manually compiling the Linux kernel, you need to modify the configuration here and recompile hvisor.</p>
-<h2 id="board-boot"><a class="header" href="#board-boot">Board Boot</a></h2>
-<p>Power on the motherboard, press <strong>F12</strong> to enter the UEFI Boot Menu, select your inserted USB drive and press Enter. It will automatically boot hvisor and enter the root Linux bash environment.</p>
+<p>The obtained <code>BOOTLOONGARCH64.EFI</code> must be placed in the <code>/EFI/BOOT/BOOTLOONGARCH64.EFI</code> position of the first FAT32 partition of the USB drive. Then insert the USB drive to boot into hvisor and automatically start root linux.</p>
+<p>Since the metadata related to root linux (loading address, memory area, etc.) is hard-coded in the hvisor source code (<code>src/platform/ls3a5000_loongarch64.rs</code>), if you are manually compiling the Linux kernel, you need to modify the configuration here and recompile hvisor.</p>
+<h2 id="board-boot"><a class="header" href="#board-boot">Board boot</a></h2>
+<p>Power on the motherboard, press <strong>F12</strong> to enter the UEFI Boot Menu, select the inserted USB drive and press Enter, hvisor will automatically start and enter the root linux bash environment.</p>
 <h2 id="start-nonroot"><a class="header" href="#start-nonroot">Start nonroot</a></h2>
-<p>If you are using the related images provided in the release, after booting, enter in the root Linux bash:</p>
+<p>If you are using the related images provided in the release, after starting, enter in the root linux bash:</p>
 <pre><code class="language-bash">./daemon.sh
 ./linux2_virtio.sh
 </code></pre>
-<p>This will automatically start nonroot (some related configuration files are located in the root Linux <code>/tool</code> directory, including the nonroot zone configuration JSON and virtio configuration JSON files provided to hvisor-tool). Afterwards, a screen process will open connecting to nonroot Linux's virtio-console, displaying a bash with "nonroot" printed. You can use the CTRL+A D shortcut key to detach (remember the displayed screen session name) during screen use. To return to nonroot Linux, run:</p>
-<pre><code class="language-bash">screen -r {the full name of the session just now or just enter the first few numbers}
+<p>Afterward, nonroot will automatically start (some related configuration files are located in the root linux <code>/tool</code> directory, including the nonroot zone configuration json and virtio configuration json files provided to hvisor-tool), then a screen process connected to nonroot linux's virtio-console will automatically open, and you will see a bash printed with the nonroot label appear, you can use the CTRL+A D shortcut key to detach during screen (please remember the displayed screen session name), at this point you will return to root linux, if you want to return to nonroot linux, run</p>
+<pre><code class="language-bash">screen -r {the full name of the session just now or just enter the first few digits}
 </code></pre>
-<p>This will return you to the nonroot Linux bash.</p>
+<p>Afterward, you will return to the nonroot linux bash.</p>
 
                     </main>
 

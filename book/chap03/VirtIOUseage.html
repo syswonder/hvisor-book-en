@@ -155,22 +155,22 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="use-of-virtio-devices"><a class="header" href="#use-of-virtio-devices">Use of VirtIO Devices</a></h1>
-<p>Currently, hvisor supports three types of Virtio devices: Virtio block, Virtio net, and Virtio Console, presented to virtual machines other than Root Linux via MMIO. The Virtio device source repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, compiled and used together with the command line tool. After creating Virtio devices through the command line tool, the Virtio device will become a daemon on Root Linux, and its log information will be output to the nohup.out file.</p>
+                        <h1 id="using-virtio-devices"><a class="header" href="#using-virtio-devices">Using VirtIO Devices</a></h1>
+<p>Currently, hvisor supports three types of Virtio devices: Virtio block, Virtio net, and Virtio Console, which are presented to virtual machines other than Root Linux via MMIO. The Virtio device source code repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, compiled and used together with the command-line tool. After creating a Virtio device through the command-line tool, the Virtio device becomes a daemon on Root Linux, and its log information is output to the nohup.out file.</p>
 <h2 id="creating-and-starting-virtio-devices"><a class="header" href="#creating-and-starting-virtio-devices">Creating and Starting Virtio Devices</a></h2>
-<p>Before creating Virtio devices through the command line, execute <code>insmod hvisor.ko</code> to load the kernel module.</p>
+<p>Before creating a Virtio device through the command line, execute <code>insmod hvisor.ko</code> to load the kernel module.</p>
 <h3 id="virtio-blk-device"><a class="header" href="#virtio-blk-device">Virtio blk Device</a></h3>
 <p>Execute the following example command on the Root Linux console to create a Virtio blk device:</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 &amp;
 </code></pre>
-<p>Here <code>--device blk</code> indicates creating a Virtio disk device for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>, and the corresponding disk image path is <code>img</code>.</p>
+<p><code>--device blk</code> indicates creating a Virtio disk device for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>, and corresponding disk image path <code>img</code>.</p>
 <blockquote>
 <p>Virtual machines using Virtio devices need to add information about the Virtio mmio node in the device tree.</p>
 </blockquote>
 <h3 id="virtio-net-device"><a class="header" href="#virtio-net-device">Virtio net Device</a></h3>
 <h4 id="creating-network-topology"><a class="header" href="#creating-network-topology">Creating Network Topology</a></h4>
-<p>Before using the Virtio net device, a network topology needs to be created in root Linux so that the Virtio net device can connect to the real network card through the Tap device and bridge device. Execute the following commands in root Linux:</p>
+<p>Before using a Virtio net device, a network topology needs to be created in Root Linux to connect the Virtio net device with the real network card through a Tap device and bridge device. Execute the following commands in Root Linux:</p>
 <pre><code class="language-shell">mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 ip link set eth0 up
@@ -183,25 +183,25 @@ ip tuntap add dev tap0 mode tap
 brctl addif br0 tap0
 ip link set dev tap0 up
 </code></pre>
-<p>This will create a network topology of <code>tap0 device&lt;--&gt;bridge device&lt;--&gt;real network card</code>.</p>
+<p>This creates a <code>tap0 device&lt;--&gt;bridge device&lt;--&gt;real network card</code> network topology.</p>
 <h4 id="starting-virtio-net"><a class="header" href="#starting-virtio-net">Starting Virtio net</a></h4>
 <p>Execute the following example command on the Root Linux console to create a Virtio net device:</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 &amp;
 </code></pre>
-<p><code>--device net</code> indicates creating a Virtio network device for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>, and it connects to the Tap device named <code>tap</code>.</p>
-<h3 id="virtio-console-device"><a class="header" href="#virtio-console-device">Virtio console Device</a></h3>
+<p><code>--device net</code> indicates creating a Virtio network device for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>, and connected to a Tap device named <code>tap</code>.</p>
+<h3 id="virtio-console-device"><a class="header" href="#virtio-console-device">Virtio Console Device</a></h3>
 <p>Execute the following example command on the Root Linux console to create a Virtio console device:</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &amp;
 </code></pre>
-<p><code>--device console</code> indicates creating a Virtio console for use by the virtual machine with id <code>zone_id</code>. This virtual machine will interact with the device through an MMIO region, which starts at <code>addr</code>, with a length of <code>len</code>, the device interrupt number is <code>irq</code>.</p>
-<p>Execute <code>cat nohup.out | grep "char device"</code>, and you will observe the output <code>char device redirected to /dev/pts/xx</code>. Execute on Root Linux:</p>
+<p><code>--device console</code> indicates creating a Virtio console for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>.</p>
+<p>Execute <code>cat nohup.out | grep "char device"</code>, and you will see the output <code>char device redirected to /dev/pts/xx</code>. On Root Linux, execute:</p>
 <pre><code>screen /dev/pts/xx
 </code></pre>
-<p>This will enter the virtual console and interact with the virtual machine. Press the shortcut key <code>Ctrl +a d</code> to return to the Root Linux terminal. Execute <code>screen -r [session_id]</code> to re-enter the virtual console.</p>
+<p>to enter the virtual console and interact with the virtual machine. Press the shortcut key <code>Ctrl +a d</code> to return to the Root Linux terminal. Execute <code>screen -r [session_id]</code> to re-enter the virtual console.</p>
 <h3 id="creating-multiple-virtio-devices"><a class="header" href="#creating-multiple-virtio-devices">Creating Multiple Virtio Devices</a></h3>
-<p>Execute the following command to create Virtio blk, net, and console devices simultaneously, all devices are within one daemon process.</p>
+<p>Execute the following command to simultaneously create Virtio blk, net, and console devices, all within one daemon process.</p>
 <pre><code class="language-shell">nohup ./hvisor virtio start \
 	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 \
 	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 \
