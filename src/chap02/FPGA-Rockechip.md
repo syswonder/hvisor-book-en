@@ -1,6 +1,6 @@
 # FPGA zcu102
 
-Author: 杨竣轶(Jerry) github.com/comet959
+Author: 杨竣轶 (Jerry) github.com/comet959
 
 ```shell
 # Before, Install vivado 2022.2 software
@@ -37,7 +37,7 @@ cd uintr-rocket-chip
 
 
 
-## Enabling H Extension in RocketChip
+## Enable H extension in RocketChip
 
 ```shell
 vim path/to/repo/common/src/main/scala/Configs.scala

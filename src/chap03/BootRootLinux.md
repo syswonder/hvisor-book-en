@@ -22,7 +22,7 @@ tar -xvf qemu-${QEMU_VERSION}.tar.xz
 
 #### 2. Conditionally Compile and Install QEMU
 
-Here we only compile QEMU for simulating aarch64. If you need QEMU for other architectures, you can refer to [QEMU Official Documentation](https://wiki.qemu.org/Hosts/Linux).
+Here we only compile QEMU for emulating aarch64, if you need QEMU for other architectures, refer to [QEMU Official Documentation](https://wiki.qemu.org/Hosts/Linux).
 ```bash
 cd qemu-7.0.0 && \
 ./configure --target-list=aarch64-softmmu,aarch64-linux-user && \
@@ -52,4 +52,4 @@ make run
 
 #### 3. Enter QEMU
 
-It will automatically load uboot. After uboot loading is complete, enter ```bootm 0x40400000 - 0x40000000``` to enter Root Linux.
+It will automatically load uboot, wait for uboot to finish loading, then enter ```bootm 0x40400000 - 0x40000000``` to enter Root Linux.

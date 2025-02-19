@@ -1,8 +1,8 @@
-# Install QEMU
+# Install qemu
 Install QEMU 7.2.12:
 ```
 wget https://download.qemu.org/qemu-7.2.12.tar.xz
-# Extract
+# Unzip
 tar xvJf qemu-7.2.12.tar.xz
 cd qemu-7.2.12
 # Configure Riscv support
@@ -10,7 +10,7 @@ cd qemu-7.2.12
 make -j$(nproc)
 # Add to environment variable
 export PATH=$PATH:/path/to/qemu-7.2.12/build
-# Test if the installation is successful
+# Test if installation is successful
 qemu-system-riscv64 --version
 ```
 # Install Cross Compiler
@@ -23,7 +23,7 @@ git clone https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
 git rm qemu 
 git submodule update --init --recursive
-# The above operation will occupy more than 5GB of disk space
+# The above operations will occupy more than 5GB of disk space
 # If git reports a network error, you can execute:
 git config --global http.postbuffer 524288000
 ```
@@ -38,7 +38,7 @@ sudo make linux -j $(nproc)
 echo 'export PATH=/opt/riscv64/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 ```
-This gives you the riscv64-unknown-linux-gnu toolchain.
+This will get the riscv64-unknown-linux-gnu toolchain.
 # Compile Linux
 ```
 git clone https://github.com/torvalds/linux -b v6.2 --depth=1
@@ -46,7 +46,7 @@ cd linux
 git checkout v6.2
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- defconfig
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- modules -j$(nproc)
-# Start compiling
+# Start compilation
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- Image -j$(nproc)
 
 ```
@@ -79,9 +79,9 @@ sudo umount rootfs/dev
 sudo umount rootfs
 ```
 # Run hvisor
-Place the prepared root file system and Linux kernel image in the specified location in the hvisor directory, and execute `make run ARCH=riscv64` in the root directory of hvisor
+Place the prepared root file system and Linux kernel image in the specified location under the hvisor directory, and execute `make run ARCH=riscv64` in the root directory of hvisor
 
-By default, it uses PLIC, execute `make run ARCH=riscv64 IRQ=aia` to enable AIA specification
+By default, PLIC is used, execute `make run ARCH=riscv64 IRQ=aia` to enable AIA specification
 
 # Possible Issues
-After running Linux, the display shows `/bin/sh: 0: can't access tty; job control turned off`, enter `bash` in the console
+After running Linux, the display shows `/bin/sh: 0: can't access tty; job control turned off`, type `bash` in the console.

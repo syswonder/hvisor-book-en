@@ -4,48 +4,47 @@
 
 # About hvisor
 
-- [Overview of hvisor](./chap01/Overview.md)
+- [hvisor Overview](./chap01/Overview.md)
 
-- [Instruction sets and processors supported by hvisor](./chap01/ISA.md)
+- [Instruction Sets and Processors Supported by hvisor](./chap01/ISA.md)
 
-- [Hardware platforms supported by hvisor](./chap01/Board.md)
+- [Hardware Platforms Supported by hvisor](./chap01/Board.md)
 
 # hvisor Quick Start Guide
 
-- [Quick Start with Qemu AArch64](./chap02/QemuAArch64.md)
+- [Qemu AArch64 Quick Start](./chap02/QemuAArch64.md)
 
-- [Quick Start with Qemu RISC-V](./chap02/QemuRISC-V.md)
+- [Qemu RISC-V Quick Start](./chap02/QemuRISC-V.md)
 
-- [Quick Start with NXP i.MX 8](./chap02/NXPIMX8.md)
+- [NXP i.MX 8 Quick Start](./chap02/NXPIMX8.md)
 
-- [Quick Start with FPGA-Rockechip](./chap02/FPGA-Rockechip.md)
+- [FPGA-Rockechip Quick Start](./chap02/FPGA-Rockechip.md)
 
-- [Quick Start with Loongson 3A5000 hvisor](./chap02/Loongson-3A5000.md)
+- [Loongson 3A5000 hvisor Quick Start](./chap02/Loongson-3A5000.md)
 
-- [Quick Start with Xilinx ZCU102 hvisor](./chap02/subchap01/Xilinx-ZCU102.md)
+- [Xilinx ZCU102 hvisor Quick Start](./chap02/subchap01/Xilinx-ZCU102.md)
 
-	- [Starting hvisor on Qemu ZCU102](./chap02/subchap01/Qemu-ZCU102.md)
+	- [Qemu ZCU102 hvisor Boot](./chap02/subchap01/Qemu-ZCU102.md)
 	
-	- [Multi-mode booting on Board ZCU102 hvisor](./chap02/subchap01/Board-ZCU102.md)
+	- [Board ZCU102 hvisor Multi-mode Boot](./chap02/subchap01/Board-ZCU102.md)
 	
-	- [Nonroot boot on ZCU102](./chap02/subchap01/Nonroot-ZCU102.md)
+	- [ZCU102 Nonroot Boot](./chap02/subchap01/Nonroot-ZCU102.md)
 	
-    - [UBOOT FIT image creation, loading, and booting](./chap02/subchap01/UbootFitImage-ZCU102.md)
+    - [UBOOT FIT Image Creation, Loading and Booting](./chap02/subchap01/UbootFitImage-ZCU102.md)
 
-- [Quick Start with FPGA Xiangshan Kunming Lake]()
-
+- [FPGA Xiangshan Kunming Lake Quick Start]()
 
 # hvisor User Manual
 
 - [How to Compile](./chap03/Compile.md)
 
-- [Boot Management for Linux VM](./chap03/BootRootLinux.md)
+- [Boot Management Linux VM](./chap03/BootRootLinux.md)
 
-- [Booting two VMs: Linux1 and Linux2](./chap03/BootNonRootLinux.md)
+- [Boot Two VMs: Linux1 and Linux2](./chap03/BootNonRootLinux.md)
 
-- [Booting two VMs: Linux and RTOS](./chap03/BootNonRootRTOS.md)
+- [Boot Two VMs: Linux and RTOS](./chap03/BootNonRootRTOS.md)
 
-- [Configuration and Management of ZONE](./chap03/ZoneConfig.md)
+- [ZONE Configuration and Management](./chap03/ZoneConfig.md)
 
 - [Command Line Tools](./chap03/CMDTools.md)
 
@@ -53,8 +52,8 @@
 
 # hvisor Architecture and Implementation
 
-- [Architecture of hvisor](./chap04/Structure.md)
-- [Boot and Operation of hvisor](./chap04/BootAndRun.md)
+- [hvisor Architecture](./chap04/Structure.md)
+- [hvisor Boot and Operation](./chap04/BootAndRun.md)
 - [CPU Virtualization](./chap04/subchap01/CPUVirtualization.md)
 
     - [PerCPU Definition](./chap04/subchap01/PerCPU.md)
@@ -78,9 +77,9 @@
 
     - [IOMMU](./chap04/subchap03/IOMMU/IOMMU-Define.md)
 
-        - [Implementation of ARM SMMU](./chap04/subchap03/IOMMU/ARM-SMMU.md)
+        - [ARM SMMU Implementation](./chap04/subchap03/IOMMU/ARM-SMMU.md)
 
-        - [Implementation of RISC-V IOMMU Standard](./chap04/subchap03/IOMMU/RISC-IOMMU.md)
+        - [RISC-V IOMMU Standard Implementation](./chap04/subchap03/IOMMU/RISC-IOMMU.md)
 - [VirtIO](./chap04/subchap03/VirtIO/VirtIO-Define.md)
     
     - [Block](./chap04/subchap03/VirtIO/BlockDevice.md)
@@ -88,10 +87,10 @@
     - [Console](./chap04/subchap03/VirtIO/ConsoleDevice.md)
     - [GPU]()
 - [PCI Virtualization](./chap04/subchap03/PCI-Virtualization.md)
-- [hvisor Management Tools](./chap04/subchap04/ManageTools.md)
+- [Hvisor Management Tools](./chap04/subchap04/ManageTools.md)
   
     - [Hypercall](./chap04/subchap04/HyperCall.md)
 
-# hvisor's Planning
+# hvisor's Plan
 
 - [TODO]()

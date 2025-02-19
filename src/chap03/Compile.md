@@ -1,21 +1,21 @@
 # How to Compile
 
-## Compiling with Docker
+## Compile using Docker
 ### 1. Install Docker
 ```bash
 sudo snap install docker
 ```
-You can also refer to the [Docker official documentation](https://docs.docker.com/install/) to install Docker.
+You can also refer to the [Docker Official Documentation](https://docs.docker.com/install/) to install Docker.
 
-### 2. Build the image
+### 2. Build the Image
 
 ```bash
 make build_docker
 ```
 
-This step builds a Docker image, automatically creating all the dependencies required for compilation.
+This step builds a Docker image, automatically compiling all required dependencies.
 
-### 3. Run the container
+### 3. Run the Container
 
 ```bash
 make docker
@@ -29,7 +29,7 @@ Execute the following command in the container to compile.
 make all
 ```
 
-## Compiling with Local Environment
+## Compile using the local environment
 
 ### 1. Install RustUp and Cargo
 
@@ -38,9 +38,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
 ```
 
-### 2. Install the toolchain
+### 2. Install the Toolchain
 
-The toolchain currently used by the project is as follows:
+The toolchain currently used by the project includes:
 
  - Rust nightly 2023-07-12
  - [rustfmt](https://crates.io/crates/rustfmt)
@@ -50,7 +50,7 @@ The toolchain currently used by the project is as follows:
  - llvm-tools-preview
  - target: aarch64-unknown-none
 
-You can check if these tools are installed on your own, or use the following commands to install:
+You can check if these tools are installed yourself, or use the following commands to install them:
 
 #### (1) Install toml-cli and cargo-binutils
 
@@ -58,7 +58,7 @@ You can check if these tools are installed on your own, or use the following com
 cargo install toml-cli cargo-binutils
 ```
 
-#### (2) Install the target platform cross-compilation toolchain
+#### (2) Install the cross-compilation toolchain for the target platform
 
 ```bash
 rustup target add aarch64-unknown-none

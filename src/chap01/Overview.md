@@ -1,17 +1,13 @@
-<div align=center>
-	<img src="img/hvisor-logo.svg"/>
-</div>
+Welcome to hvisor!
 
-# Welcome to hvisor!
-
-[hvisor](https://github.com/syswonder/hvisor) is a lightweight Type-1 hypervisor written in Rust, offering efficient resource management and low-overhead virtualization performance.
+[hvisor](https://github.com/syswonder/hvisor) is a lightweight Type-1 virtual machine monitor written in Rust, offering efficient resource management and low-overhead virtualization performance.
 
 Features
 1. **Cross-platform support**: Supports multiple architectures including AARCH64, RISC-V, and LoongArch.
-2. **Lightweight**: Focuses on core virtualization functionalities, avoiding unnecessary complexity found in traditional virtualization solutions, suitable for resource-constrained environments.
-3. **Efficient**: Runs directly on hardware without the need for an operating system layer, providing near-native performance.
+2. **Lightweight**: Focuses on core virtualization features, avoiding unnecessary complexity found in traditional virtualization solutions, suitable for resource-constrained environments.
+3. **Efficient**: Runs directly on hardware without going through an OS layer, providing near-native performance.
 4. **Security**: Rust is known for its memory safety and concurrent programming model, helping to reduce common system-level programming errors such as memory leaks and data races.
-5. **Fast startup**: Designed with simplicity in mind, it has a short startup time, suitable for scenarios requiring rapid deployment of virtualization.
+5. **Fast startup**: Designed to be simple with a short startup time, suitable for scenarios that require rapid deployment of virtualization.
 
 Main Functions
 
