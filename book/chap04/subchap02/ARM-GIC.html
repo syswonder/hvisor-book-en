@@ -163,35 +163,35 @@
 <li>SDEI version check: Obtain the version information of the Secure Debug Extensions Interface (SDEI) through smc_arg1!(0xc4000020).</li>
 <li>ICCs configuration: Set icc_ctlr_el1 to only provide priority drop functionality, set icc_pmr_el1 to define the interrupt priority mask, and enable Group 1 IRQs.</li>
 <li>Clear pending interrupts: Call the gicv3_clear_pending_irqs function to clear all pending interrupts, ensuring the system is in a clean state.</li>
-<li>VMCR and HCR configuration: Set ich_vmcr_el2 and ich_hcr_el2 registers to enable the virtualized CPU interface, preparing for virtual interrupt handling.</li>
+<li>VMCR and HCR configuration: Set ich_vmcr_el2 and ich_hcr_el2 registers to enable the virtualization CPU interface and prepare for virtual interrupt handling.</li>
 </ul>
-<h3 id="handling-pending-interrupts"><a class="header" href="#handling-pending-interrupts">Handling Pending Interrupts</a></h3>
+<h3 id="pending-interrupt-handling"><a class="header" href="#pending-interrupt-handling">Pending Interrupt Handling</a></h3>
 <ul>
-<li>The <code>pending_irq</code> function reads the <code>icc_iar1_el1</code> register, returning the ID of the current interrupt being processed. If the value is greater than or equal to 0x3fe, it is considered an invalid interrupt.</li>
-<li>The <code>deactivate_irq</code> function clears the interrupt flag by writing to the <code>icc_eoir1_el1</code> and <code>icc_dir_el1</code> registers, enabling the interrupt.</li>
+<li>The <code>pending_irq</code> function reads the <code>icc_iar1_el1</code> register and returns the current interrupt ID being processed. If the value is greater than or equal to 0x3fe, it is considered an invalid interrupt.</li>
+<li>The <code>deactivate_irq</code> function clears the interrupt flags by writing to the <code>icc_eoir1_el1</code> and <code>icc_dir_el1</code> registers, enabling the interrupt.</li>
 </ul>
 <h3 id="virtual-interrupt-injection"><a class="header" href="#virtual-interrupt-injection">Virtual Interrupt Injection</a></h3>
 <ul>
-<li>The <code>inject_irq</code> function checks for an available <code>List Register (LR)</code> and writes virtual interrupt information into it. This function distinguishes between hardware interrupts and software-generated interrupts, appropriately setting fields in the LR.</li>
+<li>The <code>inject_irq</code> function checks for an available <code>List Register (LR)</code> and writes the virtual interrupt information into it. This function distinguishes between hardware interrupts and software-generated interrupts, appropriately setting fields in the LR.</li>
 </ul>
 <h3 id="gic-data-structure-initialization"><a class="header" href="#gic-data-structure-initialization">GIC Data Structure Initialization</a></h3>
 <ul>
-<li>GIC is a global Once container used for the lazy initialization of the Gic structure, which includes the base addresses and sizes of GICD and GICR.</li>
-<li>The primary_init_early and primary_init_late functions configure the GIC in the early and late initialization phases, enabling interrupts.</li>
+<li>GIC is a global Once container used for the lazy initialization of the Gic structure, which contains the base addresses and sizes of GICD and GICR.</li>
+<li>The primary_init_early and primary_init_late functions configure the GIC during the early and late initialization stages, enabling interrupts.</li>
 </ul>
 <h3 id="zone-level-initialization"><a class="header" href="#zone-level-initialization">Zone-Level Initialization</a></h3>
 <p>In the Zone structure, the <code>arch_irqchip_reset</code> method is responsible for resetting all interrupts allocated to a specific zone by directly writing to the GICD's ICENABLER and ICACTIVER registers.</p>
 <h2 id="2-vgicv3-module"><a class="header" href="#2-vgicv3-module">2. vGICv3 Module</a></h2>
 <p>hvisor's VGICv3 (Virtual Generic Interrupt Controller version 3) module provides virtualization support for GICv3 in the ARMv8-A architecture. It controls and coordinates interrupt requests between different zones (virtual machine instances) through MMIO (Memory Mapped I/O) access and interrupt bitmaps management.</p>
 <h3 id="mmio-region-registration"><a class="header" href="#mmio-region-registration">MMIO Region Registration</a></h3>
-<p>During initialization, the <code>Zone</code> structure's <code>vgicv3_mmio_init</code> method registers the MMIO regions for the GIC Distributor (GICD) and each CPU's GIC Redistributor (GICR). MMIO region registration is completed through the <code>mmio_region_register</code> function, which associates specific processor or interrupt controller addresses with corresponding handler functions <code>vgicv3_dist_handler</code> and <code>vgicv3_redist_handler</code>.</p>
+<p>During initialization, the <code>Zone</code> structure's <code>vgicv3_mmio_init</code> method registers the MMIO regions for the GIC Distributor (GICD) and each CPU's GIC Redistributor (GICR). MMIO region registration is completed through the <code>mmio_region_register</code> function, which associates specific processor or interrupt controller addresses with corresponding handling functions <code>vgicv3_dist_handler</code> and <code>vgicv3_redist_handler</code>.</p>
 <h3 id="interrupt-bitmap-initialization"><a class="header" href="#interrupt-bitmap-initialization">Interrupt Bitmap Initialization</a></h3>
-<p>The <code>Zone</code> structure's <code>irq_bitmap_init</code> method initializes the interrupt bitmap to track which interrupts belong to the current <code>zone</code>. By iterating through the provided list of interrupts, each interrupt is inserted into the bitmap. The <code>insert_irq_to_bitmap</code> function is responsible for mapping specific interrupt numbers to the appropriate positions in the bitmap.</p>
-<h3 id="mmio-access-restrictions"><a class="header" href="#mmio-access-restrictions">MMIO Access Restrictions</a></h3>
-<p>The <code>restrict_bitmask_access</code> function restricts MMIO access to the <code>GICD</code> registers, ensuring that only interrupts belonging to the current <code>zone</code> can be modified. This function checks whether the access is for the current zone's interrupts and, if so, updates the access mask to allow or restrict specific read/write operations.</p>
+<p>The <code>Zone</code> structure's <code>irq_bitmap_init</code> method initializes the interrupt bitmap to track which interrupts belong to the current <code>zone</code>. Each interrupt is inserted into the bitmap by iterating through the provided interrupt list. The <code>insert_irq_to_bitmap</code> function is responsible for mapping specific interrupt numbers to the appropriate positions in the bitmap.</p>
+<h3 id="mmio-access-restriction"><a class="header" href="#mmio-access-restriction">MMIO Access Restriction</a></h3>
+<p>The <code>restrict_bitmask_access</code> function restricts MMIO access to the <code>GICD</code> registers, ensuring that only interrupts belonging to the current <code>zone</code> can be modified. The function checks whether the access is for the current zone's interrupts and, if so, updates the access mask to allow or restrict specific read/write operations.</p>
 <h3 id="vgicv3-mmio-handling"><a class="header" href="#vgicv3-mmio-handling">VGICv3 MMIO Handling</a></h3>
-<p>The <code>vgicv3_redist_handler</code> and <code>vgicv3_dist_handler</code> functions handle MMIO access for GICR and GICD, respectively. The <code>vgicv3_redist_handler</code> function handles read and write operations for GICR, checking whether the access is for the current <code>zone</code>'s GICR and allowing access if so; otherwise, the access is ignored. The <code>vgicv3_dist_handler</code> function, depending on the type of GICD register, calls the <code>vgicv3_handle_irq_ops</code> or <code>restrict_bitmask_access</code> functions to appropriately handle interrupt routing and configuration register access.</p>
-<p>Through these mechanisms, hvisor effectively manages interrupts across zones, ensuring that each zone can only access and control the interrupts allocated to it, while providing necessary isolation. This allows VGICv3 to work efficiently and securely in a multi-zone environment, supporting complex virtualization scenarios.</p>
+<p>The <code>vgicv3_redist_handler</code> and <code>vgicv3_dist_handler</code> functions handle MMIO access for GICR and GICD, respectively. The <code>vgicv3_redist_handler</code> function handles read/write operations for GICR, checking whether the access is for the current <code>zone</code>'s GICR and allowing access if so; otherwise, the access is ignored. The <code>vgicv3_dist_handler</code> function calls <code>vgicv3_handle_irq_ops</code> or <code>restrict_bitmask_access</code> based on different types of GICD registers to appropriately handle interrupt routing and configuration register access.</p>
+<p>Through these mechanisms, hvisor effectively manages interrupts across zones, ensuring that each zone can only access and control the interrupt resources allocated to it while providing necessary isolation. This allows VGICv3 to work efficiently and securely in a multi-zone environment, supporting complex virtualization scenarios.</p>
 
                     </main>
 

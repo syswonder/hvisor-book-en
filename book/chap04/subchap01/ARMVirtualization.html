@@ -157,21 +157,21 @@
                     <main>
                         <h1 id="cpu-virtualization-on-aarch64"><a class="header" href="#cpu-virtualization-on-aarch64">CPU Virtualization on AArch64</a></h1>
 <h2 id="cpu-boot-mechanism"><a class="header" href="#cpu-boot-mechanism">CPU Boot Mechanism</a></h2>
-<p>Under the AArch64 architecture, hvisor uses the <code>psci::cpu_on()</code> function to wake up a specified CPU core, bringing it from an off state to a running state. This function receives the CPU's ID, boot address, and an opaque parameter as input. If an error occurs, such as the CPU already being awake, the function handles the error appropriately to avoid reawakening.</p>
+<p>Under the AArch64 architecture, hvisor uses the <code>psci::cpu_on()</code> function to wake up a specified CPU core, bringing it from a shutdown state to a running state. This function takes the CPU's ID, boot address, and an opaque parameter as input. If an error occurs, such as the CPU already being awake, the function will handle the error appropriately to avoid redundant wake-ups.</p>
 <h2 id="cpu-virtualization-initialization-and-operation"><a class="header" href="#cpu-virtualization-initialization-and-operation">CPU Virtualization Initialization and Operation</a></h2>
-<p>The <code>ArchCpu</code> structure encapsulates architecture-specific CPU information and functionality, with its <code>reset()</code> method responsible for setting the CPU to the initial state of virtualization mode. This includes:</p>
+<p>The <code>ArchCpu</code> structure encapsulates architecture-specific CPU information and functionalities, and its <code>reset()</code> method is responsible for setting the CPU to the initial state of virtualization mode. This includes:</p>
 <ul>
 <li>Setting the ELR_EL2 register to the specified entry point</li>
 <li>Configuring the SPSR_EL2 register</li>
-<li>Clearing general registers</li>
-<li>Resetting virtual machine-related registers</li>
+<li>Clearing the general registers</li>
+<li>Resetting the virtual machine-related registers</li>
 <li><code>activate_vmm()</code>, activating the Virtual Memory Manager (VMM)</li>
 </ul>
 <p>The <code>activate_vmm()</code> method is used to configure the VTCR_EL2 and HCR_EL2 registers, enabling the virtualization environment.</p>
-<p>The <code>run()</code> and <code>idle()</code> methods of <code>ArchCpu</code> are used to start and idle the CPU, respectively. When starting, it activates the zone's GPM (Guest Page Management), resets to the specified entry point and device tree binary (DTB) address, and then jumps to the EL2 entry point through the <code>vmreturn</code> macro. In idle mode, the CPU is reset to a wait state (WFI) and prepares a <code>parking</code> instruction page for use during idle periods.</p>
-<h2 id="switching-between-el1-and-el2"><a class="header" href="#switching-between-el1-and-el2">Switching between EL1 and EL2</a></h2>
-<p>hvisor uses EL2 as the hypervisor mode and EL1 for the guest OS in the AArch64 architecture. The <code>handle_vmexit</code> macro handles the context switch from EL1 to EL2 (VMEXIT event), saves the user mode register context, calls an external function to handle the exit reason, and then returns to continue executing hypervisor code. The <code>vmreturn</code> function is used to return from EL2 mode to EL1 mode (VMENTRY event), restores the user mode register context, and returns to the guest OS's code segment through the <code>eret</code> instruction.</p>
-<h2 id="mmu-configuration-and-enablement"><a class="header" href="#mmu-configuration-and-enablement">MMU Configuration and Enablement</a></h2>
+<p>The <code>ArchCpu</code>'s <code>run()</code> and <code>idle()</code> methods are used to start and idle the CPU, respectively. Upon starting, it activates the zone's GPM (Guest Page Management), resets to the specified entry point and device tree binary (DTB) address, and then jumps to the EL2 entry point through the <code>vmreturn</code> macro. In idle mode, the CPU is reset to a waiting state (WFI) and prepares a <code>parking</code> instruction page for use during idle periods.</p>
+<h2 id="switching-between-el1-and-el2"><a class="header" href="#switching-between-el1-and-el2">Switching Between EL1 and EL2</a></h2>
+<p>hvisor uses EL2 as the hypervisor mode and EL1 for the guest OS in the AArch64 architecture. The <code>handle_vmexit</code> macro handles the context switch from EL1 to EL2 (VMEXIT event), saves the user mode register context, calls an external function to handle the exit reason, and then returns to continue executing the hypervisor code segment. The <code>vmreturn</code> function is used to return from EL2 mode to EL1 mode (VMENTRY event), restores the user mode register context, and then returns to the guest OS code segment through the <code>eret</code> instruction.</p>
+<h2 id="mmu-configuration-and-enabling"><a class="header" href="#mmu-configuration-and-enabling">MMU Configuration and Enabling</a></h2>
 <p>To support virtualization, the <code>enable_mmu()</code> function configures MMU mapping in EL2 mode, including setting the MAIR_EL2, TCR_EL2, and SCTLR_EL2 registers, enabling instruction and data caching capabilities, and ensuring the virtual range covers the entire 48-bit address space.</p>
 <p>Through these mechanisms, hvisor achieves efficient CPU virtualization on the AArch64 architecture, allowing multiple independent zones to operate under statically allocated resources while maintaining system stability and performance.</p>
 

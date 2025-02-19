@@ -155,16 +155,16 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="initialization-process-of-hvisor"><a class="header" href="#initialization-process-of-hvisor">Initialization process of hvisor</a></h1>
-<p>Abstract: Introduces the relevant knowledge involved in running hvisor on qemu and the initialization process of hvisor. Starting from the start of qemu, track the entire process, and you will have a general understanding of the initialization process of hvisor after reading this article.</p>
-<h2 id="qemu-startup-process"><a class="header" href="#qemu-startup-process">qemu startup process</a></h2>
-<p>The startup process of the computer simulated by qemu: After the necessary files are loaded into memory, the PC register is initialized to 0x1000, and a few instructions are executed from here before jumping to 0x80000000 to start executing the bootloader (hvsior arm part uses Uboot), after executing a few instructions, it jumps to the starting address of the kernel that uboot can recognize and executes.</p>
+                        <h1 id="initialization-process-of-hvisor"><a class="header" href="#initialization-process-of-hvisor">Initialization Process of hvisor</a></h1>
+<p>Abstract: This article introduces the relevant knowledge involved in running hvisor on qemu and the initialization process of hvisor. Starting from the launch of qemu, the entire process is tracked, and after reading this article, you will have a general understanding of the initialization process of hvisor.</p>
+<h2 id="boot-process-of-qemu"><a class="header" href="#boot-process-of-qemu">Boot Process of qemu</a></h2>
+<p>The boot process of the computer simulated by qemu: After loading the necessary files into memory, the PC register is initialized to 0x1000, and a few instructions are executed from here before jumping to 0x80000000 to start executing the bootloader (hvsior arm part uses Uboot). After executing a few instructions, it jumps to the starting address of the kernel that uboot can recognize.</p>
 <h3 id="generate-the-executable-file-of-hvisor"><a class="header" href="#generate-the-executable-file-of-hvisor">Generate the executable file of hvisor</a></h3>
 <pre><code>rust-objcopy --binary-architecture=aarch64 target/aarch64-unknown-none/debug/hvisor --strip-all -O binary target/aarch64-unknown-none/debug/hvisor.bin.tmp
 </code></pre>
-<p>Convert the executable file of hvisor into logical binary and save it as <code>hvisor.bin.tmp</code>.</p>
-<h3 id="generate-an-image-file-that-uboot-can-recognize"><a class="header" href="#generate-an-image-file-that-uboot-can-recognize">Generate an image file that uboot can recognize</a></h3>
-<p>uboot is a bootloader, its main task is to jump to the first instruction of the hvisor image to start execution, so it is necessary to ensure that the generated hvisor image is recognizable by uboot, here you need to use the <code>mkimage</code> tool.</p>
+<p>Convert the executable file of hvisor into a logical binary and save it as <code>hvisor.bin.tmp</code>.</p>
+<h3 id="generate-an-image-file-recognizable-by-uboot"><a class="header" href="#generate-an-image-file-recognizable-by-uboot">Generate an image file recognizable by uboot</a></h3>
+<p>Uboot is a bootloader whose main task is to jump to the first instruction of the hvisor image and start execution, so it is necessary to ensure that the generated hvisor image is recognizable by uboot. Here, the <code>mkimage</code> tool is needed.</p>
 <pre><code>mkimage -n hvisor_img -A arm64 -O linux -C none -T kernel -a 0x40400000 -e 0x40400000 -d target/aarch64-unknown-none/debug/hvisor.bin.tmp target/aarch64-unknown-none/debug/hvisor.bin
 </code></pre>
 <ul>
@@ -176,11 +176,11 @@
 <li><code>-a 0x40400000</code>: Specify the loading address as <code>0x40400000</code>.</li>
 <li><code>-e 0x40400000</code>: Specify the entry address as <code>0x40400000</code>.</li>
 <li><code>-d target/aarch64-unknown-none/debug/hvisor.bin.tmp</code>: Specify the input file as the previously generated temporary binary file.</li>
-<li>The last parameter is the generated output file name, which is the final kernel image file <code>hvisor.bin</code>.</li>
+<li>The last parameter is the output file name, i.e., the final kernel image file <code>hvisor.bin</code>.</li>
 </ul>
-<h2 id="initialization-process"><a class="header" href="#initialization-process">Initialization process</a></h2>
-<h3 id="aarch64ld-link-script"><a class="header" href="#aarch64ld-link-script">aarch64.ld link script</a></h3>
-<p>To understand how hvisor executes, we first look at the link script <code>aarch64.ld</code>, which gives us a general understanding of the execution process of hvisor.</p>
+<h2 id="initialization-process"><a class="header" href="#initialization-process">Initialization Process</a></h2>
+<h3 id="aarch64ld-link-script"><a class="header" href="#aarch64ld-link-script">aarch64.ld Link Script</a></h3>
+<p>To understand how hvisor is executed, we first look at the link script <code>aarch64.ld</code>, which gives us a general understanding of the execution process of hvisor.</p>
 <pre><code>ENTRY(arch_entry)
 BASE_ADDRESS = 0x40400000;
 </code></pre>
@@ -190,8 +190,8 @@ BASE_ADDRESS = 0x40400000;
         *(.text .text.*)
     }
 </code></pre>
-<p>We make the <code>.text</code> section the very beginning section, and put the <code>.text.entry</code> containing the first entry instruction at the beginning of the <code>.text</code> section, ensuring that hvisor indeed starts executing from the 0x40400000 location agreed with qemu.</p>
-<p>Here we also need to remember something called <code>__core_end</code>, which is the address of the end position of the link script, which can be known during the startup process.</p>
+<p>We make the <code>.text</code> segment the first segment, and place the <code>.text.entry</code> containing the first instruction of the entry at the beginning of the <code>.text</code> segment, ensuring that hvisor indeed starts execution from the 0x40400000 location agreed with qemu.</p>
+<p>Here we also need to remember something called <code>__core_end</code>, which is the address of the end position of the link script, and its role can be known during the startup process.</p>
 <h3 id="arch_entry"><a class="header" href="#arch_entry">arch_entry</a></h3>
 <p>With the above prerequisites, we can step into the first instruction of hvisor, which is <code>arch_entry()</code>.</p>
 <pre><code>// src/arch/aarch64/entry.rs
@@ -218,20 +218,20 @@ pub unsafe extern "C" fn arch_entry() -&gt; i32 {
     }
 }
 </code></pre>
-<p>First, look at the embedded assembly part. The first instruction <code>mov x1,x0</code>, passes the value of the <code>x0</code> register into the <code>x1</code> register, where x0 contains the address of the device tree. qemu simulates an arm architecture computer, which also has various devices such as input/output devices like mice and displays, as well as various storage devices. When we want to get input from the keyboard and output to the display, we need to get input from somewhere or put the output data somewhere. In the computer, we use specific addresses to access these devices. The device tree saves the access addresses of these devices. As the supervisor of all software, the hypervisor naturally needs to know the information of the device tree, so Uboot will put this information in <code>x0</code> before entering the kernel, which is a convention.</p>
-<p><code>mrs x0, mpidr_el1</code> is an instruction to access system-level registers, that is, to send the contents of the system register <code>mpidr_el1</code> to <code>x0</code>, and <code>mpidr_el1</code> contains information about which CPU we are currently dealing with (the computer supports multi-core CPUs), and there are many cooperations with the CPU later, so we need to know which CPU is currently in use. This register contains a lot of information about the CPU, and what we currently need is the lower 8 bits, which extract the corresponding CPU id, which is what the sentence <code>and x0, x0, #0xff</code> is doing.</p>
-<p><code>ldr x2, = __core_end</code>, we set a symbol <code>__core_end</code> at the end of the link script, as the end address of the entire hvisor program space, and put this address into <code>x2</code>.</p>
-<p><code>mov x3,{per_cpu_size}</code> puts the size of each CPU's stack into <code>x3</code>, this <code>{xxx}</code> is to replace the value of <code>xxx</code> with the assembly code, you can see below <code>per_cpu_size=const PER_CPU_SIZE</code> The external variable is renamed as a parameter. Another parameter with <code>sym</code> indicates that what follows is a symbol defined elsewhere.</p>
-<p><code>per_cpu_size</code> In this size space, related registers can be saved and restored, including the CPU's stack space.</p>
-<p><code>madd x4, x0, x3, x3</code> is a multiply-add instruction, cpu_id * per_cpu_size + per_cpu_size, the result is put into <code>x4</code>, at this time <code>x4</code> contains how much space the current number of CPUs needs. (The sequence starts from 0, so add per_cpu_size one more time).</p>
-<p><code>add x5,x2,x4</code> means to add the end address of hvisor to the total space required by the CPU and put it into <code>x5</code>.</p>
-<p><code>mov sp,x5</code> is to find the top of the current CPU's stack.</p>
-<p><code>b {rust_main}</code> means to jump to <code>rust_main</code> to start execution, which also indicates that this piece of assembly code will not return, corresponding to <code>option(noreturn)</code>.</p>
+<p>First, look at the embedded assembly part. The first instruction <code>mov x1, x0</code> transfers the value in the <code>x0</code> register to the <code>x1</code> register, where x0 contains the address of the device tree. Qemu simulates an ARM architecture computer, which also has various devices such as mice, display screens, and various storage devices. When we want to get input from the keyboard or output to the display, we need to get input from somewhere or put the output data somewhere. In the computer, we use specific addresses to access these devices. The device tree contains the access addresses of these devices, and the hypervisor, as the general manager of all software, naturally needs to know the information of the device tree. Therefore, Uboot will put this information in <code>x0</code> before entering the kernel, which is a convention.</p>
+<p>In <code>mrs x0, mpidr_el1</code>, <code>mrs</code> is an instruction to access system-level registers, which means to send the contents of the system register <code>mpidr_el1</code> to <code>x0</code>. <code>mpidr_el1</code> contains information about which CPU we are currently dealing with (the computer supports multi-core CPUs), and there will be a lot of cooperation work with the CPU later, so we need to know which CPU is currently in use. This register contains a lot of information about the CPU, and we currently need to use the lower 8 bits to extract the corresponding CPU id, which is what the instruction <code>and x0, x0, #0xff</code> is doing.</p>
+<p><code>ldr x2, = __core_end</code>, at the end of the link script, we set a symbol <code>__core_end</code> as the end address of the entire hvisor program space, and put this address into <code>x2</code>.</p>
+<p><code>mov x3, {per_cpu_size}</code> puts the size of each CPU's stack into <code>x3</code>. This <code>{xxx}</code> is to replace the value of <code>xxx</code> defined externally into the assembly code. You can see that the parameter below <code>per_cpu_size=const PER_CPU_SIZE</code> has changed the name of an external variable as a parameter. Another parameter with <code>sym</code> indicates that a symbol follows, which is defined elsewhere.</p>
+<p><code>per_cpu_size</code> in this size space, related registers can be saved and restored, including the CPU's stack space.</p>
+<p><code>madd x4, x0, x3, x3</code> is a multiply-add instruction, cpu_id * per_cpu_size + per_cpu_size, and the result is put into <code>x4</code>. At this point, <code>x4</code> contains the total space required by the current number of CPUs. (Starting from 0, so add per_cpu_size one more time).</p>
+<p><code>add x5, x2, x4</code> means to add the end address of hvisor and the total space required by the CPU to <code>x5</code>.</p>
+<p><code>mov sp, x5</code> finds the top of the current CPU's stack.</p>
+<p><code>b {rust_main}</code> represents jumping to <code>rust_main</code> to start execution, which also indicates that this section of assembly code will not return, corresponding to <code>option(noreturn)</code>.</p>
 <h2 id="enter-rust_main"><a class="header" href="#enter-rust_main">Enter rust_main()</a></h2>
-<h3 id="fn-rust_maincpuidusize-host_dtbusize"><a class="header" href="#fn-rust_maincpuidusize-host_dtbusize">fn rust_main(cpuid:usize, host_dtb:usize)</a></h3>
-<p>Entering <code>rust_main</code> requires two parameters, which are passed through <code>x0</code> and <code>x1</code>. Remember that in the previous entry, our <code>x0</code> stored the cpu_id and <code>x1</code> stored the device tree related information.</p>
+<h3 id="fn-rust_maincpuid-usize-host_dtb-usize"><a class="header" href="#fn-rust_maincpuid-usize-host_dtb-usize">fn rust_main(cpuid: usize, host_dtb: usize)</a></h3>
+<p>Entering <code>rust_main</code> requires two parameters, which are passed through <code>x0</code> and <code>x1</code>. Remember that in the previous entry, our <code>x0</code> stored the cpu_id and <code>x1</code> stored the device tree information.</p>
 <h3 id="install_trap_vector"><a class="header" href="#install_trap_vector">install_trap_vector()</a></h3>
-<p>When the processor encounters an exception or interrupt, it needs to jump to the corresponding location for processing. Here, these corresponding jump addresses are set (can be regarded as setting a table) for handling exceptions at the Hypervisor level. Each privilege level has its own corresponding exception vector table, except for EL0, the application privilege level, which must jump to other privilege levels to handle exceptions. The <code>VBAR_ELn</code> register is used to store the base address of the exception vector table under the ELn privilege level.</p>
+<p>When the processor encounters an exception or interrupt, it needs to jump to the corresponding location for processing. Here, the corresponding jump addresses are set (which can be considered as setting a table) for handling exceptions at the Hypervisor level. Each privilege level has its own corresponding exception vector table, except for EL0, the application privilege level, which must jump to other privilege levels to handle exceptions. The <code>VBAR_ELn</code> register is used to store the base address of the exception vector table for the ELn privilege level.</p>
 <pre><code>extern "C" {
     fn _hyp_trap_vector();
 }
@@ -242,15 +242,145 @@ pub fn install_trap_vector() {
 }
 
 </code></pre>
-<p><code>VBAR_EL2.set()</code> sets the address of <code>_hyp_trap_vector()</code> as the base address of the exception vector table for EL2 privilege level.</p>
-<p><code>_hyp_trap_vector()</code> This assembly code is constructing the exception vector table.</p>
-<p><strong>Simple introduction to the format of the exception vector table</strong></p>
-<p>According to the level of the exception and whether the level of handling the exception is the same, it is divided into two categories. If the level remains unchanged, it is divided into two groups according to whether the current level's SP is used. If the exception level changes, it is divided into two groups according to whether the execution mode is 64-bit/32-bit. At this point, the exception vector table is divided into 4 groups. In each group, each table entry represents an entry for handling a certain type of exception.</p>
+<p><code>VBAR_EL2.set()</code> sets the address of <code>_hyp_trap_vector()</code> as the base address of the exception vector table for the EL2 privilege level.</p>
+<p><code>_hyp_trap_vector()</code> This assembly code constructs the exception vector table.</p>
+<p><strong>Simple Introduction to the Exception Vector Table Format</strong></p>
+<p>Based on the level of the exception and whether the level of handling the exception remains the same, it is divided into two categories. If the level does not change, it is divided into two groups based on whether the current level's SP is used. If the exception level changes, it is divided into two groups based on whether the execution mode is 64-bit/32-bit. Thus, the exception vector table is divided into 4 groups. In each group, each table entry represents an entry point for handling a specific type of exception.</p>
 <h3 id="main-cpu"><a class="header" href="#main-cpu">Main CPU</a></h3>
 <pre><code>static MASTER_CPU: AtomicI32 = AtomicI32::new(-1);
 
 let mut is_primary = false;
-    if</code></pre>
+    if MASTER_CPU.load(Ordering::Acquire) == -1 {
+        MASTER_CPU.store(cpuid as i32, Ordering::Release);
+        is_primary = true;
+        println!("Hello, HVISOR!");
+        #[cfg(target_arch = "riscv64")]
+        clear_bss();
+    }
+</code></pre>
+<p><code>static MASTER_CPU: AtomicI32</code> In this, <code>AtomicI32</code> indicates that this is an atomic type, meaning its operations are either successful or fail without any intermediate state, ensuring safe access in a multi-threaded environment. In short, it is a very safe <code>i32</code> type.</p>
+<p><code>MASSTER_CPU.load()</code> is a method for performing read operations. The parameter <code>Ordering::Acquire</code> indicates that if there are some write operations before I read, I need to wait for these write operations to be completed in order. <strong>In short, this parameter ensures that the data is correctly changed before being read.</strong></p>
+<p>If it reads -1, the same as when it was defined, it indicates that the main CPU has not been set, so set <code>cpu_id</code> as the main CPU. Similarly, the role of <code>Ordering::Release</code> is certainly to ensure that all other modifications are completed before the change.</p>
+<h3 id="common-data-structure-for-cpus-percpu"><a class="header" href="#common-data-structure-for-cpus-percpu">Common Data Structure for CPUs: PerCpu</a></h3>
+<p>hvisor supports different architectures, and a reasonable system design should allow different architectures to use a unified interface for easy description of each part's work. <code>PerCpu</code> is such a general CPU description.</p>
+<pre><code>pub struct PerCpu {
+    pub id: usize,
+    pub cpu_on_entry: usize,
+    pub arch_cpu: ArchCpu,
+    pub zone: Option&lt;Arc&lt;RwLock&lt;Zone&gt;&gt;&gt;,
+    pub ctrl_lock: Mutex&lt;()&gt;,
+    pub boot_cpu: bool,
+    // percpu stack
+}
+</code></pre>
+<p>For each field of <code>PerCpu</code>:</p>
+<ul>
+<li><code>id</code>: CPU sequence number</li>
+<li><code>cpu_on_entry</code>: The address of the first instruction when the CPU enters EL1, also known as the guest. Only when this CPU is the boot CPU will it be set to a valid value. Initially, we set it to an inaccessible address.</li>
+<li><code>arch_cpu</code>: CPU description related to the architecture. The behavior is initiated by <code>PerCpu</code>, and the specific executor is <code>arch_cpu</code>.
+<ul>
+<li><code>cpu_id</code></li>
+<li><code>psci_on</code>: Whether the cpu is started</li>
+</ul>
+</li>
+<li><code>zone</code>: zone actually represents a guestOS. For the same guestOS, multiple CPUs may serve it.</li>
+<li><code>ctrl_lock</code>: Set for concurrent safety.</li>
+<li><code>boot_cpu</code>: For a guestOS, it distinguishes the main/secondary cores serving it. <code>boot_cpu</code> indicates whether the current CPU is the main core for a guest.</li>
+</ul>
+<h3 id="main-core-wakes-up-other-cores"><a class="header" href="#main-core-wakes-up-other-cores">Main Core Wakes Up Other Cores</a></h3>
+<pre><code>if is_primary {
+        wakeup_secondary_cpus(cpu.id, host_dtb);
+}
+
+fn wakeup_secondary_cpus(this_id: usize, host_dtb: usize) {
+    for cpu_id in 0..MAX_CPU_NUM {
+        if cpu_id == this_id {
+            continue;
+        }
+        cpu_start(cpu_id, arch_entry as _, host_dtb);
+    }
+}
+
+pub fn cpu_start(cpuid: usize, start_addr: usize, opaque: usize) {
+    psci::cpu_on(cpuid as u64 | 0x80000000, start_addr as _, opaque as _).unwrap_or_else(|err| {
+        if let psci::error::Error::AlreadyOn = err {
+        } else {
+            panic!("can't wake up cpu {}", cpuid);
+        }
+    });
+}
+</code></pre>
+<p>If the current CPU is the main CPU, it will wake up other secondary cores, and the secondary cores execute <code>cpu_start</code>. In <code>cpu_start</code>, <code>cpu_on</code> actually calls the SMC instruction in <code>call64</code>, falling into EL3 to perform the action of waking up the CPU.</p>
+<p>From the declaration of <code>cpu_on</code>, we can roughly guess its function: to wake up a CPU, which will start executing from the location <code>arch_entry</code>. This is because multi-core processors communicate and cooperate with each other, so CPU consistency must be ensured. Therefore, the same entry should be used to start execution to maintain synchronization. This can be verified by the following few lines of code.</p>
+<pre><code>    ENTERED_CPUS.fetch_add(1, Ordering::SeqCst);
+    wait_for(|| PerCpu::entered_cpus() &lt; MAX_CPU_NUM as _);
+    assert_eq!(PerCpu::entered_cpus(), MAX_CPU_NUM as _);
+</code></pre>
+<p>Among them, <code>ENTERED_CPUS.fetch_add(1, Ordering::SeqCst)</code> represents increasing the value of <code>ENTERED_CPUS</code> in sequence consistency. After each CPU executes once, this <code>assert_eq</code> macro should pass smoothly.</p>
+<h3 id="things-the-main-core-still-needs-to-do-primary_init_early"><a class="header" href="#things-the-main-core-still-needs-to-do-primary_init_early">Things the Main Core Still Needs to Do primary_init_early()</a></h3>
+<p><strong>Initialize Logging</strong></p>
+<ol>
+<li>Creation of a global log recorder</li>
+<li>Setting of the log level filter, the main purpose of setting the log level filter is to decide which log messages should be recorded and output.</li>
+</ol>
+<p><strong>Initialize Heap Space and Page Tables</strong></p>
+<ol>
+<li>A space in the .bss segment is allocated as heap space, and the allocator is set up.</li>
+<li>Set up the page frame allocator.</li>
+</ol>
+<p><strong>Parse Device Tree Information</strong></p>
+<p>Parse the device tree information based on the device tree address in the <code>rust_main</code> parameter.</p>
+<p><strong>Create a GIC Instance</strong></p>
+<p>Instantiate a global static variable GIC, an instance of the Generic Interrupt Controller.</p>
+<p><strong>Initialize hvisor's Page Table</strong></p>
+<p>This page table is only for the implementation of converting VA to PA for hypervisor itself (understood in terms of the relationship between the kernel and applications).</p>
+<p><strong>Create a zone for each VM</strong></p>
+<pre><code>zone_create(zone_id, TENANTS[zone_id] as _, DTB_IPA);
+
+zone_create(vmid: usize, dtb_ptr: *const u8, dtb_ipa: usize) -&gt; Arc&lt;RwLock&lt;Zone&gt;&gt;
+</code></pre>
+<p>zone actually represents a guestVM, containing various information that a guestVM might use. Observing the function parameters, <code>dtb_ptr</code> is the address of the device information that the hypervisor wants this guest to see, which can be seen in <code>images/aarch64/devicetree</code>. The role of <code>dtb_ipa</code> is that each guest will obtain this address from the CPU's <code>x0</code> register to find the device tree information, so it is necessary to ensure that this IPA will map to the guest's dtb address during the construction of the stage2 page table. In this way, the guest is informed about the type of machine it is running on, the starting address of the physical memory, the number of CPUs, etc.</p>
+<pre><code>let guest_fdt = unsafe { fdt::Fdt::from_ptr(dtb_ptr) }.unwrap();
+    let guest_entry = guest_fdt
+        .memory()
+        .regions()
+        .next()
+        .unwrap()
+        .starting_address as usize;
+</code></pre>
+<p>The above content, by parsing the device tree information, obtained <code>guest_entry</code>, which is the starting address of the physical address that this guest can see. In the qemu startup parameters, we can also see where a guest image is loaded into memory, and these two values are equal.</p>
+<p>Next, the stage-2 page table, MMIO mapping, and IRQ bitmap for this guest will be constructed based on the <code>dtb</code> information.</p>
+<pre><code>guest_fdt.cpus().for_each(|cpu| {
+        let cpu_id = cpu.ids().all().next().unwrap();
+        zone.cpu_set.set_bit(cpu_id as usize);
+});
+
+pub fn set_bit(&amp;mut self, id: usize) {
+    assert!(id &lt;= self.max_cpu_id);
+    self.bitmap |= 1 &lt;&lt; id;
+}
+</code></pre>
+<p>The above code records the id of the CPU allocated to this zone in the bitmap according to the CPU information given in the dtb.</p>
+<pre><code>let new_zone_pointer = Arc::new(RwLock::new(zone));
+    {
+        cpu_set.iter().for_each(|cpuid| {
+            let cpu_data = get_cpu_data(cpuid);
+            cpu_data.zone = Some(new_zone_pointer.clone());
+            //chose boot cpu
+            if cpuid == cpu_set.first_cpu().unwrap() {
+                cpu_data.boot_cpu = true;
+            }
+            cpu_data.cpu_on_entry = guest_entry;
+        });
+    }
+  
+</code></pre>
+<p>The task completed by the above code is: Traverse the CPUs allocated to this zone, obtain the mutable reference of the <code>PerCpu</code> of that CPU, modify its zone member variable, and mark the first CPU allocated to this zone as <code>boot_cpu</code>. Also, set the address of the first instruction after this zone's main CPU enters the guest as <code>guest_entry</code>.</p>
+<p>The tasks that the main core CPU needs to do are paused, marked with <code>INIT_EARLY_OK.store(1, Ordering::Release)</code>, while other CPUs can only wait before the main core completes <code>wait_for_counter(&amp;INIT_EARLY_OK, 1)</code>.</p>
+<h3 id="address-space-initialization"><a class="header" href="#address-space-initialization">Address Space Initialization</a></h3>
+<p>The previous section mentioned IPA and PA, which are actually part of the address space. Specific content will be provided in the memory management document, and here is a brief introduction.</p>
+<p>If Hypervisor is not considered, guestVM, as a kernel, will perform memory management work, which is the process from the application program's virtual address VA to the kernel's PA. In this case, the PA is the actual physical memory address.</p>
+<p>When considering Hypervisor, Hypervisor, as a kernel role, will also perform memory management work, only this time the application program becomes guestVM, and guestVM will not be aware of the existence of Hypervisor (otherwise, it would require changing the design of guestVM, which does not meet our intention to improve performance). We call the PA in guestVM IPA or GPA because it</p>
 
                     </main>
 

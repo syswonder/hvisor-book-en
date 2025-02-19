@@ -156,31 +156,31 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="arm-smmu-technical-documentation"><a class="header" href="#arm-smmu-technical-documentation">ARM-SMMU Technical Documentation</a></h1>
-<p>Abstract: Introduction to the development process of ARM-SMMU.</p>
+<p>Abstract: Introducing the development process of ARM-SMMU.</p>
 <h2 id="background-knowledge"><a class="header" href="#background-knowledge">Background Knowledge</a></h2>
 <p>A brief introduction to the principle and function of SMMU.</p>
-<h3 id="what-is-dma-why-do-we-need-iommu"><a class="header" href="#what-is-dma-why-do-we-need-iommu">What is DMA? Why do we need IOMMU?</a></h3>
-<p>Virtual machines running on top of the hypervisor need to interact with devices, but if they wait for the CPU to host such tasks every time, it will reduce processing efficiency, hence the emergence of the DMA mechanism. <strong>DMA is a mechanism that allows devices to exchange data directly with memory without CPU involvement.</strong></p>
-<p>We can roughly outline the process of virtual machines interacting with devices through DMA. First, the virtual machine issues a DMA request, telling the target device where to write the data, and then the device writes into the memory according to the address.</p>
+<h3 id="what-is-dma-why-is-iommu-needed"><a class="header" href="#what-is-dma-why-is-iommu-needed">What is DMA? Why is IOMMU needed?</a></h3>
+<p>Virtual machines running on top of the hypervisor need to interact with devices, but if they wait for the CPU to host this work every time, it would reduce processing efficiency. Therefore, the DMA mechanism appears. <strong>DMA is a mechanism that allows devices to exchange data directly with memory without CPU involvement.</strong></p>
+<p>We can roughly figure out the process of virtual machines interacting with devices through DMA. First, the virtual machine issues a DMA request, telling the target device where to write the data, and then the device writes to the memory according to the address.</p>
 <p>However, some issues need to be considered in the above process:</p>
 <ul>
 <li>The hypervisor has virtualized memory for each virtual machine, so the target memory address of the DMA request issued by the virtual machine is GPA, also called IOVA here, which needs to be converted to the real PA to be written to the correct position in physical memory.</li>
-<li>Moreover, if the range of IOVA is not restricted, it means that any memory address can be accessed through the DMA mechanism, causing unforeseeable serious consequences.</li>
+<li>Moreover, if the range of IOVA is not restricted, it means that any memory address can be accessed through the DMA mechanism, causing unforeseen severe consequences.</li>
 </ul>
-<p>Therefore, we need an institution that can help us with address conversion and ensure the legality of the operation address, just like the MMU memory management unit. This institution is called <strong>IOMMU</strong>, and in the Arm architecture, it has another name called <strong>SMMU</strong> (hereinafter referred to as SMMU).</p>
+<p>Therefore, we need an institution that can help us with address conversion and ensure the legality of the operation address, just like the MMU memory management unit. This institution is called <strong>IOMMU</strong>, and it has another name in the Arm architecture called <strong>SMMU</strong> (referred to as SMMU hereafter).</p>
 <p>Now you know that SMMU can convert virtual addresses to physical addresses, thus ensuring the legality of devices directly accessing memory.</p>
-<h3 id="specific-work-of-smmu"><a class="header" href="#specific-work-of-smmu">Specific Work of SMMU</a></h3>
-<p>As mentioned above, the function of SMMU is similar to MMU, whose target is virtual machines or applications, while SMMU targets each device, each identified by a sid, corresponding to a table called <strong>stream table</strong>. The table uses the device's sid as an index, and the sid of PCI devices can be obtained from the BDF number: sid = (B &lt;&lt; 5) | (D &lt;&lt; 3) | F.</p>
+<h3 id="specific-tasks-of-smmu"><a class="header" href="#specific-tasks-of-smmu">Specific Tasks of SMMU</a></h3>
+<p>As mentioned above, the function of SMMU is similar to MMU, whose target is virtual machines or applications, while the target of SMMU is each device. Each device is identified by a sid, and the corresponding table is called <strong>stream table</strong>. This table uses the device's sid as an index, and the sid of PCI devices can be obtained from the BDF number: sid = (B &lt;&lt; 5) | (D &lt;&lt; 3) | F.</p>
 <h2 id="development-work"><a class="header" href="#development-work">Development Work</a></h2>
 <p>Currently, we have implemented support for stage-2 address translation of SMMUv3 in Qemu, created a simple linear table, and conducted simple verification using PCI devices.</p>
-<p>The work of IOMMU has not yet been merged into the mainline, you can switch to the IOMMU branch to check.</p>
+<p>The work of IOMMU has not yet been merged into the mainline, and you can switch to the IOMMU branch to check.</p>
 <h3 id="overall-idea"><a class="header" href="#overall-idea">Overall Idea</a></h3>
-<p>We pass through PCI HOST to zone0, that is, add a PCI node to the device tree provided to zone0, map the corresponding memory address in the second-stage page table of zone0, and ensure normal interrupt injection. Then zone0 will detect and configure the PCI device by itself, and we only need to do the configuration work of SMMU in the hypervisor.</p>
+<p>We pass through the PCI HOST to zone0, that is, add the PCI node to the device tree provided to zone0, map the corresponding memory address in the second-stage page table of zone0, and ensure normal interrupt injection. Then zone0 will detect and configure the PCI device by itself, and we only need to configure SMMU in the hypervisor.</p>
 <h3 id="qemu-parameters"><a class="header" href="#qemu-parameters">Qemu Parameters</a></h3>
-<p>Add <code>iommu=smmuv3</code> in <code>machine</code> to enable SMMUv3 support, and add <code>arm-smmuv3.stage=2</code> in <code>global</code> to enable the second-stage address translation.</p>
-<p>Note that nested translation is not yet supported in Qemu. If <code>stage=2</code> is not specified, it defaults to supporting only the first-stage address translation. Please use Qemu version 8.1 or above, as lower versions do not support enabling the second-stage address translation.</p>
-<p>When adding a PCI device, please enable <code>iommu_platform=on</code>.</p>
-<p>addr can specify the bdf number of the device.</p>
+<p>Add <code>iommu=smmuv3</code> in <code>machine</code> to enable SMMUv3 support, and add <code>arm-smmuv3.stage=2</code> in <code>global</code> to enable second-stage address translation.</p>
+<p>Note that nested translation is not yet supported in Qemu. If <code>stage=2</code> is not specified, only the first stage of address translation is supported by default. Please use Qemu version 8.1 or above, as lower versions do not support enabling second-stage address translation.</p>
+<p>When adding PCI devices, please ensure to enable <code>iommu_platform=on</code>.</p>
+<p>The addr can specify the bdf number of the device.</p>
 <p><strong>In the PCI bus simulated by Qemu, in addition to the PCI HOST, there is a default network card device, so the addr parameter of other added devices must start from 2.0.</strong></p>
 <pre><code>// scripts/qemu-aarch64.mk
 
@@ -189,8 +189,8 @@ QEMU_ARGS += -global arm-smmuv3.stage=2
 
 QEMU_ARGS += -device virtio-blk-pci,drive=Xa003e000,disable-legacy=on,disable-modern=off,iommu_platform=on,addr=2.0
 </code></pre>
-<h3 id="mapping-smmu-related-memory-in-the-hypervisors-page-table"><a class="header" href="#mapping-smmu-related-memory-in-the-hypervisors-page-table">Mapping SMMU Related Memory in the Hypervisor's Page Table</a></h3>
-<p>Consulting the source code of Qemu, it is known that the memory region corresponding to VIRT_SMMU starts at 0x09050000 and is 0x20000 in size. We need to access this area, so it must be mapped in the hypervisor's page table.</p>
+<h3 id="mapping-smmu-related-memory-in-the-hypervisors-page-table"><a class="header" href="#mapping-smmu-related-memory-in-the-hypervisors-page-table">Mapping SMMU-related Memory in the Hypervisor's Page Table</a></h3>
+<p>Consulting the Qemu source code reveals that the memory area corresponding to VIRT_SMMU starts at 0x09050000 and is 0x20000 in size. We need to access this area, so it must be mapped in the hypervisor's page table.</p>
 <pre><code>// src/arch/aarch64/mm.rs
 
 pub fn init_hv_page_table(fdt: &amp;fdt::Fdt) -&gt; HvResult {
@@ -203,8 +203,8 @@ pub fn init_hv_page_table(fdt: &amp;fdt::Fdt) -&gt; HvResult {
 }
 </code></pre>
 <h3 id="smmuv3-data-structure"><a class="header" href="#smmuv3-data-structure">SMMUv3 Data Structure</a></h3>
-<p>This structure contains a reference to the memory region of SMMUv3 that will be accessed, whether it supports a second-level table, the maximum number of bits of sid, and the base address and allocated page frames of the stream table.</p>
-<p>The rp is a reference to <code>RegisterPage</code> defined, and <code>RegisterPage</code> is set according to the offsets in Chapter 6 of the SMMUv3 manual. Readers can refer to it themselves.</p>
+<p>This structure contains a reference to the memory area of SMMUv3 that will be accessed, whether it supports secondary tables, the maximum number of bits of sid, and the base address and allocated page frames of the stream table.</p>
+<p>The rp is a reference to the defined <code>RegisterPage</code>, which is set according to the offsets in Chapter 6 of the SMMUv3 manual. Readers can refer to it on their own.</p>
 <pre><code>// src/arch/aarch64/iommu.rs
 
 pub struct Smmuv3{
@@ -245,7 +245,7 @@ pub struct Smmuv3{
 </code></pre>
 <h3 id="check_env"><a class="header" href="#check_env">check_env()</a></h3>
 <p>Check which stage of address translation the current environment supports, what type of stream table it supports, how many bits of sid it supports, etc.</p>
-<p>Taking the check of which table format the environment supports as an example, the supported table type is in the <code>IDR0</code> register, obtained by <code>self.rp.IDR0.get() as usize</code>, and the value of <code>IDR0</code> is obtained by <code>extract_bit</code>, obtaining the value of the <code>ST_LEVEL</code> field. According to the manual, 0b00 represents support for a linear table, 0b01 represents support for a linear table and a second-level table, and 0b1x is a reserved bit. We can choose what type of stream table to create based on this information.</p>
+<p>Taking the check of which table format the environment supports as an example, the supported table type is in the <code>IDR0</code> register. Obtain the value of <code>IDR0</code> by <code>self.rp.IDR0.get() as usize</code>, and use <code>extract_bit</code> to extract and get the value of the <code>ST_LEVEL</code> field. According to the manual, 0b00 represents support for linear tables, 0b01 represents support for linear tables and secondary tables, and 0b1x is a reserved bit. We can choose what type of stream table to create based on this information.</p>
 <pre><code>impl Smmuv3{
     fn check_env(&amp;mut self){
         let idr0 = self.rp.IDR0.get() as usize;
@@ -259,7 +259,7 @@ pub struct Smmuv3{
             1 =&gt; {info!("Smmuv3 2-level Stream Table Supported.");
                 self.strtab_2lvl = true;
             }
-            _ =&gt; info!("Smmuv3 don't support any stream table."),
+            _ =&gt; info!("Smmuv3 doesn't support any stream table."),
         }
 
 	...
@@ -267,20 +267,20 @@ pub struct Smmuv3{
 }
 </code></pre>
 <h3 id="init_linear_strtab"><a class="header" href="#init_linear_strtab">init_linear_strtab()</a></h3>
-<p>We need to support the second-stage address translation, and there are not many devices in the system, so we choose to use a linear table.</p>
-<p>When applying for the space needed for the linear table, we should determine the number of entries according to the current maximum number of bits of sid, multiplied by the space required for each entry <code>STRTAB_STE_SIZE</code>, and then know how many page frames need to be applied for. However, SMMUv3 has strict requirements for the starting address of the stream table, the low (5+sid_max_bits) bits of the starting address must be 0.</p>
-<p>Since the current hypervisor does not yet support such space application, we apply for a space under the premise of ensuring safety, and select an address that meets the conditions within this space as the table base address, although this will cause some space waste.</p>
-<p>After applying for the space, we can fill in this table's base address into the <code>STRTAB_BASE</code> register:</p>
+<p>We need to support the second stage of address translation, and there are not many devices in the system, so we choose to use a linear table.</p>
+<p>When applying for the space needed for the linear table, we should calculate the number of table entries based on the current maximum number of bits of sid, multiplied by the space needed for each table entry <code>STRTAB_STE_SIZE</code>, to know how many page frames need to be applied for. However, SMMUv3 has strict requirements for the starting address of the stream table. The low (5+sid_max_bits) bits of the starting address must be 0.</p>
+<p>Since the current hypervisor does not support applying for space in this way, we apply for a space under safe conditions and select an address that meets the conditions as the table base address within this space, although this will cause some space waste.</p>
+<p>After applying for space, we can fill in this table's base address into the <code>STRTAB_BASE</code> register:</p>
 <pre><code>	let mut base = extract_bits(self.strtab_base, STRTAB_BASE_OFF, STRTAB_BASE_LEN);
 	base = base &lt;&lt; STRTAB_BASE_OFF;
 	base |= STRTAB_BASE_RA;
 	self.rp.STRTAB_BASE.set(base as _);
 </code></pre>
-<p>Then we also need to set the <code>STRTAB_BASE_CFG</code> register to indicate the format of the table we are using, whether it is a linear table or a second-level table, and the number of entries (represented in LOG2 form, i.e., the maximum number of bits of SID):</p>
-<pre><code>        // format : linear table
+<p>Next, we also need to set the <code>STRTAB_BASE_CFG</code> register to indicate the format of the table we are using, whether it is a linear table or a secondary table, and the number of table items (represented in LOG2 form, i.e., the maximum number of bits of SID):</p>
+<pre><code>        // format: linear table
         cfg |= STRTAB_BASE_CFG_FMT_LINEAR &lt;&lt; STRTAB_BASE_CFG_FMT_OFF;
 
-        // table size : log2(entries)
+        // table size: log2(entries)
         // entry_num = 2^(sid_bits)
         // log2(size) = sid_bits
         cfg |= self.sid_max_bits &lt;&lt; STRTAB_BASE_CFG_LOG2SIZE_OFF;
@@ -288,7 +288,86 @@ pub struct Smmuv3{
         // linear table -&gt; ignore SPLIT field
         self.rp.STRTAB_BASE_CFG.set(cfg as _);
 </code></pre>
-<h3 id="init_bypass"><a class="header" href="#init_bypass">init_bypass</a></h3>
+<h3 id="init_bypass_stesidusize"><a class="header" href="#init_bypass_stesidusize">init_bypass_ste(sid:usize)</a></h3>
+<p>Currently, we have not configured any relevant information yet, so we need to set all table entries to the default state first.</p>
+<p>For each sid, find the address of the table entry based on the table base address, i.e., the valid bit is 0, and the address translation is set to <code>BYPASS</code>.</p>
+<pre><code>	let base = self.strtab_base + sid * STRTAB_STE_SIZE;
+	let tab = unsafe{&amp;mut *(base as *mut [u64;STRTAB_STE_DWORDS])};
+
+	let mut val:usize = 0;
+	val |= STRTAB_STE_0_V;
+	val |= STRTAB_STE_0_CFG_BYPASS &lt;&lt; STRTAB_STE_0_CFG_OFF;
+</code></pre>
+<h3 id="device_reset"><a class="header" href="#device_reset">device_reset()</a></h3>
+<p>We have done some preparatory work above, but some additional configurations are still needed, such as enabling SMMU, otherwise, SMMU will be in a disabled state.</p>
+<pre><code>	let cr0 = CR0_SMMUEN;
+	self.rp.CR0.set(cr0 as _);
+</code></pre>
+<h3 id="write_stesidusizevmidusizeroot_ptusize"><a class="header" href="#write_stesidusizevmidusizeroot_ptusize">write_ste(sid:usize,vmid:usize,root_pt:usize)</a></h3>
+<p>This method is used to configure specific device information.</p>
+<p>First, we need to find the address of the corresponding table entry based on sid.</p>
+<pre><code>	let base = self.strtab_base + sid * STRTAB_STE_SIZE;
+        let tab = unsafe{&amp;mut *(base as *mut [u64;STRTAB_STE_DWORDS])};
+</code></pre>
+<p>In the second step, we need to indicate that the information related to this device is used for the second stage of address translation, and this table entry is now valid.</p>
+<pre><code>        let mut val0:usize = 0;
+        val0 |= STRTAB_STE_0_V;
+        val0 |= STRTAB_STE_0_CFG_S2_TRANS &lt;&lt; STRTAB_STE_0_CFG_OFF;
+</code></pre>
+<p>In the third step, we need to specify which virtual machine this device is allocated to, and enable the second-stage page table traversal, <code>S2AA64</code> represents that the second-stage translation table is based on aarch64, <code>S2R</code> represents enabling error recording.</p>
+<pre><code>        let mut val2:usize = 0;
+        val2 |= vmid &lt;&lt; STRTAB_STE_2_S2VMID_OFF;
+        val2 |= STRTAB_STE_2_S2PTW;
+        val2 |= STRTAB_STE_2_S2AA64;
+        val2 |= STRTAB_STE_2_S2R;
+</code></pre>
+<p>The last step is to point out the basis for the second-stage translation, which is the page table of the corresponding virtual machine in the hypervisor. Just fill in the base address of the page table in the corresponding position, i.e., the <code>S2TTB</code> field.</p>
+<p>Here we also need to explain the configuration information of this page table, so that SMMU knows the format and other information of this page table and can use this page table, i.e., the <code>VTCR</code> field.</p>
+<pre><code>	let vtcr = 20 + (2&lt;&lt;6) + (1&lt;&lt;8) + (1&lt;&lt;10) + (3&lt;&lt;12) + (0&lt;&lt;14) + (4&lt;&lt;16);
+        let v = extract_bits(vtcr as _, 0, STRTAB_STE_2_VTCR_LEN);
+        val2 |= v &lt;&lt; STRTAB_STE_2_VTCR_OFF;
+
+        let vttbr = extract_bits(root_pt, STRTAB_STE_3_S2TTB_OFF, STRTAB_STE_3_S2TTB_LEN);
+</code></pre>
+<h2 id="initialization-and-device-allocation"><a class="header" href="#initialization-and-device-allocation">Initialization and Device Allocation</a></h2>
+<p>In <code>src/main.rs</code>, after the hypervisor's page table is initialized (mapping the SMMU-related area), SMMU can be initialized.</p>
+<pre><code>fn primary_init_early(dtb: usize) {
+    ...
+
+    crate::arch::mm::init_hv_page_table(&amp;host_fdt).unwrap();
+
+    info!("Primary CPU init hv page table OK.");
+
+    iommu_init();
+
+    zone_create(0,ROOT_ENTRY,ROOT_ZONE_DTB_ADDR as _, DTB_IPA).unwrap();
+    INIT_EARLY_OK.store(1, Ordering::Release);
+}
+</code></pre>
+<p>Next, we need to allocate devices, which we complete synchronously when creating the virtual machine. Currently, we only allocate devices for zone0 to use.</p>
+<pre><code>// src/zone.rs
+
+pub fn zone_create(
+    zone_id: usize,
+    guest_entry: usize,
+    dtb_ptr: *const u8,
+    dtb_ipa: usize,
+) -&gt; HvResult&lt;Arc&lt;RwLock&lt;Zone&gt;&gt;&gt; {
+    ...
+
+    if zone_id==0{
+        // add_device(0, 0x8, zone.gpm.root_paddr());
+        iommu_add_device(zone_id, BLK_PCI_ID, zone.gpm.root_paddr());
+    }
+  
+    ...
+}
+</code></pre>
+<h2 id="simple-verification"><a class="header" href="#simple-verification">Simple Verification</a></h2>
+<p>Start qemu with the parameter <code>-trace smmuv3_*</code> to see related outputs:</p>
+<pre><code>smmuv3_config_cache_hit Config cache HIT for sid=0x10 (hits=1469, misses=1, hit rate=99)
+smmuv3_translate_success smmuv3-iommu-memory-region-16-2 sid=0x10 iova=0x8e043242 translated=0x8e043242 perm=0x3
+</code></pre>
 
                     </main>
 

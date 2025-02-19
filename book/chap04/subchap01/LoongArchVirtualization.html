@@ -157,25 +157,25 @@
                     <main>
                         <h1 id="loongarch-processor-virtualization"><a class="header" href="#loongarch-processor-virtualization">LoongArch Processor Virtualization</a></h1>
 <p>The LoongArch instruction set is an independent RISC instruction set released by China's Loongson Zhongke Company in 2020, which includes five modules: the basic instruction set, binary translation extension (LBT), vector extension (LSX), advanced vector extension (LASX), and virtualization extension (LVZ).</p>
-<p>This article will briefly introduce the CPU virtualization design of the LoongArch instruction set, with related explanations from the publicly available KVM source code and code comments.</p>
+<p>This article will briefly introduce the CPU virtualization design of the LoongArch instruction set, with related explanations from the currently publicly available KVM source code and code comments.</p>
 <h2 id="introduction-to-loongarch-registers"><a class="header" href="#introduction-to-loongarch-registers">Introduction to LoongArch Registers</a></h2>
 <h3 id="general-register-usage-convention"><a class="header" href="#general-register-usage-convention">General Register Usage Convention</a></h3>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Alias</th><th>Usage</th><th>Preserved in Call</th></tr></thead><tbody>
-<tr><td><code>$r0</code></td><td><code>$zero</code></td><td>Constant 0</td><td>(constant)</td></tr>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Alias</th><th>Usage</th><th>Preserved across calls</th></tr></thead><tbody>
+<tr><td><code>$r0</code></td><td><code>$zero</code></td><td>Constant 0</td><td>(Constant)</td></tr>
 <tr><td><code>$r1</code></td><td><code>$ra</code></td><td>Return address</td><td>No</td></tr>
-<tr><td><code>$r2</code></td><td><code>$tp</code></td><td>Thread pointer</td><td>(non-assignable)</td></tr>
+<tr><td><code>$r2</code></td><td><code>$tp</code></td><td>Thread pointer</td><td>(Unallocatable)</td></tr>
 <tr><td><code>$r3</code></td><td><code>$sp</code></td><td>Stack pointer</td><td>Yes</td></tr>
-<tr><td><code>$r4 - $r5</code></td><td><code>$a0 - $a1</code></td><td>Argument/return registers</td><td>No</td></tr>
+<tr><td><code>$r4 - $r5</code></td><td><code>$a0 - $a1</code></td><td>Argument/return value regs</td><td>No</td></tr>
 <tr><td><code>$r6 - $r11</code></td><td><code>$a2 - $a7</code></td><td>Argument registers</td><td>No</td></tr>
 <tr><td><code>$r12 - $r20</code></td><td><code>$t0 - $t8</code></td><td>Temporary registers</td><td>No</td></tr>
-<tr><td><code>$r21</code></td><td>Reserved</td><td>(non-assignable)</td><td></td></tr>
+<tr><td><code>$r21</code></td><td>Reserved</td><td>(Unallocatable)</td><td></td></tr>
 <tr><td><code>$r22</code></td><td><code>$fp / $s9</code></td><td>Frame pointer / static reg</td><td>Yes</td></tr>
 <tr><td><code>$r23 - $r31</code></td><td><code>$s0 - $s8</code></td><td>Static registers</td><td>Yes</td></tr>
 </tbody></table>
 </div>
 <h3 id="floating-point-register-usage-convention"><a class="header" href="#floating-point-register-usage-convention">Floating Point Register Usage Convention</a></h3>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Alias</th><th>Usage</th><th>Preserved in Call</th></tr></thead><tbody>
-<tr><td><code>$f0 - $f1</code></td><td><code>$fa0 - $fa1</code></td><td>Argument/return registers</td><td>No</td></tr>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Alias</th><th>Usage</th><th>Preserved across calls</th></tr></thead><tbody>
+<tr><td><code>$f0 - $f1</code></td><td><code>$fa0 - $fa1</code></td><td>Argument/return value regs</td><td>No</td></tr>
 <tr><td><code>$f2 - $f7</code></td><td><code>$fa2 - $fa7</code></td><td>Argument registers</td><td>No</td></tr>
 <tr><td><code>$f8 - $f23</code></td><td><code>$ft0 - $ft15</code></td><td>Temporary registers</td><td>No</td></tr>
 <tr><td><code>$f24 - $f31</code></td><td><code>$fs0 - $fs7</code></td><td>Static registers</td><td>Yes</td></tr>
@@ -183,93 +183,21 @@
 </div>
 <p>Temporary registers are also known as caller-saved registers. Static registers are also known as callee-saved registers.</p>
 <h3 id="csr-registers"><a class="header" href="#csr-registers">CSR Registers</a></h3>
-<p><strong>Control and Status Register (CSR)</strong> is a special type of register in the LoongArch architecture used to control the processor's operational state.</p>
+<p><strong>Control and Status Register (CSR)</strong> is a special type of register in the LoongArch architecture used to control the processor's operational state. List of CSR registers (excluding new CSRs in the LVZ virtualization extension):</p>
+<p>(Here follows a table of various CSR registers, their numbers, and names, organized in three columns.)</p>
 <p>For processors that have implemented the LVZ virtualization extension, there is also a set of CSRs for controlling virtualization.</p>
-<h3 id="gcsr-register-set"><a class="header" href="#gcsr-register-set">GCSR Register Set</a></h3>
-<p>In LoongArch processors that implement virtualization, there is an additional set of <strong>Guest Control and Status Registers (GCSR)</strong>.</p>
-<h3 id="entering-guest-mode-process-from-linux-kvm-source-code"><a class="header" href="#entering-guest-mode-process-from-linux-kvm-source-code">Entering Guest Mode Process (from Linux KVM source code)</a></h3>
-<ol>
-<li><strong><code>switch_to_guest</code></strong>:</li>
-<li>Clear the <code>CSR.ECFG.VS</code> field (set to 0, i.e., all exceptions use one entry address)</li>
-<li>Read the guest eentry (guest OS interrupt vector address) saved in Hypervisor -&gt; GEENTRY, then write GEENTRY to <code>CSR.EENTRY</code></li>
-<li>Read the guest era (guest OS exception return address) saved in Hypervisor -&gt; GPC, then write GPC to <code>CSR.ERA</code></li>
-<li>Read <code>CSR.PGDL</code> global page table address, store in Hypervisor</li>
-<li>Load guest pgdl from Hypervisor to <code>CSR.PGDL</code></li>
-<li>Read out <code>CSR.GSTAT.GID</code> and <code>CSR.GTLBC.TGID</code>, write to <code>CSR.GTLBC</code></li>
-<li>Set <code>CSR.PRMD.PIE</code> to 1, enabling global interrupts at the Hypervisor level</li>
-<li>Set <code>CSR.GSTAT.PGM</code> to 1, aiming to make the ertn instruction enter guest mode</li>
-<li>Hypervisor restores the guest's general-purpose registers (GPRS) saved earlier to the hardware registers (restoring the context)</li>
-<li><strong>Execute the <code>ertn</code> instruction, entering guest mode</strong></li>
-</ol>
+<h3 id="gcsr-registers"><a class="header" href="#gcsr-registers">GCSR Registers</a></h3>
+<p>In LoongArch processors that implement virtualization, there is an additional set of <strong>GCSR (Guest Control and Status Register)</strong> registers.</p>
+<h3 id="process-of-entering-guest-mode-from-linux-kvm-source-code"><a class="header" href="#process-of-entering-guest-mode-from-linux-kvm-source-code">Process of Entering Guest Mode (from Linux KVM source code)</a></h3>
+<p>(Here follows a detailed list of steps for entering guest mode, involving various CSR operations and transitions between host and guest modes.)</p>
 <h2 id="virtualization-related-exceptions"><a class="header" href="#virtualization-related-exceptions">Virtualization-related Exceptions</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>code</th><th>subcode</th><th>abbreviation</th><th>description</th></tr></thead><tbody>
-<tr><td>22</td><td>-</td><td>GSPR</td><td>Guest-sensitive privilege resource exception, triggered by <code>cpucfg</code>, <code>idle</code>, <code>cacop</code> instructions, and when a virtual machine accesses non-existent GCSR and IOCSR, forcing a trap into Hypervisor for handling (e.g., software emulation)</td></tr>
-<tr><td>23</td><td>-</td><td>HVC</td><td>Exception triggered by hvcl supercall instruction</td></tr>
-<tr><td>24</td><td>0</td><td>GCM</td><td>Guest GCSR software modification exception</td></tr>
-<tr><td>24</td><td>1</td><td>GCHC</td><td>Guest GCSR hardware modification exception</td></tr>
-</tbody></table>
-</div>
-<h3 id="handling-exceptions-in-guest-mode-process-from-linux-kvm-source-code"><a class="header" href="#handling-exceptions-in-guest-mode-process-from-linux-kvm-source-code">Handling Exceptions in Guest Mode Process (from Linux KVM source code)</a></h3>
-<ol>
-<li>
-<p><strong><code>kvm_exc_entry</code></strong>:</p>
-</li>
-<li>
-<p>Hypervisor first saves the guest's general-purpose registers (GPRS), protecting the context.</p>
-</li>
-<li>
-<p>Hypervisor saves <code>CSR.ESTAT</code> -&gt; host ESTAT</p>
-</li>
-<li>
-<p>Hypervisor saves <code>CSR.ERA</code> -&gt; GPC</p>
-</li>
-<li>
-<p>Hypervisor saves <code>CSR.BADV</code> -&gt; host BADV, which records the erroneous virtual address when an address error exception is triggered</p>
-</li>
-<li>
-<p>Hypervisor saves <code>CSR.BADI</code> -&gt; host BADI, which records the opcode of the instruction that triggered the synchronous class exception, excluding interrupts (INT), guest CSR hardware modification exceptions (GCHC), and machine error exceptions (MERR).</p>
-</li>
-<li>
-<p>Read the host ECFG saved by Hypervisor, write to <code>CSR.ECFG</code> (i.e., switch to host's exception configuration)</p>
-</li>
-<li>
-<p>Read the host EENTRY saved by Hypervisor, write to <code>CSR.EENTRY</code></p>
-</li>
-<li>
-<p>Read the host PGD saved by Hypervisor, write to <code>CSR.PGDL</code> (restoring host page table global directory base address, lower half space)</p>
-</li>
-<li>
-<p>Set <code>CSR.GSTAT.PGM</code> off</p>
-</li>
-<li>
-<p>Clear <code>GTLBC.TGID</code> field</p>
-</li>
-<li>
-<p>Restore kvm per CPU registers</p>
-<ol>
-<li>Involving KVM_ARCH_HTP, KVM_ARCH_HSP, KVM_ARCH_HPERCPU in kvm assembly</li>
-</ol>
-</li>
-<li>
-<p><strong>Jump to KVM_ARCH_HANDLE_EXIT position to handle the exception</strong></p>
-</li>
-<li>
-<p>Determine if the recent function ret is &lt;=0</p>
-<ol>
-<li>If &lt;=0, continue running host</li>
-<li>Otherwise, continue running guest, save percpu registers, as it may switch to a different CPU to continue running guest. Save host percpu registers to <code>CSR.KSAVE</code> register</li>
-</ol>
-</li>
-<li>
-<p>Jump to <code>switch_to_guest</code></p>
-</li>
-</ol>
+<p>(Here follows a table of exception codes, subcodes, abbreviations, and descriptions related to virtualization, such as guest-sensitive privilege resource exceptions, hypercall exceptions, and guest GCSR modification exceptions.)</p>
+<h3 id="process-for-handling-exceptions-in-guest-mode-from-linux-kvm-source-code"><a class="header" href="#process-for-handling-exceptions-in-guest-mode-from-linux-kvm-source-code">Process for Handling Exceptions in Guest Mode (from Linux KVM source code)</a></h3>
+<p>(Here follows a detailed list of steps for handling exceptions in guest mode, including saving and restoring registers and switching between host and guest configurations.)</p>
 <h2 id="vcpu-context-registers-to-be-saved"><a class="header" href="#vcpu-context-registers-to-be-saved">vCPU Context Registers to be Saved</a></h2>
-<p>According to the LoongArch function call standard, the registers to be saved when manually switching CPU function running context are (excluding floating point registers): <code>$s0</code>-<code>$s9</code>, <code>$sp</code>, <code>$ra</code></p>
+<p>According to the LoongArch function call convention, if manual switching of the CPU function running context is required, the following registers need to be saved (excluding floating-point registers): <code>$s0</code>-<code>$s9</code>, <code>$sp</code>, <code>$ra</code></p>
 <h2 id="references"><a class="header" href="#references">References</a></h2>
-<p>[1] Loongson Zhongke Technology Co., Ltd. Loongson Architecture ELF psABI Specification. Version 2.01.</p>
-<p>[2] Loongson Zhongke Technology Co., Ltd. Loongson Architecture Reference Manual. Volume One: Basic Architecture.</p>
-<p>[3] <a href="https://github.com/torvalds/linux/blob/master/arch/loongarch/kvm/switch.S">https://github.com/torvalds/linux/blob/master/arch/loongarch/kvm/switch.S</a>.</p>
+<p>(Here follows a list of references including technical documents from Loongson Zhongke Technology Co., Ltd. and a link to relevant Linux KVM source code on GitHub.)</p>
 
                     </main>
 

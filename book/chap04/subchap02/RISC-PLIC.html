@@ -158,7 +158,7 @@
                         <h1 id="source-of-interruptions"><a class="header" href="#source-of-interruptions">Source of Interruptions</a></h1>
 <p>In hvisor, there are three types of interrupts: timer interrupts, software interrupts, and external interrupts.</p>
 <p>Timer Interrupt: A timer interrupt is generated when the time register becomes greater than the timecmp register.</p>
-<p>Software Interrupt: In a multi-core system, one hart sends an inter-hart interrupt to another hart, which is implemented through an SBI call.</p>
+<p>Software Interrupt: In a multi-core system, one hart sends an inter-core interrupt to another hart, implemented through an SBI call.</p>
 <p>External Interrupt: External devices send interrupt signals to the processor through interrupt lines.</p>
 <h1 id="timer-interrupt"><a class="header" href="#timer-interrupt">Timer Interrupt</a></h1>
 <p>When a virtual machine needs to trigger a timer interrupt, it traps into hvisor through the ecall instruction.</p>
@@ -183,7 +183,7 @@ pub fn sbi_vs_handler(current_cpu: &amp;mut ArchCpu) {
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<p>If the sstc extension is not enabled, it is necessary to trap into machine mode through an SBI call, set the mtimecmp register, clear the virtual machine's timer interrupt pending bit, and enable the hvisor's timer interrupt enable bit; if the sstc extension is enabled, stimecmp can be set directly.</p>
+<p>If the sstc extension is not enabled, it is necessary to trap into machine mode through an SBI call, set the mtimecmp register, clear the virtual machine's timer interrupt pending bit, and enable hvisor's timer interrupt; if the sstc extension is enabled, stimecmp can be set directly.</p>
 <pre><code class="language-rs">pub fn sbi_time_handler(fid: usize, current_cpu: &amp;mut ArchCpu) -&gt; SbiRet {
 ...
     if current_cpu.sstc {
@@ -201,7 +201,7 @@ pub fn sbi_vs_handler(current_cpu: &amp;mut ArchCpu) {
 }
 </code></pre>
 <p>When the time register becomes greater than the timecmp register, a timer interrupt is generated.</p>
-<p>After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handler function.</p>
+<p>After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handling function.</p>
 <pre><code class="language-rs">        InterruptType::STI =&gt; {
             unsafe {
                 hvip::set_vstip();
@@ -209,7 +209,7 @@ pub fn sbi_vs_handler(current_cpu: &amp;mut ArchCpu) {
             }
         }
 </code></pre>
-<p>Set the virtual machine's timer interrupt pending bit to 1, inject a timer interrupt into the virtual machine, and clear hvisor's timer interrupt enable bit to complete the interrupt handling.</p>
+<p>Set the virtual machine's timer interrupt pending bit to 1, injecting a timer interrupt into the virtual machine, and clear hvisor's timer interrupt enable bit to complete the interrupt handling.</p>
 <h1 id="software-interrupt"><a class="header" href="#software-interrupt">Software Interrupt</a></h1>
 <p>When a virtual machine needs to send an IPI, it traps into hvisor through the ecall instruction.</p>
 <pre><code class="language-rs">        SBI_EID::SEND_IPI =&gt; {
@@ -225,8 +225,8 @@ pub fn sbi_vs_handler(current_cpu: &amp;mut ArchCpu) {
             );
         }
 </code></pre>
-<p>Then, through an SBI call, trap into machine mode to send an IPI to the specified hart by setting the SSIP bit of the mip register to 1 to inject an inter-hart interrupt into hvisor.</p>
-<p>After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handler function.</p>
+<p>Then through an SBI call, trap into machine mode to send an IPI to the specified hart, setting the SSIP bit in the mip register to inject an inter-core interrupt into hvisor.</p>
+<p>After the interrupt is triggered, the trap context is saved, and dispatched to the corresponding handling function.</p>
 <pre><code class="language-rs">pub fn handle_ssi(current_cpu: &amp;mut ArchCpu) {
     ...
     clear_csr!(CSR_SIP, 1 &lt;&lt; 1);
@@ -234,20 +234,20 @@ pub fn sbi_vs_handler(current_cpu: &amp;mut ArchCpu) {
     check_events();
 }
 </code></pre>
-<p>Set the virtual machine's software interrupt pending bit to 1, injecting a software interrupt into the virtual machine. Then determine the type of inter-hart interrupt, wake up or block the CPU, or handle VIRTIO-related interrupt requests.</p>
+<p>Set the virtual machine's software interrupt pending bit to 1, injecting a software interrupt into the virtual machine. Then determine the type of inter-core interrupt, wake or block the CPU, or handle VIRTIO-related interrupt requests.</p>
 <h1 id="external-interrupt"><a class="header" href="#external-interrupt">External Interrupt</a></h1>
 <h2 id="plic"><a class="header" href="#plic">PLIC</a></h2>
-<p>RISC-V implements external interrupt handling through PLIC, which does not support virtualization and does not support MSI.</p>
-<p>PLIC architecture diagram</p>
-<p>The interrupt process of PLIC is shown in the diagram below.</p>
-<p>Interrupt sources send an interrupt signal to PLIC through the interrupt line, and only when the interrupt priority is greater than the threshold, it can pass through the threshold register filter.</p>
+<p>RISC-V implements external interrupt handling through PLIC, which does not support virtualization or MSI.</p>
+<p>The architectural diagram of PLIC.</p>
+<p>The interrupt process of PLIC is shown in the following diagram.</p>
+<p>The interrupt source sends an interrupt signal to the PLIC through the interrupt line, and only when the interrupt priority is greater than the threshold, it can pass through the threshold register's filter.</p>
 <p>Then read the claim register to get the pending highest priority interrupt, then clear the corresponding pending bit. Pass it to the target hart for interrupt handling.</p>
 <p>After handling, write the interrupt number to the complete register to receive the next interrupt request.</p>
 <h2 id="initialization"><a class="header" href="#initialization">Initialization</a></h2>
 <p>The initialization process is similar to AIA.</p>
-<h2 id="processing"><a class="header" href="#processing">Processing</a></h2>
-<p>When an external interrupt is triggered in the virtual machine, it accesses the vPLIC address space, but since PLIC does not support virtualization, this address space is unmapped. Therefore, a page fault exception is triggered, and it traps into hvisor for handling.</p>
-<p>After the exception is triggered, the trap context is saved, and enters the page fault exception handler function.</p>
+<h2 id="handling-process"><a class="header" href="#handling-process">Handling Process</a></h2>
+<p>When an external interrupt is triggered in the virtual machine, it will access the vPLIC address space, however, PLIC does not support virtualization, and this address space is unmapped. Therefore, a page fault exception will be triggered, trapping into hvisor for handling.</p>
+<p>After the exception is triggered, the trap context is saved, and enters the page fault exception handling function.</p>
 <pre><code class="language-rs">pub fn guest_page_fault_handler(current_cpu: &amp;mut ArchCpu) {
     ...
     if addr &gt;= host_plic_base &amp;&amp; addr &lt; host_plic_base + PLIC_TOTAL_SIZE {
@@ -265,7 +265,7 @@ pub fn sbi_vs_handler(current_cpu: &amp;mut ArchCpu) {
     }
 }
 </code></pre>
-<p>Determine whether the address where the page fault occurred is within the PLIC address space, then parse the instruction that caused the exception, and modify the PLIC address space based on the access address and instruction to implement the simulation configuration for vPLIC.</p>
+<p>Determine if the address where the page fault occurred is within the PLIC's address space, then parse the instruction that caused the exception, and modify the PLIC's address space based on the access address and instruction to emulate the configuration for vPLIC.</p>
 <pre><code class="language-rs">pub fn vplic_hart_emul_handler(current_cpu: &amp;mut ArchCpu, addr: GuestPhysAddr, inst: Instruction) {
     ...
     if offset &gt;= PLIC_GLOBAL_SIZE &amp;&amp; offset &lt; PLIC_TOTAL_SIZE {
