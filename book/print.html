@@ -3259,6 +3259,55 @@ struct hvisor_event {
 <blockquote>
 <p>Since the PTY master and PTY slave are connected by a TTY driver, which includes a line discipline to pass the data written from the PTY master to the PTY slave back to the PTY master, we need to disable this functionality using the <code>cfmakeraw</code> function to turn off the line discipline feature.</p>
 </blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="virtio-gpu"><a class="header" href="#virtio-gpu">Virtio GPU</a></h1>
+<p>To use the Virtio GPU device in hvisor-tool, you need to first install libdrm on the host and perform some related configurations.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Install libdrm</li>
+</ul>
+<p>We need to install libdrm to compile Virtio-gpu, assuming the target platform is <strong>arm64</strong>.</p>
+<pre><code class="language-shell">wget https://dri.freedesktop.org/libdrm/libdrm-2.4.100.tar.gz
+tar -xzvf libdrm-2.4.100.tar.gz
+cd libdrm-2.4.100
+</code></pre>
+<p>Tips: libdrm versions above 2.4.100 require compilation with tools like meson, which can be complicated. More versions are available at https://dri.freedesktop.org/libdrm.</p>
+<pre><code class="language-shell"># Install to your aarch64-linux-gnu compiler
+./configure --host=aarch64-linux-gnu --prefix=/usr/aarch64-linux-gnu &amp;&amp; make &amp;&amp; make install
+</code></pre>
+<p>For loongarch64, use:</p>
+<pre><code class="language-shell">./configure --host=loongarch64-unknown-linux-gnu --disable-nouveau --disable-intel --prefix=/opt/libdrm-install &amp;&amp; make &amp;&amp; sudo make install
+</code></pre>
+<ul>
+<li>Configure the Linux kernel</li>
+</ul>
+<p>The Linux kernel needs to support virtio-gpu and drm related drivers. Specifically, the following options need to be enabled when compiling the kernel:</p>
+<pre><code>CONFIG_DRM=y
+CONFIG_DRM_VIRTIO_GPU=y
+</code></pre>
+<p>Other GPU-related drivers may not be compiled into the kernel. You need to compile according to the specific device, and you can use menuconfig during compilation. Specifically, go to <code>Device Drivers</code> -&gt; <code>Graphics support</code> -&gt; <code>Direct Rendering Infrastructure(DRM)</code>. Under <code>Graphics support</code>, there are also drivers supporting virtio-gpu. If needed, enable the compilation of related fields such as <code>Virtio GPU driver</code> and <code>DRM Support for bochs dispi vga interface</code>.</p>
+<p>At the bottom of the <code>Graphics support</code> entry, there is <code>Bootup logo</code>. Enabling this option will display the Linux logo representing the number of CPU cores on the screen at startup.</p>
+<ul>
+<li>Detect physical GPU devices in Root Linux</li>
+</ul>
+<p>To detect physical GPU devices in <code>Root Linux</code>, you need to edit files in the <code>hvisor/src/platform</code> directory to detect GPU devices on the PCI bus. You need to add the interrupt number of the Virtio-gpu device to <code>ROOT_ZONE_IRQS</code>. For example:</p>
+<pre><code>pub const ROOT_PCI_DEVS: [u64; 3] = [0, 1 &lt;&lt; 3, 6 &lt;&lt; 3];
+</code></pre>
+<p>After starting <code>Root Linux</code>, you can check if your GPU device is working properly by running <code>dmesg | grep drm</code> or <code>lspci</code>. If files like card0 and renderD128 appear under /dev/dri, it means the graphics device is successfully recognized and can be controlled by drm.</p>
+<ul>
+<li>Check if the real GPU device is supported</li>
+</ul>
+<p>If you want to port Virtio-GPU to other platforms, you need to ensure that the physical GPU device on that platform is supported by the drm framework. To see the devices supported by libdrm, you can install the <code>libdrm-tests</code> package using the command <code>apt install libdrm-tests</code>, and then run <code>modetest</code>.</p>
+<ul>
+<li>qemu startup parameters</li>
+</ul>
+<p>If hvisor runs in a qemu aarch64 environment, qemu needs to provide a GPU device to root linux. Add the following to the qemu startup parameters:</p>
+<pre><code>QEMU_ARGS += -device virtio-gpu,addr=06,iommu_platform=on
+QEMU_ARGS += -display sdl
+</code></pre>
+<p>Also, ensure that the startup parameters include smmu configuration:</p>
+<pre><code>-machine virt,secure=on,gic-version=3,virtualization=on,iommu=smmuv3
+-global arm-smmuv3.stage=2
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><p>PCI devices primarily have three spaces: Configuration Space, Memory Space, and I/O Space.</p>
 <h3 id="1-configuration-space"><a class="header" href="#1-configuration-space">1. Configuration Space</a></h3>
 <ul>

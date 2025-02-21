@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>hvisor Supported Instruction Sets and Processors - hvisor Manual</title>
+        <title>GPU - hvisor Manual</title>
 
 
         <!-- Custom HTML head -->
@@ -12,32 +12,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../../favicon.svg">
+        <link rel="shortcut icon" href="../../../favicon.png">
+        <link rel="stylesheet" href="../../../css/variables.css">
+        <link rel="stylesheet" href="../../../css/general.css">
+        <link rel="stylesheet" href="../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" href="../../../highlight.css">
+        <link rel="stylesheet" href="../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root to javascript -->
         <script>
-            var path_to_root = "../";
+            var path_to_root = "../../../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -89,7 +89,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -123,7 +123,7 @@
                     <h1 class="menu-title">hvisor Manual</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
                         <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
@@ -155,16 +155,65 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="virtio-gpu"><a class="header" href="#virtio-gpu">Virtio GPU</a></h1>
+<p>To use the Virtio GPU device in hvisor-tool, you need to first install libdrm on the host and perform some related configurations.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Install libdrm</li>
+</ul>
+<p>We need to install libdrm to compile Virtio-gpu, assuming the target platform is <strong>arm64</strong>.</p>
+<pre><code class="language-shell">wget https://dri.freedesktop.org/libdrm/libdrm-2.4.100.tar.gz
+tar -xzvf libdrm-2.4.100.tar.gz
+cd libdrm-2.4.100
+</code></pre>
+<p>Tips: libdrm versions above 2.4.100 require compilation with tools like meson, which can be complicated. More versions are available at https://dri.freedesktop.org/libdrm.</p>
+<pre><code class="language-shell"># Install to your aarch64-linux-gnu compiler
+./configure --host=aarch64-linux-gnu --prefix=/usr/aarch64-linux-gnu &amp;&amp; make &amp;&amp; make install
+</code></pre>
+<p>For loongarch64, use:</p>
+<pre><code class="language-shell">./configure --host=loongarch64-unknown-linux-gnu --disable-nouveau --disable-intel --prefix=/opt/libdrm-install &amp;&amp; make &amp;&amp; sudo make install
+</code></pre>
+<ul>
+<li>Configure the Linux kernel</li>
+</ul>
+<p>The Linux kernel needs to support virtio-gpu and drm related drivers. Specifically, the following options need to be enabled when compiling the kernel:</p>
+<pre><code>CONFIG_DRM=y
+CONFIG_DRM_VIRTIO_GPU=y
+</code></pre>
+<p>Other GPU-related drivers may not be compiled into the kernel. You need to compile according to the specific device, and you can use menuconfig during compilation. Specifically, go to <code>Device Drivers</code> -&gt; <code>Graphics support</code> -&gt; <code>Direct Rendering Infrastructure(DRM)</code>. Under <code>Graphics support</code>, there are also drivers supporting virtio-gpu. If needed, enable the compilation of related fields such as <code>Virtio GPU driver</code> and <code>DRM Support for bochs dispi vga interface</code>.</p>
+<p>At the bottom of the <code>Graphics support</code> entry, there is <code>Bootup logo</code>. Enabling this option will display the Linux logo representing the number of CPU cores on the screen at startup.</p>
+<ul>
+<li>Detect physical GPU devices in Root Linux</li>
+</ul>
+<p>To detect physical GPU devices in <code>Root Linux</code>, you need to edit files in the <code>hvisor/src/platform</code> directory to detect GPU devices on the PCI bus. You need to add the interrupt number of the Virtio-gpu device to <code>ROOT_ZONE_IRQS</code>. For example:</p>
+<pre><code>pub const ROOT_PCI_DEVS: [u64; 3] = [0, 1 &lt;&lt; 3, 6 &lt;&lt; 3];
+</code></pre>
+<p>After starting <code>Root Linux</code>, you can check if your GPU device is working properly by running <code>dmesg | grep drm</code> or <code>lspci</code>. If files like card0 and renderD128 appear under /dev/dri, it means the graphics device is successfully recognized and can be controlled by drm.</p>
+<ul>
+<li>Check if the real GPU device is supported</li>
+</ul>
+<p>If you want to port Virtio-GPU to other platforms, you need to ensure that the physical GPU device on that platform is supported by the drm framework. To see the devices supported by libdrm, you can install the <code>libdrm-tests</code> package using the command <code>apt install libdrm-tests</code>, and then run <code>modetest</code>.</p>
+<ul>
+<li>qemu startup parameters</li>
+</ul>
+<p>If hvisor runs in a qemu aarch64 environment, qemu needs to provide a GPU device to root linux. Add the following to the qemu startup parameters:</p>
+<pre><code>QEMU_ARGS += -device virtio-gpu,addr=06,iommu_platform=on
+QEMU_ARGS += -display sdl
+</code></pre>
+<p>Also, ensure that the startup parameters include smmu configuration:</p>
+<pre><code>-machine virt,secure=on,gic-version=3,virtualization=on,iommu=smmuv3
+-global arm-smmuv3.stage=2
+</code></pre>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../chap01/Overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../../chap04/subchap03/VirtIO/ConsoleDevice.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../chap01/Board.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../../chap04/subchap03/PCI-Virtualization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -174,11 +223,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../chap01/Overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../../chap04/subchap03/VirtIO/ConsoleDevice.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../chap01/Board.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../../chap04/subchap03/PCI-Virtualization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -193,17 +242,17 @@
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../../elasticlunr.min.js"></script>
+        <script src="../../../mark.min.js"></script>
+        <script src="../../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../../clipboard.min.js"></script>
+        <script src="../../../highlight.js"></script>
+        <script src="../../../book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script src="../assets/fzf.umd.js"></script>
-        <script src="../assets/elasticlunr.js"></script>
+        <script src="../../../assets/fzf.umd.js"></script>
+        <script src="../../../assets/elasticlunr.js"></script>
 
 
     </div>
