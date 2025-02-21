@@ -156,40 +156,41 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="running-hvisor-on-qemu"><a class="header" href="#running-hvisor-on-qemu">Running hvisor on QEMU</a></h1>
-<h2 id="1-install-cross-compiler-aarch64-none-linux-gnu-103"><a class="header" href="#1-install-cross-compiler-aarch64-none-linux-gnu-103">1. Install Cross Compiler aarch64-none-linux-gnu-10.3</a></h2>
+<h2 id="1-install-cross-compiler-aarch64-none-linux-gnu--103"><a class="header" href="#1-install-cross-compiler-aarch64-none-linux-gnu--103">1. Install Cross Compiler aarch64-none-linux-gnu- 10.3</a></h2>
 <p>URL: <a href="https://developer.arm.com/downloads/-/gnu-a">https://developer.arm.com/downloads/-/gnu-a</a></p>
-<p>Tool selection: AArch64 GNU/Linux target (aarch64-none-linux-gnu)</p>
-<p>Download link: <a href="https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC">https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC</a></p>
+<p>Tool Selection: AArch64 GNU/Linux target (aarch64-none-linux-gnu)</p>
+<p>Download Link: <a href="https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC">https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC</a></p>
 <pre><code class="language-bash">wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
 tar xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
 ls gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/
 </code></pre>
-<p>After installation, remember the path, for example, at: /home/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-, this path will be used later.</p>
-<h2 id="2-compile-and-install-qemu-7212"><a class="header" href="#2-compile-and-install-qemu-7212">2. Compile and Install QEMU 7.2.12</a></h2>
-<pre><code># Install required dependencies for compilation
+<p>After installation, remember the path, for example: /home/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-, which will be used later.</p>
+<h2 id="2-compile-and-install-qemu-901"><a class="header" href="#2-compile-and-install-qemu-901">2. Compile and Install QEMU 9.0.1</a></h2>
+<p><strong>Note, QEMU needs to be changed from 7.2.12 to 9.0.1 to properly use PCI virtualization</strong></p>
+<pre><code># Install required packages for compilation
 sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \
               gawk build-essential bison flex texinfo gperf libtool patchutils bc \
               zlib1g-dev libexpat-dev pkg-config  libglib2.0-dev libpixman-1-dev libsdl2-dev \
               git tmux python3 python3-pip ninja-build
-# Download source code
-wget https://download.qemu.org/qemu-7.2.12.tar.xz
-# Unzip
-tar xvJf qemu-7.2.12.tar.xz
-cd qemu-7.2.12
-# Generate configuration files
+# Download the source code
+wget https://download.qemu.org/qemu-9.0.1.tar.xz
+# Extract
+tar xvJf qemu-9.0.1.tar.xz
+cd qemu-9.0.1
+# Generate configuration file
 ./configure --enable-kvm --enable-slirp --enable-debug --target-list=aarch64-softmmu,x86_64-softmmu
 # Compile
 make -j$(nproc)
 </code></pre>
 <p>Then edit the <code>~/.bashrc</code> file, add a few lines at the end of the file:</p>
-<pre><code># Please note, the parent directory of qemu-7.2.12 can be flexibly adjusted according to your actual installation location
-export PATH=$PATH:/path/to/qemu-7.2.12/build
+<pre><code># Please note, the parent directory of qemu-9.0.1 can be flexibly adjusted according to your actual installation location. Also, it needs to be placed at the beginning of the $PATH variable.
+export PATH=/path/to/qemu-7.2.12/build:$PATH
 </code></pre>
-<p>Afterward, you can update the system path in the current terminal by <code>source ~/.bashrc</code>, or directly restart a new terminal. At this point, you can check the qemu version:</p>
-<pre><code>qemu-system-aarch64 --version   #Check version
+<p>Then you can update the system path in the current terminal with <code>source ~/.bashrc</code>, or directly restart a new terminal. At this point, you can confirm the qemu version, if it displays qemu-9.0.1, then the installation was successful:</p>
+<pre><code>qemu-system-aarch64 --version   # Check version
 </code></pre>
 <blockquote>
-<p>Note, the above dependency packages may not be complete, for example:</p>
+<p>Note, the above packages may not be complete, for example:</p>
 <ul>
 <li>If you encounter <code>ERROR: pkg-config binary 'pkg-config' not found</code>, you can install the <code>pkg-config</code> package;</li>
 <li>If you encounter <code>ERROR: glib-2.48 gthread-2.0 is required to compile QEMU</code>, you can install the <code>libglib2.0-dev</code> package;</li>
@@ -197,11 +198,11 @@ export PATH=$PATH:/path/to/qemu-7.2.12/build
 </ul>
 </blockquote>
 <blockquote>
-<p>If you encounter an error ERROR: Dependency "slirp" not found, tried pkgconfig while generating configuration files:</p>
-<p>Download <a href="https://gitlab.freedesktop.org/slirp/libslirp">https://gitlab.freedesktop.org/slirp/libslirp</a> package, and install according to the readme.</p>
+<p>If you encounter an error ERROR: Dependency "slirp" not found, tried pkgconfig when generating the configuration file:</p>
+<p>Download the <a href="https://gitlab.freedesktop.org/slirp/libslirp">https://gitlab.freedesktop.org/slirp/libslirp</a> package and install according to the readme.</p>
 </blockquote>
 <h2 id="3-compile-linux-kernel-54"><a class="header" href="#3-compile-linux-kernel-54">3. Compile Linux Kernel 5.4</a></h2>
-<p>Before compiling the root linux image, change the CONFIG_IPV6 and CONFIG_BRIDGE config in the .config file to y, to support creating bridges and tap devices in root linux. The specific operations are as follows:</p>
+<p>Before compiling the root linux image, change the CONFIG_IPV6 and CONFIG_BRIDGE config in the .config file to y, to support creating bridges and tap devices in root linux. Specific operations are as follows:</p>
 <pre><code>git clone https://github.com/torvalds/linux -b v5.4 --depth=1
 cd linux
 git checkout v5.4
@@ -216,30 +217,31 @@ CONFIG_BRIDGE=y
 make ARCH=arm64 CROSS_COMPILE=/root/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- Image -j$(nproc)
 </code></pre>
 <blockquote>
-<p>If you encounter an error while compiling linux:</p>
+<p>If you encounter an error during the compilation of linux:</p>
 <pre><code>/usr/bin/ld: scripts/dtc/dtc-parser.tab.o:(.bss+0x20): multiple definition of `yylloc'; scripts/dtc/dtc-lexer.lex.o:(.bss+0x0): first defined here
 </code></pre>
-<p>Then modify the file <code>scripts/dtc/dtc-lexer.lex.c</code> under the linux folder, add <code>extern</code> before <code>YYLTYPE yylloc;</code>. Compile again, if you encounter an error: openssl/bio.h: No such file or directory, then execute <code>sudo apt install libssl-dev</code></p>
+<p>Then modify the <code>scripts/dtc/dtc-lexer.lex.c</code> file under the linux folder, add <code>extern</code> before <code>YYLTYPE yylloc;</code>. Recompile, and if you encounter the error: openssl/bio.h: No such file or directory, execute <code>sudo apt install libssl-dev</code></p>
 </blockquote>
-<p>After compilation, the kernel file is located at: arch/arm64/boot/Image. Remember the entire linux folder's path, for example: home/korwylee/lgw/hypervisor/linux, we will use this path in step 7.</p>
-<h2 id="4-build-file-system-based-on-ubuntu-2004-arm64-base"><a class="header" href="#4-build-file-system-based-on-ubuntu-2004-arm64-base">4. Build File System Based on Ubuntu 20.04 arm64 Base</a></h2>
+<p>After compilation, the kernel file is located at: arch/arm64/boot/Image. Remember the entire path of the linux folder, for example: home/korwylee/lgw/hypervisor/linux, we will use this path again in step 7.</p>
+<h2 id="4-build-file-system-based-on-ubuntu-2204-arm64-base"><a class="header" href="#4-build-file-system-based-on-ubuntu-2204-arm64-base">4. Build File System Based on Ubuntu 22.04 Arm64 Base</a></h2>
 <blockquote>
-<p>This section can be omitted, you can directly download the ready-made disk image for use. https://blog.syswonder.org/#/2024/20240415_Virtio_devices_tutorial</p>
+<p>You can skip this part and directly download the ready-made disk image. https://blog.syswonder.org/#/2024/20240415_Virtio_devices_tutorial</p>
 </blockquote>
-<p>We use Ubuntu 20.04 (22.04 is also possible) to build the root file system.</p>
-<p>Download: <a href="http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz">ubuntu-base-20.04.5-base-arm64.tar.gz</a></p>
-<p>Link: <a href="http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz">http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz</a></p>
-<pre><code class="language-bash">wget http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.5-base-arm64.tar.gz
+<p>We use Ubuntu 22.04 to build the root file system.</p>
+<blockquote>
+<p><strong>Ubuntu 20.04</strong> can also be used, but it will report a low glibc version error when running. You can refer to the solution in the comment section of <a href="https://blog.syswonder.org/#/2023/20230421_ARM64-QEMU-jailhouse">ARM64-qemu-jailhouse</a>.</p>
+</blockquote>
+<pre><code class="language-bash">wget http://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04.5-base-arm64.tar.gz
 
 mkdir rootfs
 # Create a 1G ubuntu.img, you can modify the count to change the img size
-dd if=/dev/zero of=ubuntu-20.04-rootfs_ext4.img bs=1M count=1024 oflag=direct
-mkfs.ext4 ubuntu-20.04-rootfs_ext4.img
-# Put ubuntu.tar.gz into the ubuntu.img that has been mounted on rootfs
-sudo mount -t ext4 ubuntu-20.04-rootfs_ext4.img rootfs/
-sudo tar -xzf ubuntu-base-20.04.5-base-arm64.tar.gz -C rootfs/
+dd if=/dev/zero of=rootfs1.img bs=1M count=1024 oflag=direct
+mkfs.ext4 rootfs1.img
+# Put ubuntu.tar.gz into the ubuntu.img that has been mounted to rootfs
+sudo mount -t ext4 rootfs1.img rootfs/
+sudo tar -xzf ubuntu-base-22.04.5-base-arm64.tar.gz -C rootfs/
 
-# Let rootfs bind and get some information and hardware of the physical machine
+# Bind rootfs to get some information and hardware from the physical machine
 # qemu-path is your qemu path
 sudo cp qemu-path/build/qemu-system-aarch64 rootfs/usr/bin/
 sudo cp /etc/resolv.conf rootfs/etc/resolv.conf
@@ -250,10 +252,11 @@ sudo mount -o bind /dev/pts rootfs/dev/pts
 
 # Executing this command may report an error, please refer to the solution below
 sudo chroot rootfs
-sudo apt-get install git sudo vim bash-completion \
-		kmod net-tools iputils-ping resolvconf ntpdate
+apt-get update
+apt-get install git sudo vim bash-completion \
+		kmod net-tools iputils-ping resolvconf ntpdate screen
 
-# The following content surrounded by # is optional
+# The following content surrounded by # can be done or not
 ###################
 adduser arm64
 adduser arm64 sudo
@@ -271,7 +274,7 @@ sudo umount rootfs/dev/pts
 sudo umount rootfs/dev
 sudo umount rootfs
 </code></pre>
-<p>Finally, unmount the mount to complete the root file system production.</p>
+<p>Finally, unmount the mount to complete the production of the root file system.</p>
 <blockquote>
 <p>When executing <code>sudo chroot .</code>, if you encounter the error <code>chroot: failed to run command ‘/bin/bash’: Exec format error</code>, you can execute the command:</p>
 <pre><code>sudo apt-get install qemu-user-static
@@ -281,36 +284,41 @@ sudo update-binfmts --enable qemu-aarch64
 <h2 id="5-rust-environment-configuration"><a class="header" href="#5-rust-environment-configuration">5. Rust Environment Configuration</a></h2>
 <p>Please refer to: <a href="https://course.rs/first-try/intro.html">Rust Language Bible</a></p>
 <h2 id="6-compile-and-run-hvisor"><a class="header" href="#6-compile-and-run-hvisor">6. Compile and Run hvisor</a></h2>
-<p>First, pull the <a href="https://github.com/KouweiLee/hvisor">hvisor code repository</a> locally, then switch to the dev branch, and in the hvisor/images/aarch64 folder, put the previously compiled root file system and Linux kernel image respectively in the virtdisk and kernel directories, and rename them as rootfs1.ext4 and Image respectively. And in the devicetree directory, execute <code>make all</code>.</p>
+<p>First, pull the <a href="https://github.com/KouweiLee/hvisor">hvisor code repository</a> locally, then switch to the dev branch, and in the hvisor/images/aarch64 folder, put the previously compiled root file system and Linux kernel image in the virtdisk and kernel directories respectively, and rename them to rootfs1.ext4 and Image.</p>
+<p>Second, prepare the configuration files. Taking the <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/qemu-aarch64/with_virtio_blk_console">virtio-blk&amp;console example</a> as an example, this directory contains 6 files, perform the following operations on these 6 files:</p>
+<ul>
+<li>linux1.dts: Root Linux's device tree, used by hvisor at startup.</li>
+<li>linux2.dts: Zone1 Linux's device tree, needed by hvisor-tool when starting zone1. Replace linux1.dts and linux2.dts in the devicetree directory with the same name files, and execute <code>make all</code> to compile, obtaining linux1.dtb and linux2.dtb.</li>
+<li>qemu_aarch64.rs and qemu-aarch64.mk directly replace the files with the same name in the hvisor repository.</li>
+</ul>
 <p>Then, in the hvisor directory, execute:</p>
-<pre><code>make ARCH=aarch64 LOG=info FEATURES=platform_qemu run
+<pre><code>make ARCH=aarch64 BOARD=qemu FEATURES=platform_qemu,gicv3 LOG=info run
 </code></pre>
-<p>Afterward, you will enter the uboot startup interface, under this interface execute:</p>
+<p>Afterward, you will enter the uboot startup interface. In this interface, execute:</p>
 <pre><code>bootm 0x40400000 - 0x40000000
 </code></pre>
-<p>This startup command will boot hvisor from the physical address <code>0x40400000</code>, with the device tree address at <code>0x40000000</code>. When hvisor starts, it will automatically start root linux (used for management) and enter the shell interface of root linux, root linux is zone0, taking on management tasks.</p>
+<p>This boot command will start hvisor from the physical address <code>0x40400000</code>. <code>0x40000000</code> is essentially no longer used, but is still retained for historical reasons. When hvisor starts, it will automatically start root linux (Linux used for management), and enter the shell interface of root linux. Root linux is zone0, which undertakes management tasks.</p>
 <blockquote>
-<p>If missing <code>dtc</code>, you can execute the command:</p>
+<p>If you are missing <code>dtc</code>, you can execute the command:</p>
 <pre><code>sudo apt install device-tree-compiler
 </code></pre>
 </blockquote>
-<h2 id="7-use-hvisor-tool-to-start-zone1-linux"><a class="header" href="#7-use-hvisor-tool-to-start-zone1-linux">7. Use hvisor-tool to Start zone1-linux</a></h2>
-<p>First, complete the compilation of the latest version of hvisor-tool. For details, please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a> (the Chinese version is the latest version, the English README may not be updated in time). For example, if you want to compile a command line tool for arm64, and the source code of the Linux image in the Hvisor environment is located at <code>~/linux</code>, you can execute</p>
+<h2 id="7-use-hvisor-tool-to-start-zone1-linux"><a class="header" href="#7-use-hvisor-tool-to-start-zone1-linux">7. Use hvisor-tool to Start Zone1-linux</a></h2>
+<p>First, complete the compilation of the latest version of hvisor-tool. For specific details, please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>. For example, if you want to compile a command-line tool for arm64, and the source code of the Linux image in the Hvisor environment is compiled from the source code directory located at <code>~/linux</code>, you can execute</p>
 <pre><code>make all ARCH=arm64 LOG=LOG_WARN KDIR=~/linux
 </code></pre>
 <blockquote>
-<p>Please make sure that the Linux image in Hvisor is compiled from the Linux source directory specified in the options of compiling hvisor-tool.</p>
+<p>Please make sure that the Root Linux image in Hvisor is compiled from the Linux source code directory specified in the compilation options of hvisor-tool.</p>
 </blockquote>
-<p>After compilation, copy driver/hvisor.ko, tools/hvisor, driver/ivc.ko (if this file exists) to the directory where zone1 linux is started in the image/virtdisk/rootfs1.ext4 root file system (currently /home/arm64); then put the kernel image of zone1 (if it is the same Linux as zone0, copy a copy of image/aarch64/kernel/Image), and the device tree (image/aarch64/linux2.dtb) in the same directory (/home/arm64) of rootfs1.ext4, and rename them as Image and linux2.dtb respectively.</p>
-<p>Finally, copy rootfs1.ext4 in place in image/aarch64/virtdisk, rename it as rootfs2.etx4.</p>
-<p>Then, zone1-linux can be started on QEMU through root linux-zone0.</p>
+<p>After compilation, copy driver/hvisor.ko and tools/hvisor to the directory where zone1 linux starts in the image/virtdisk/rootfs1.ext4 root file system (for example, /same_path/); then put the kernel image of zone1 (if it is the same Linux as zone0, just copy a copy of image/aarch64/kernel/Image) and the device tree (image/aarch64/linux2.dtb) in the same directory (/same_path/), and rename them to Image and linux2.dtb.</p>
+<p>Then you need to create a root file system for Zone1 linux. You can copy a copy of image/aarch64/virtdisk/rootfs1.ext4, or repeat step 4 (preferably reduce the image size), and rename it to rootfs2.etx4. Then put rootfs2.ext4 in the same directory (/same_path/) as rootfs1.ext4.</p>
 <blockquote>
-<p>For detailed steps to start zone1-linux, refer to the README of hvisor-tool. Here is a reference (subject to hvisor-tool), where linux2.json is the configuration file for zone1-linux:</p>
+<p>If the capacity of rootfs1.ext4 is not enough, you can refer to <a href="https://blog.syswonder.org/#/2023/20230421_ARM64-QEMU-jailhouse?id=_2-img%e6%89%a9%e5%ae%b9">img expansion</a> to expand rootfs1.ext4.</p>
 </blockquote>
-<pre><code># Execute in the /home/arm64 directory:
-insmod hvisor.ko
-./hvisor zone start linux2.json
-</code></pre>
+<p>Then you can start zone1-linux on QEMU through root linux-zone0.</p>
+<blockquote>
+<p>For detailed steps on starting zone1-linux, refer to the README of hvisor-tool and the <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/qemu-aarch64/with_virtio_blk_console/README.md">startup example</a></p>
+</blockquote>
 
                     </main>
 
