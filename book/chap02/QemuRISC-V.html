@@ -156,21 +156,21 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="install-qemu"><a class="header" href="#install-qemu">Install qemu</a></h1>
-<p>Install QEMU 7.2.12:</p>
-<pre><code>wget https://download.qemu.org/qemu-7.2.12.tar.xz
+<p>Install QEMU 9.0.2:</p>
+<pre><code>wget https://download.qemu.org/qemu-9.0.2.tar.xz
 # Unzip
-tar xvJf qemu-7.2.12.tar.xz
-cd qemu-7.2.12
+tar xvJf qemu-9.0.2.tar.xz
+cd qemu-9.0.2
 # Configure Riscv support
 ./configure --target-list=riscv64-softmmu,riscv64-linux-user 
 make -j$(nproc)
 # Add to environment variable
-export PATH=$PATH:/path/to/qemu-7.2.12/build
-# Test if installation is successful
+export PATH=$PATH:/path/to/qemu-9.0.2/build
+# Test if installation was successful
 qemu-system-riscv64 --version
 </code></pre>
-<h1 id="install-cross-compiler"><a class="header" href="#install-cross-compiler">Install Cross Compiler</a></h1>
-<p>The RISC-V cross compiler needs to be obtained and compiled from riscv-gnu-toolchain.</p>
+<h1 id="install-cross-compiler"><a class="header" href="#install-cross-compiler">Install cross-compiler</a></h1>
+<p>The Riscv cross-compiler needs to be obtained and compiled from riscv-gnu-toolchain.</p>
 <pre><code># Install necessary tools
 sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev
 
@@ -178,7 +178,7 @@ git clone https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
 git rm qemu 
 git submodule update --init --recursive
-# The above operations will occupy more than 5GB of disk space
+# The above operation will occupy more than 5GB of disk space
 # If git reports a network error, you can execute:
 git config --global http.postbuffer 524288000
 </code></pre>
@@ -199,11 +199,11 @@ cd linux
 git checkout v6.2
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- defconfig
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- modules -j$(nproc)
-# Start compilation
+# Start compiling
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- Image -j$(nproc)
 
 </code></pre>
-<h1 id="create-ubuntu-root-file-system"><a class="header" href="#create-ubuntu-root-file-system">Create Ubuntu Root File System</a></h1>
+<h1 id="make-ubuntu-root-filesystem"><a class="header" href="#make-ubuntu-root-filesystem">Make Ubuntu root filesystem</a></h1>
 <pre><code>wget http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.2-base-riscv64.tar.gz
 mkdir rootfs
 dd if=/dev/zero of=riscv_rootfs.img bs=1M count=1024 oflag=direct
@@ -231,10 +231,17 @@ sudo umount rootfs/dev
 sudo umount rootfs
 </code></pre>
 <h1 id="run-hvisor"><a class="header" href="#run-hvisor">Run hvisor</a></h1>
-<p>Place the prepared root file system and Linux kernel image in the specified location under the hvisor directory, and execute <code>make run ARCH=riscv64</code> in the root directory of hvisor</p>
-<p>By default, PLIC is used, execute <code>make run ARCH=riscv64 IRQ=aia</code> to enable AIA specification</p>
-<h1 id="possible-issues"><a class="header" href="#possible-issues">Possible Issues</a></h1>
-<p>After running Linux, the display shows <code>/bin/sh: 0: can't access tty; job control turned off</code>, type <code>bash</code> in the console.</p>
+<p>Place the prepared root filesystem and Linux kernel image in the specified location in the hvisor directory, then execute <code>make run ARCH=riscv64</code> in the hvisor root directory</p>
+<p>By default, it uses PLIC, execute <code>make run ARCH=riscv64 IRQ=aia</code> to enable AIA specification</p>
+<h1 id="start-non-root-linux"><a class="header" href="#start-non-root-linux">Start non-root linux</a></h1>
+<p>Use hvisor-tool to generate the hvisor.ko file, then you can start zone1-linux through root linux-zone0 on QEMU.</p>
+<p>After starting root linux, execute in the /home directory</p>
+<pre><code class="language-bash">sudo insmod hvisor.ko
+rm nohup.out
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+nohup ./hvisor zone start linux2-aia.json &amp;&amp; cat nohup.out | grep "char device" &amp;&amp; script /dev/null
+</code></pre>
 
                     </main>
 

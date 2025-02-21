@@ -349,21 +349,21 @@ insmod hvisor.ko
 ./hvisor zone start linux2.json
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="install-qemu"><a class="header" href="#install-qemu">Install qemu</a></h1>
-<p>Install QEMU 7.2.12:</p>
-<pre><code>wget https://download.qemu.org/qemu-7.2.12.tar.xz
+<p>Install QEMU 9.0.2:</p>
+<pre><code>wget https://download.qemu.org/qemu-9.0.2.tar.xz
 # Unzip
-tar xvJf qemu-7.2.12.tar.xz
-cd qemu-7.2.12
+tar xvJf qemu-9.0.2.tar.xz
+cd qemu-9.0.2
 # Configure Riscv support
 ./configure --target-list=riscv64-softmmu,riscv64-linux-user 
 make -j$(nproc)
 # Add to environment variable
-export PATH=$PATH:/path/to/qemu-7.2.12/build
-# Test if installation is successful
+export PATH=$PATH:/path/to/qemu-9.0.2/build
+# Test if installation was successful
 qemu-system-riscv64 --version
 </code></pre>
-<h1 id="install-cross-compiler"><a class="header" href="#install-cross-compiler">Install Cross Compiler</a></h1>
-<p>The RISC-V cross compiler needs to be obtained and compiled from riscv-gnu-toolchain.</p>
+<h1 id="install-cross-compiler"><a class="header" href="#install-cross-compiler">Install cross-compiler</a></h1>
+<p>The Riscv cross-compiler needs to be obtained and compiled from riscv-gnu-toolchain.</p>
 <pre><code># Install necessary tools
 sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev
 
@@ -371,7 +371,7 @@ git clone https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
 git rm qemu 
 git submodule update --init --recursive
-# The above operations will occupy more than 5GB of disk space
+# The above operation will occupy more than 5GB of disk space
 # If git reports a network error, you can execute:
 git config --global http.postbuffer 524288000
 </code></pre>
@@ -392,11 +392,11 @@ cd linux
 git checkout v6.2
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- defconfig
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- modules -j$(nproc)
-# Start compilation
+# Start compiling
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- Image -j$(nproc)
 
 </code></pre>
-<h1 id="create-ubuntu-root-file-system"><a class="header" href="#create-ubuntu-root-file-system">Create Ubuntu Root File System</a></h1>
+<h1 id="make-ubuntu-root-filesystem"><a class="header" href="#make-ubuntu-root-filesystem">Make Ubuntu root filesystem</a></h1>
 <pre><code>wget http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.2-base-riscv64.tar.gz
 mkdir rootfs
 dd if=/dev/zero of=riscv_rootfs.img bs=1M count=1024 oflag=direct
@@ -424,10 +424,17 @@ sudo umount rootfs/dev
 sudo umount rootfs
 </code></pre>
 <h1 id="run-hvisor"><a class="header" href="#run-hvisor">Run hvisor</a></h1>
-<p>Place the prepared root file system and Linux kernel image in the specified location under the hvisor directory, and execute <code>make run ARCH=riscv64</code> in the root directory of hvisor</p>
-<p>By default, PLIC is used, execute <code>make run ARCH=riscv64 IRQ=aia</code> to enable AIA specification</p>
-<h1 id="possible-issues"><a class="header" href="#possible-issues">Possible Issues</a></h1>
-<p>After running Linux, the display shows <code>/bin/sh: 0: can't access tty; job control turned off</code>, type <code>bash</code> in the console.</p>
+<p>Place the prepared root filesystem and Linux kernel image in the specified location in the hvisor directory, then execute <code>make run ARCH=riscv64</code> in the hvisor root directory</p>
+<p>By default, it uses PLIC, execute <code>make run ARCH=riscv64 IRQ=aia</code> to enable AIA specification</p>
+<h1 id="start-non-root-linux"><a class="header" href="#start-non-root-linux">Start non-root linux</a></h1>
+<p>Use hvisor-tool to generate the hvisor.ko file, then you can start zone1-linux through root linux-zone0 on QEMU.</p>
+<p>After starting root linux, execute in the /home directory</p>
+<pre><code class="language-bash">sudo insmod hvisor.ko
+rm nohup.out
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+nohup ./hvisor zone start linux2-aia.json &amp;&amp; cat nohup.out | grep "char device" &amp;&amp; script /dev/null
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nxp-launches-jailhouse"><a class="header" href="#nxp-launches-jailhouse">NXP Launches Jailhouse</a></h1>
 <p>Date: 2024/2/25
 Update Date: 2024/3/13</p>
@@ -3244,12 +3251,12 @@ struct hvisor_event {
 <blockquote>
 <p>Since the PTY master and PTY slave are connected by a TTY driver, which includes a line discipline to pass the data written from the PTY master to the PTY slave back to the PTY master, we need to disable this functionality using the <code>cfmakeraw</code> function to turn off the line discipline feature.</p>
 </blockquote>
-<div style="break-before: page; page-break-before: always;"></div><p>PCI devices mainly have three spaces: Configuration Space, Memory Space, and I/O Space.</p>
+<div style="break-before: page; page-break-before: always;"></div><p>PCI devices primarily have three spaces: Configuration Space, Memory Space, and I/O Space.</p>
 <h3 id="1-configuration-space"><a class="header" href="#1-configuration-space">1. Configuration Space</a></h3>
 <ul>
 <li><strong>Purpose</strong>: Used for device initialization and configuration.</li>
 <li><strong>Size</strong>: Each PCI device has 256 bytes of configuration space.</li>
-<li><strong>Access method</strong>: Accessed via bus number, device number, and function number.</li>
+<li><strong>Access Method</strong>: Accessed via bus number, device number, and function number.</li>
 <li><strong>Contents</strong>:
 <ul>
 <li>Device identification information (such as vendor ID, device ID).</li>
@@ -3263,7 +3270,7 @@ struct hvisor_event {
 <ul>
 <li><strong>Purpose</strong>: Used to access device registers and memory, suitable for high bandwidth access.</li>
 <li><strong>Size</strong>: Defined by the device manufacturer, mapped into the system memory address space.</li>
-<li><strong>Access method</strong>: Accessed via memory read and write instructions.</li>
+<li><strong>Access Method</strong>: Accessed via memory read/write instructions.</li>
 <li><strong>Contents</strong>:
 <ul>
 <li>Device registers: Used for control and status reading.</li>
@@ -3273,9 +3280,9 @@ struct hvisor_event {
 </ul>
 <h3 id="3-io-space"><a class="header" href="#3-io-space">3. I/O Space</a></h3>
 <ul>
-<li><strong>Purpose</strong>: Used to access device control registers, suitable for low bandwidth access.</li>
+<li><strong>Purpose</strong>: Used to access the device's control registers, suitable for low bandwidth access.</li>
 <li><strong>Size</strong>: Defined by the device manufacturer, mapped into the system's I/O address space.</li>
-<li><strong>Access method</strong>: Accessed via special I/O instructions (such as <code>in</code> and <code>out</code>).</li>
+<li><strong>Access Method</strong>: Accessed via special I/O instructions (such as <code>in</code> and <code>out</code>).</li>
 <li><strong>Contents</strong>:
 <ul>
 <li>Device control registers: Used to perform specific I/O operations.</li>
@@ -3288,12 +3295,75 @@ struct hvisor_event {
 <li><strong>Memory Space</strong> is used for high-speed access to device registers and memory.</li>
 <li><strong>I/O Space</strong> is used for low-speed access to device control registers.</li>
 </ul>
-<p>PCI virtualization mainly involves managing the three spaces mentioned above. Considering that most devices do not have multiple PCI buses, and the ownership of the PCI bus generally belongs to zone0, to ensure the access speed of PCI devices in zone0, hvisor does not process the PCI bus and PCI devices in zone0 when there is no need to allocate devices on this bus to other zones.</p>
-<p>When allocating PCI devices to a zone, we need to ensure that Linux in zone0 no longer uses them. As long as the devices are allocated to other zones, zone0 should not access these devices. Unfortunately, we cannot simply use PCI hot-plugging to remove/re-add devices at runtime, as Linux may reprogram the BARs and locate resources to positions we do not expect or allow. Therefore, a driver in the zone0 kernel needs to intercept access to these PCI devices, and we turned our attention to the hvisor tool.</p>
-<p>The hvisor tool registers itself as a PCI virtual driver and claims management of these devices when other zones use them. Before creating a zone, hvisor lets these devices unbind from their own drivers and bind to the hvisor tool. When a zone is destroyed, these devices are actually no longer used by any zone, but from the perspective of zone0, the hvisor tool is still a valid virtual driver, so the release of the devices needs to be done manually. The hvisor tool releases the devices bound to these zones, from the perspective of zone0 Linux, these devices are not bound to any drivers, so if these devices are needed, Linux will automatically rebind the correct drivers.</p>
-<p>Now we need to allow the zone to correctly access the PCI devices. To achieve this goal as simply as possible, we directly reused the structure of the PCI bus, meaning that the content about the PCI bus will appear in the device tree of the zone that needs to use the devices on this bus, but other than the zone that actually owns this bus, other zones can only access the device through mmio proxy by hvisor. When a zone tries to access a PCI device, hvisor checks whether it owns the device, and the ownership is declared when the zone is created.</p>
-<p>Currently, the treatment of I/O space and memory space is the same as that of configuration space. Because of the uniqueness of the BARs resources, the configuration space cannot be directly allocated to a zone, and the frequency of access to the BAR space is low, which does not significantly affect efficiency. However, direct allocation of I/O space and memory space is theoretically feasible, and further, I/O space and memory space will be directly allocated to the corresponding zone to improve access speed.</p>
-<p>To facilitate testing PCI virtualization in QEMU, we wrote a PCI device.</p>
+<p>PCI virtualization mainly involves managing the above three spaces. Considering that most devices do not have multiple PCI buses, and the ownership of the PCI bus generally belongs to zone0, to ensure the access speed of PCI devices in zone0, hvisor does not process the PCI bus and PCI devices in zone0 when there is no need to allocate devices on this bus to other zones.</p>
+<p>When allocating PCI devices to a zone, we need to ensure that Linux in zone0 no longer uses them. As long as the devices are allocated to other zones, zone0 should not access these devices. Unfortunately, we cannot simply use PCI hot-plugging to remove/re-add devices at runtime, as Linux might reprogram the BARs and locate resources in positions we do not expect or allow. Therefore, a driver in the zone0 kernel is needed to intercept access to these PCI devices, and we turn to the hvisor tool.</p>
+<p>The hvisor tool registers itself as a PCI virtual driver and claims management of these devices when other zones use them. Before creating a zone, hvisor allows these devices to unbind from their own drivers and bind to the hvisor tool. When a zone is destroyed, these devices are actually no longer in use by any zone, but from the perspective of zone0, the hvisor tool is still a valid virtual driver, so the release of the devices needs to be done manually. The hvisor tool releases the devices bound to these zones, and from the perspective of zone0 Linux, these devices are not bound to any drivers, so if these devices are needed, Linux will automatically rebind the correct drivers.</p>
+<p>Now we need to allow zones to correctly access PCI devices, and to achieve this goal as simply as possible, we directly reuse the structure of the PCI bus, meaning the content about the PCI bus will appear in the device tree of the zones that need to use devices on this bus, but other than the zone that truly owns this bus, other zones can only access the device through mmio proxy by hvisor. When a zone attempts to access a PCI device, hvisor checks if it owns the device, which is declared when the zone is created. If a zone accesses the configuration space of a device that belongs to it, hvisor will correctly return the information.</p>
+<p>Currently, the handling of I/O space and memory space is the same as for configuration space. Due to the uniqueness of BAR resources, configuration space cannot be directly allocated to a zone, and the frequency of access to BAR space is low, which does not significantly affect efficiency. However, direct allocation of I/O space and memory space is theoretically feasible, and further direct allocation of I/O space and memory space to the corresponding zone would improve access speed.</p>
+<p>To facilitate testing of PCI virtualization in QEMU, we wrote a PCI device.</p>
+<h1 id="pcie-resource-allocation-and-isolation"><a class="header" href="#pcie-resource-allocation-and-isolation">PCIe Resource Allocation and Isolation</a></h1>
+<h2 id="resource-allocation-method"><a class="header" href="#resource-allocation-method">Resource Allocation Method</a></h2>
+<p>In each zone's configuration file, the number of PCIe devices allocated to that zone is specified by <code>num_pci_devs</code>, and these devices' BDF is specified by <code>alloc_pci_devs</code>. Note that it must include 0.</p>
+<p>For example:</p>
+<pre><code class="language-json">{
+    "arch": "riscv",
+    "name": "linux2",
+    "zone_id": 1,
+    ///
+    "num_pci_devs": 2,
+    "alloc_pci_devs": [0, 16]
+}
+</code></pre>
+<h2 id="virt-pci"><a class="header" href="#virt-pci">virt PCI</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct PciRoot {
+    endpoints: Vec&lt;EndpointConfig&gt;,
+    bridges: Vec&lt;BridgeConfig&gt;,
+    alloc_devs: Vec&lt;usize&gt;, // include host bridge
+    phantom_devs: Vec&lt;PhantomCfg&gt;,
+    bar_regions: Vec&lt;BarRegion&gt;,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>It should be noted that <code>phantom_devs</code> are devices that do not belong to this virtual machine; <code>bar_regions</code> are the BAR spaces of devices that belong to this virtual machine.</p>
+<h3 id="phantom_dev"><a class="header" href="#phantom_dev">phantom_dev</a></h3>
+<p>This part of the code can be found in <code>src/pci/phantom_cfg.rs</code>. When the virtual machine first accesses a device that does not belong to it, a <code>phantom_dev</code> is created.</p>
+<p>The handling function can be found in <code>src/pci/pci.rs</code> under <code>mmio_pci_handler</code>, which is our function for handling the virtual machine's access to the configuration space.</p>
+<h4 id="header"><a class="header" href="#header">header</a></h4>
+<p><strong>hvisor lets each virtual machine see the same PCIe topology, which can avoid complex processing brought by different BAR and bus number allocations, especially for configurations involving TLB forwarding in bridge devices, saving a lot of effort.</strong></p>
+<p>However, for Endpoints not allocated to the virtual machine, they are virtualized as <code>phantom_devs</code>. When accessing the header, it should return a specific <code>vendor-id</code> and <code>device-id</code>, such as 0x77777777, and return a reserved <code>class-code</code>. For such devices that exist but cannot find corresponding drivers, the virtual machine will only perform some basic configurations during the enumeration stage, such as reserving BARs.</p>
+<h4 id="capabilities"><a class="header" href="#capabilities">capabilities</a></h4>
+<p>The capabilities section involves MSI configurations and more. When the virtual machine accesses the <code>capabilities-pointer</code>, it returns 0, indicating that the device has no capabilities, preventing overwriting the configuration of the device's owning virtual machine (e.g., the configuration content in the MSI-TABLE in the BAR space).</p>
+<h4 id="command"><a class="header" href="#command">command</a></h4>
+<p>Additionally, for the <code>COMMAND</code> register, when the virtual machine detects no <code>MSI capabilities</code>, it will turn on traditional interrupts, which involves setting the <code>DisINTx</code> field in the <code>COMMAND</code> register. Hardware requires choosing between MSI and legacy, avoiding contradictions set by different virtual machines (originally, non-owning virtual machines should not set this), hence we need a virtual <code>COMMAND</code> register.</p>
+<h3 id="about-bar"><a class="header" href="#about-bar">About BAR</a></h3>
+<p>This part of the code can be found in <code>src/pci/pcibar.rs</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct PciBar {
+    val: u32,
+    bar_type: BarType,
+    size: usize,
+}
+
+pub struct BarRegion{
+    pub start: usize,
+    pub size: usize,
+    pub bar_type: BarType
+}
+
+pub enum BarType {
+    Mem32,
+    Mem64,
+    IO,
+    #[default]
+    Unknown,
+}
+<span class="boring">}</span></code></pre></pre>
+<p>If each virtual machine sees the same topology, then the allocation of BAR space is completely the same.</p>
+<p>Then, when a non-root virtual machine starts, it directly reads the BAR configured by the root to know which BAR spaces each virtual machine should access (determined by the devices allocated to it).</p>
+<p>If the virtual machine accesses the BAR and then traps into the hypervisor for proxy, the efficiency is low. We should let the hardware do this, directly writing this space into the virtual machine's stage-2 page table. Note in the <code>pci_bars_register</code> function, when filling in the page table, according to the <code>BarRegion</code>'s <code>BarType</code>, find the mapping relationship between the PCI address and the CPU address of that type (written in the device tree, also synchronized in the configuration file's <code>pci_config</code>), and convert the PCI address in the BAR configuration to the corresponding CPU address before writing it into the page table.</p>
+<p><strong>The method of obtaining the BAR allocation result from the root-configured BAR as described above mainly distinguishes between Endpoint and Bridge (because the number of BARs is different for the two), accesses the configuration space according to BDF, first reads the root's configuration result, then writes all 1s to get the size, and then writes back the configuration result. Specific code can be combined with <code>endpoint.rs</code>, <code>bridge.rs</code>, and <code>pcibar.rs</code> for reference, with special attention needed for handling 64-bit memory addresses.</strong></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="hvisor-management-tool"><a class="header" href="#hvisor-management-tool">hvisor Management Tool</a></h1>
 <p>hvisor manages the entire system through a Root Linux that manages virtual machines. Root Linux provides services for starting and shutting down virtual machines and starting and shutting down Virtio daemons through a set of management tools. The management tools include a command-line tool and a kernel module. The command-line tool is used to parse and execute commands entered by the user, and the kernel module is used for communication between the command-line tool, Virtio daemon, and Hypervisor. The repository address for the management tools is: <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
 <h2 id="starting-virtual-machines"><a class="header" href="#starting-virtual-machines">Starting Virtual Machines</a></h2>
