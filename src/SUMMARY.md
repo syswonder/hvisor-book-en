@@ -6,9 +6,9 @@
 
 - [hvisor Overview](./chap01/Overview.md)
 
-- [Instruction Sets and Processors Supported by hvisor](./chap01/ISA.md)
+- [hvisor Supported Instruction Sets and Processors](./chap01/ISA.md)
 
-- [Hardware Platforms Supported by hvisor](./chap01/Board.md)
+- [hvisor Supported Hardware Platforms](./chap01/Board.md)
 
 # hvisor Quick Start Guide
 
@@ -81,16 +81,16 @@
 
         - [RISC-V IOMMU Standard Implementation](./chap04/subchap03/IOMMU/RISC-IOMMU.md)
 - [VirtIO](./chap04/subchap03/VirtIO/VirtIO-Define.md)
-    
+  
     - [Block](./chap04/subchap03/VirtIO/BlockDevice.md)
     - [Net](./chap04/subchap03/VirtIO/NetDevice.md)
     - [Console](./chap04/subchap03/VirtIO/ConsoleDevice.md)
-    - [GPU]()
+    - [GPU](./chap04/subchap03/VirtIO/GPUDevice.md)
 - [PCI Virtualization](./chap04/subchap03/PCI-Virtualization.md)
 - [Hvisor Management Tools](./chap04/subchap04/ManageTools.md)
   
     - [Hypercall](./chap04/subchap04/HyperCall.md)
 
-# hvisor's Plan
+# hvisor's Planning
 
 - [TODO]()
