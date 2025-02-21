@@ -1,20 +1,20 @@
 # Install qemu
-Install QEMU 7.2.12:
+Install QEMU 9.0.2:
 ```
-wget https://download.qemu.org/qemu-7.2.12.tar.xz
+wget https://download.qemu.org/qemu-9.0.2.tar.xz
 # Unzip
-tar xvJf qemu-7.2.12.tar.xz
-cd qemu-7.2.12
+tar xvJf qemu-9.0.2.tar.xz
+cd qemu-9.0.2
 # Configure Riscv support
 ./configure --target-list=riscv64-softmmu,riscv64-linux-user 
 make -j$(nproc)
 # Add to environment variable
-export PATH=$PATH:/path/to/qemu-7.2.12/build
-# Test if installation is successful
+export PATH=$PATH:/path/to/qemu-9.0.2/build
+# Test if installation was successful
 qemu-system-riscv64 --version
 ```
-# Install Cross Compiler
-The RISC-V cross compiler needs to be obtained and compiled from riscv-gnu-toolchain.
+# Install cross-compiler
+The Riscv cross-compiler needs to be obtained and compiled from riscv-gnu-toolchain.
 ```
 # Install necessary tools
 sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev
@@ -23,7 +23,7 @@ git clone https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
 git rm qemu 
 git submodule update --init --recursive
-# The above operations will occupy more than 5GB of disk space
+# The above operation will occupy more than 5GB of disk space
 # If git reports a network error, you can execute:
 git config --global http.postbuffer 524288000
 ```
@@ -46,11 +46,11 @@ cd linux
 git checkout v6.2
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- defconfig
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- modules -j$(nproc)
-# Start compilation
+# Start compiling
 make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- Image -j$(nproc)
 
 ```
-# Create Ubuntu Root File System
+# Make Ubuntu root filesystem
 ```
 wget http://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.2-base-riscv64.tar.gz
 mkdir rootfs
@@ -79,9 +79,18 @@ sudo umount rootfs/dev
 sudo umount rootfs
 ```
 # Run hvisor
-Place the prepared root file system and Linux kernel image in the specified location under the hvisor directory, and execute `make run ARCH=riscv64` in the root directory of hvisor
+Place the prepared root filesystem and Linux kernel image in the specified location in the hvisor directory, then execute `make run ARCH=riscv64` in the hvisor root directory
 
-By default, PLIC is used, execute `make run ARCH=riscv64 IRQ=aia` to enable AIA specification
+By default, it uses PLIC, execute `make run ARCH=riscv64 IRQ=aia` to enable AIA specification
 
-# Possible Issues
-After running Linux, the display shows `/bin/sh: 0: can't access tty; job control turned off`, type `bash` in the console.
+# Start non-root linux
+Use hvisor-tool to generate the hvisor.ko file, then you can start zone1-linux through root linux-zone0 on QEMU.
+
+After starting root linux, execute in the /home directory
+```bash
+sudo insmod hvisor.ko
+rm nohup.out
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+nohup ./hvisor zone start linux2-aia.json && cat nohup.out | grep "char device" && script /dev/null
+```
