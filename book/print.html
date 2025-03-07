@@ -443,453 +443,219 @@ mkdir -p /dev/pts
 mount -t devpts devpts /dev/pts
 nohup ./hvisor zone start linux2-aia.json &amp;&amp; cat nohup.out | grep "char device" &amp;&amp; script /dev/null
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="nxp-launches-jailhouse"><a class="header" href="#nxp-launches-jailhouse">NXP Launches Jailhouse</a></h1>
-<p>Date: 2024/2/25
-Update Date: 2024/3/13</p>
-<p>Authors: Yang Junyi, Chen Xingyu</p>
-<p>Overall Approach:</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="starting-hvisor-on-nxp-imx8mp"><a class="header" href="#starting-hvisor-on-nxp-imx8mp">Starting hvisor on NXP-IMX8MP</a></h1>
+<p>Date: 2024/2/25</p>
+<p>Update Date: 2025/3/7</p>
+<p>Authors: Yang Junyi, Chen Xingyu, Li Guowei, Chen Linkun</p>
+<h2 id="1-download-the-linux-source-code-provided-by-the-manufacturer"><a class="header" href="#1-download-the-linux-source-code-provided-by-the-manufacturer">1. Download the Linux source code provided by the manufacturer</a></h2>
+<p>https://pan.baidu.com/s/1XimrhPBQIG5edY4tPN9_pw?pwd=kdtk
+Extraction code: kdtk</p>
+<p>Enter the <code>Linux/sources/</code> directory, download the <code>OK8MP-linux-sdk.tar.bz2.0*</code> three compressed packages, after downloading, execute:</p>
+<pre><code>cd Linux/sources
+
+# Merge split compressed packages
+cat OK8MP-linux-sdk.tar.bz2.0* &gt; OK8MP-linux-sdk.tar.bz2
+
+# Unzip the merged compressed package
+tar -xvjf OK8MP-linux-sdk.tar.bz2
+
+</code></pre>
+<p>After decompression, the <code>OK8MP-linux-kernel</code> directory is the Linux source code directory.</p>
+<h2 id="2-compile-linux-source-code"><a class="header" href="#2-compile-linux-source-code">2. Compile Linux source code</a></h2>
+<h3 id="install-cross-compilation-tools"><a class="header" href="#install-cross-compilation-tools">Install cross-compilation tools</a></h3>
 <ol>
-<li>Boot the first Linux using an SD card, it is recommended to use Ubuntu's rootfs for this Linux and ensure it is network-enabled for easy package installation.</li>
-<li>Boot the root Linux and compile the Linux kernel and Jailhouse.</li>
-<li>Restart, modify the root dtb, and boot root Linux.</li>
-<li>Jailhouse boots nonroot Linux, which is the Linux on the eMMC (original manufacturer's Linux), specifying rootfs as eMMC.</li>
+<li>
+<p>Download the cross-compilation toolchain:</p>
+<pre><code class="language-bash">wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
+</code></pre>
+</li>
+<li>
+<p>Unzip the toolchain:</p>
+<pre><code class="language-bash">tar xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
+</code></pre>
+</li>
+<li>
+<p>Add the path so that <code>aarch64-none-linux-gnu-*</code> can be used directly, modify the <code>~/.bashrc</code> file:</p>
+<pre><code class="language-bash">echo 'export PATH=$PWD/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin:$PATH' &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</code></pre>
+</li>
 </ol>
-<h2 id="1-creating-an-ubuntu-sd-card-image"><a class="header" href="#1-creating-an-ubuntu-sd-card-image">1. Creating an Ubuntu SD Card Image</a></h2>
-<pre><code class="language-shell">wget https://cdimage.ubuntu.com/ubuntu-base/releases/18.04/release/ubuntu-base-18.04.5-base-arm64.tar.gz
-tar zxvf ubuntu-base-18.04.5-base-arm64.tar.gz
-
-cd ubuntu-base-18.04.5-base-arm64
-
-# chroot in x86
-sudo apt-get install qemu
-sudo cp /usr/bin/qemu-aarch64-static usr/bin/
-
-sudo mount /sys ./sys -o bind
-sudo mount /proc ./proc -o bind
-sudo mount /dev ./dev -o bind
-
-sudo mv etc/resolv.conf etc/resolv.conf.saved
-sudo cp /etc/resolv.conf etc
-
-sudo LC_ALL=C chroot . /bin/bash
-
-# chroot in arm
-sudo arch-chroot .
-
-sudo apt-get update 
-# Install necessary packages, such as vim, build-essential, python3, python3-dev, gcc, g++, git, make, kmod.
-sudo apt-get install &lt;PKG_NAME&gt; 
-
-exit
-
-# If using arch-chroot, no need to manually umount
-sudo umount ./sys
-sudo umount ./proc
-sudo umount ./dev
-
-mv etc/resolv.conf.saved etc/resolv.conf
-
-## Additionally, copy Linux and jailhouse to the SD card, change to local path here.
-sudo cp -r LINUX_DEMO ubuntu-base-18.04.5-base-arm64/home # Source path see Linux kernel compilation section
-sudo cp -r Jailhouse_DEMO ubuntu-base-18.04.5-base-arm64/home
-# Then copy the ubuntu-base-18.04.5-base-arm64 directory to the SD card as rootfs.
-# It is recommended to complete the "Compilation" section before copying, or you can compile after entering the system
-sudo fdisk -l # Determine the SD card device name
-sudo mount /dev/sdb1 /mnt 
-sudo cp -r ubuntu-base-18.04.5-base-arm64 /mnt
+<h3 id="compile-linux-1"><a class="header" href="#compile-linux-1">Compile Linux</a></h3>
+<ol>
+<li>
+<p>Switch to the Linux kernel source code directory:</p>
+<pre><code class="language-bash">cd Linux/sources/OK8MP-linux-sdk
 </code></pre>
-<h2 id="2-compile-nxp-linux-kernel"><a class="header" href="#2-compile-nxp-linux-kernel">2. Compile NXP Linux Kernel</a></h2>
-<p>The source code can be obtained from the manufacturer's materials (source location: /OKMX8MP-C_Linux5.4.70+Qt5.15.0_User Data_R5 (update date: 20231012)/Linux/Source/OK8MP-linux-sdk/OK8MP-linux-kernel)</p>
-<h3 id="adding-root-device-tree"><a class="header" href="#adding-root-device-tree">Adding root device tree</a></h3>
-<p>Device tree storage location is arch/arm64/boot/dts/freescale, add new device tree OK8MP-C-root.dts, mainly modify to disable usdhc3 (eMMC) and uart4, and share pins between usdhc3 and usdhc2 to facilitate booting non-root-linux</p>
-<p>Content:</p>
-<pre><code class="language-C">// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-/*
- * Copyright 2019 NXP
- */
+</li>
+<li>
+<p>Execute the compilation command:</p>
+<pre><code class="language-makefile"># Set Linux kernel configuration
+make OK8MP-C_defconfig ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-
 
-/dts-v1/;
+# Compile the Linux kernel
+make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- Image -j$(nproc)
 
-#include "OK8MP-C.dts"
-
-/ {
-        interrupt-parent = &lt;&amp;gic&gt;;
-
-        resmem: reserved-memory {
-                #address-cells = &lt;2&gt;;
-                #size-cells = &lt;2&gt;;
-                ranges;
-        };
-};
-
-&amp;cpu_pd_wait {
-        /delete-property/ compatible;
-};
-
-&amp;clk {
-        init-on-array = &lt;IMX8MP_CLK_USDHC3_ROOT
-                         IMX8MP_CLK_NAND_USDHC_BUS
-                         IMX8MP_CLK_HSIO_ROOT
-                         IMX8MP_CLK_UART4_ROOT
-                         IMX8MP_CLK_OCOTP_ROOT&gt;;
-};
-
-&amp;{/busfreq} {
-        status = "disabled";
-};
-
-&amp;{/reserved-memory} { // Reserved jailhouse memory area
-        jh_reserved: jh@fdc00000 {
-                no-map;
-                reg = &lt;0 0xfdc00000 0x0 0x400000&gt;;
-        };
-
-        loader_reserved: loader@fdb00000 {
-                no-map;
-                reg = &lt;0 0xfdb00000 0x0 0x00100000&gt;;
-        };
-
-        ivshmem_reserved: ivshmem@fda00000 {
-                no-map;
-                reg = &lt;0 0xfda00000 0x0 0x00100000&gt;;
-        };
-
-        ivshmem2_reserved: ivshmem2@fd900000 {
-                no-map;
-                reg = &lt;0 0xfd900000 0x0 0x00100000&gt;;
-        };
-
-        pci_reserved: pci@fd700000 {
-                no-map;
-                reg = &lt;0 0xfd700000 0x0 0x00200000&gt;;
-        };
-
-        inmate_reserved: inmate@60000000 {
-                no-map;
-                reg = &lt;0 0x60000000 0x0 0x10000000&gt;;
-        };
-};
-
-&amp;iomuxc {
-        pinctrl_uart4: uart4grp {
-                fsl,pins = &lt;
-                        MX8MP_IOMUXC_UART4_RXD__UART4_DCE_RX    0x49
-                        MX8MP_IOMUXC_UART4_TXD__UART4_DCE_TX    0x49
-                &gt;;
-        };
-};
-
-&amp;usdhc3 { // eMMC: mmc2, since this eMMC is nonroot, root should not occupy it, so disable it
-        status = "disabled";
-};
-
-&amp;uart4 { // This is also disabled, used for nonroot boot.
-        /delete-property/ dmas;
-        /delete-property/ dma-names;
-        pinctrl-names = "default";
-        pinctrl-0 = &lt;&amp;pinctrl_uart4&gt;;
-        status = "disabled";
-};
-
-&amp;uart2 { // uart1=ttymxc0 uart4=ttymxc3 default for ttymxc1.
-        /* uart4 is used by the 2nd OS, so configure pin and clk */
-        pinctrl-0 = &lt;&amp;pinctrl_uart2&gt;, &lt;&amp;pinctrl_uart4&gt;;
-        assigned-clocks = &lt;&amp;clk IMX8MP_CLK_UART4&gt;;
-        assigned-clock-parents = &lt;&amp;clk IMX8MP_CLK_24M&gt;;
-};
-
-&amp;usdhc2 {
-        pinctrl-0 = &lt;&amp;pinctrl_usdhc3&gt;, &lt;&amp;pinctrl_usdhc2&gt;, &lt;&amp;pinctrl_usdhc2_gpio&gt;;
-        pinctrl-1 = &lt;&amp;pinctrl_usdhc3&gt;, &lt;&amp;pinctrl_usdhc2_100mhz&gt;, &lt;&amp;pinctrl_usdhc2_gpio&gt;;
-        pinctrl-2 = &lt;&amp;pinctrl_usdhc3&gt;, &lt;&amp;pinctrl_usdhc2_200mhz&gt;, &lt;&amp;pinctrl_usdhc2_gpio&gt;;
-};
+# Copy the compiled image to the tftp directory
+cp arch/arm64/boot/Image ~/tftp/
 </code></pre>
-<h3 id="kernel-compilation"><a class="header" href="#kernel-compilation">Kernel Compilation</a></h3>
-<pre><code class="language-shell"># First, refer to the previous chroot and enter the source directory
-make OK8MP-C_defconfig # Configure default config
-make -j$(nproc) ARCH=arm64 # Compilation takes about 15 minutes
+</li>
+</ol>
+<p>This creates a tftp directory, convenient for later image organization and for using tftp to transfer images in the appendix.</p>
+<h2 id="3-create-an-sd-card"><a class="header" href="#3-create-an-sd-card">3. Create an SD card</a></h2>
+<ol>
+<li>
+<p>Insert the SD card into the card reader and connect it to the host.</p>
+</li>
+<li>
+<p>Switch to the Linux/Images directory.</p>
+</li>
+<li>
+<p>Execute the following commands to partition:</p>
+<pre><code class="language-bash">fdisk &lt;$DRIVE&gt;
+d  # Delete all partitions
+n  # Create a new partition
+p  # Select primary partition
+1  # Partition number 1
+16384  # Starting sector
+t  # Change partition type
+83  # Select Linux filesystem (ext4)
+w  # Save and exit
 </code></pre>
-<p>If the gcc version is high, you may encounter yylloc issues, which can be resolved by lowering the version or by adding extern in front of yylloc in scripts/dtc under dtc-lexer.lex.c_shipped</p>
-<p>If there are definition conflicts between jailhouse and the kernel, prioritize the kernel and modify jailhouse accordingly</p>
-<h3 id="compile-jailhouse"><a class="header" href="#compile-jailhouse">Compile jailhouse</a></h3>
-<p>Use jailhouse version v0.12 and manually add dts and configuration files</p>
-<pre><code class="language-shell">git checkout v0.12
+</li>
+<li>
+<p>Write the boot file to the SD card boot disk:</p>
+<pre><code class="language-bash">dd if=imx-boot_4G.bin of=&lt;$DRIVE&gt; bs=1K seek=32 conv=fsync
 </code></pre>
-<p>.c file addition location configs/arm64</p>
-<p>.dts file addition location configs/arm64/dts</p>
-<p>imx8mp.c</p>
-<pre><code class="language-C">/*
- * i.MX8MM Target
- *
- * Copyright 2018 NXP
- *
- * Authors:
- *  Peng Fan &lt;peng.fan@nxp.com&gt;
- *
- * This work is licensed under the terms of the GNU GPL, version 2.  See
- * the COPYING file in the top-level directory.
- *
- * Reservation via device tree: reg = &lt;0x0 0xffaf0000 0x0 0x510000&gt;
- */
-
-#include &lt;jailhouse/types.h&gt;
-#include &lt;jailhouse/cell-config.h&gt;
-
-struct {
-        struct jailhouse_system header;
-        __u64 cpus[1];
-        struct jailhouse_memory mem_regions[15];
-        struct jailhouse_irqchip irqchips[3];
-        struct jailhouse_pci_device pci_devices[2];
-} __attribute__((packed)) config = {
-        .header = {
-                .signature = JAILHOUSE_SYSTEM_SIGNATURE,
-                .revision = JAILHOUSE_CONFIG_REVISION,
-                .flags = JAILHOUSE_SYS_VIRTUAL_DEBUG_CONSOLE,
-                .hypervisor_memory = {
-                        .phys_start = 0xfdc00000,
-                        .size =       0x00400000,
-                },
-                .debug_console = {
-                        .address = 0x30890000,
-                        .size = 0x1000,
-                        .flags = JAILHOUSE_CON_TYPE_IMX |
-                                 JAILHOUSE_CON_ACCESS_MMIO |
-                                 JAILHOUSE_CON_REGDIST_4,
-                        .type = JAILHOUSE_CON_TYPE_IMX,
-                },
-                .platform_info = {
-                        .pci_mmconfig_base = 0xfd700000,
-                        .pci_mmconfig_end_bus = 0,
-                        .pci_is_virtual = 1,
-                        .pci_domain = 0,
-
-                        .arm = {
-                                .gic_version = 3,
-                                .gicd_base = 0x38800000,
-                                .gicr_base = 0x38880000,
-                                .maintenance_irq = 25,
-                        },
-                },
-                .root_cell = {
-                        .name = "imx8mp",
-
-                        .num_pci_devices = ARRAY_SIZE(config.pci_devices),
-                        .cpu_set_size = sizeof(config.cpus),
-                        .num_memory_regions = ARRAY_SIZE(config.mem_regions),
-                        .num_irqchips = ARRAY_SIZE(config.irqchips),
-                        /* gpt5/4/3/2 not used by root cell */
-                        .vpci_irq_base = 51, /* Not include 32 base */
-                },
-        },
-
-        .cpus = {
-                0xf,
-        },
-
-        .mem_regions = {
-                /* IVHSMEM shared memory region for 00:00.0 (demo )*/ {
-                        .phys_start = 0xfd900000,
-                        .virt_start = 0xfd900000,
-                        .size = 0x1000,
-                        .flags = JAILHOUSE_MEM_READ,
-                },
-                {
-                        .phys_start = 0xfd901000,
-                        .virt_start = 0xfd901000,
-                        .size = 0x9000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE ,
-                },
-                {
-                        .phys_start = 0xfd90a000,
-                        .virt_start = 0xfd90a000,
-                        .size = 0x2000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE ,
-                },
-                {
-                        .phys_start = 0xfd90c000,
-                        .virt_start = 0xfd90c000,
-                        .size = 0x2000,
-                        .flags = JAILHOUSE_MEM_READ,
-                },
-                {
-                        .phys_start = 0xfd90e000,
-                        .virt_start = 0xfd90e000,
-                        .size = 0x2000,
-                        .flags = JAILHOUSE_MEM_READ,
-                },
-                /* IVSHMEM shared memory regions for 00:01.0 (networking) */
-                JAILHOUSE_SHMEM_NET_REGIONS(0xfda00000, 0),
-                /* IO */ {
-                        .phys_start = 0x00000000,
-                        .virt_start = 0x00000000,
-                        .size =       0x40000000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
-                                JAILHOUSE_MEM_IO,
-                },
-                /* RAM 00*/ {
-                        .phys_start = 0x40000000,
-                        .virt_start = 0x40000000,
-                        .size = 0x80000000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
-                                JAILHOUSE_MEM_EXECUTE,
-                },
-                /* Inmate memory */{
-                        .phys_start = 0x60000000,
-                        .virt_start = 0x60000000,
-                        .size = 0x10000000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
-                                JAILHOUSE_MEM_EXECUTE | JAILHOUSE_MEM_DMA,
-                },
-                /* Loader */{
-                        .phys_start = 0xfdb00000,
-                        .virt_start = 0xfdb00000,
-                        .size = 0x100000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
-                                JAILHOUSE_MEM_EXECUTE,
-                },
-                /* OP-TEE reserved memory?? */{
-                        .phys_start = 0xfe000000,
-                        .virt_start = 0xfe000000,
-                        .size = 0x2000000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE,
-                },
-                /* RAM04 */{
-                        .phys_start = 0x100000000,
-                        .virt_start = 0x100000000,
-                        .size = 0xC0000000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE,
-                },
-        },
-
-        .irqchips = {
-                /* GIC */ {
-                        .address = 0x38800000,
-                        .pin_base = 32,
-                        .pin_bitmap = {
-                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
-                        },
-                },
-                /* GIC */ {
-                        .address = 0x38800000,
-                        .pin_base = 160,
-                        .pin_bitmap = {
-                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
-                        },
-                },
-                /* GIC */ {
-                        .address = 0x38800000,
-                        .pin_base = 288,
-                        .pin_bitmap = {
-                                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
-                        },
-                },
-        },
-
-        .pci_devices = {
-                { /* IVSHMEM 0000:00:00.0 (demo) */
-                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
-                        .domain = 0,
-                        .bdf = 0 &lt;&lt; 3,
-                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
-                        .shmem_regions_start = 0,
-                        .shmem_dev_id = 0,
-                        .shmem_peers = 3,
-                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_UNDEFINED,
-                },
-                { /* IVSHMEM 0000:00:01.0 (networking) */
-                        .type = JAILHOUSE_PCI_TYPE_IVSHMEM,
-                        .domain = 0,
-                        .bdf = 1 &lt;&lt; 3,
-                        .bar_mask = JAILHOUSE_IVSHMEM_BAR_MASK_INTX,
-                        .shmem_regions_start = 5,
-                        .shmem_dev_id = 0,
-                        .shmem_peers = 2,
-                        .shmem_protocol = JAILHOUSE_SHMEM_PROTO_VETH,
-                },
-        },
-};
+</li>
+<li>
+<p>Format the first partition of the SD card boot disk as ext4 format:</p>
+<pre><code class="language-bash">mkfs.ext4 &lt;$DRIVE&gt;1
 </code></pre>
-<p>imx8mp-linux-demo.c</p>
-<pre><code class="language-C">/*
- * iMX8MM target - linux-demo
- *
- * Copyright 2019 NXP
- *
- * Authors:
- *  Peng Fan &lt;peng.fan@nxp.com&gt;
- *
- * This work is licensed under the terms of the GNU GPL, version 2.  See
- * the COPYING file in the top-level directory.
- */
+</li>
+<li>
+<p>Remove the SD card reader, reconnect it. Extract the root file system rootfs.tar to the 1st partition of the SD card, rootfs.tar can be made by referring to <a href="https://hvisor.syswonder.org/chap02/QemuAArch64.html">qemu-aarch64</a>, or use the image below.</p>
+<pre><code class="language-bash">tar -xvf rootfs.tar -C &lt;path/to/mounted/SD/card/partition&gt;
+</code></pre>
+</li>
+</ol>
+<p>rootfs.tar download address:</p>
+<pre><code>https://disk.pku.edu.cn/link/AADFFFE8F568DE4E73BE24F5AED54B00EB
+Filename: rootfs.tar
+</code></pre>
+<ol start="7">
+<li>After completion, eject the SD card.</li>
+</ol>
+<h2 id="4-compile-hvisor"><a class="header" href="#4-compile-hvisor">4. Compile hvisor</a></h2>
+<ol>
+<li>Organize the configuration files</li>
+</ol>
+<p>Place the configuration files where they belong, sample configuration files can be referred to <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/nxp-aarch64/gpu_on_root">here</a>.</p>
+<ol start="2">
+<li>Compile hvisor</li>
+</ol>
+<p>Enter the hvisor directory, switch to the main branch or dev branch, execute the compilation command:</p>
+<pre><code class="language-makefile">make ARCH=aarch64 FEATURES=platform_imx8mp,gicv3 LOG=info all
 
-/*
- * Boot 2nd Linux cmdline:
- * export PATH=$PATH:/usr/share/jailhouse/tools/
- * jailhouse cell linux imx8mp-linux-demo.cell Image -d imx8mp-evk-inmate.dtb -c "clk_ignore_unused console=ttymxc3,115200 earlycon=ec_imx6q,0x30890000,115200  root=/dev/mmcblk2p2 rootwait rw"
- */
-#include &lt;jailhouse/types.h&gt;
-#include &lt;jailhouse/cell-config.h&gt;
+# Put the compiled hvisor image into tftp
+make cp
+</code></pre>
+<h2 id="5-start-hvisor-and-root-linux"><a class="header" href="#5-start-hvisor-and-root-linux">5. Start hvisor and root linux</a></h2>
+<p>Before starting the NXP board, you need to put the files from the tftp directory onto the SD card, such as into the /home/arm64 directory of the SD card, files in the tftp directory include:</p>
+<ul>
+<li>Image: root linux image, can also be used as non-root linux image</li>
+<li>linux1.dtb, linux2.dtb: device trees for root linux and non-root linux</li>
+<li>hvisor.bin: hvisor image</li>
+<li>OK8MP-C.dtb: this is essentially not needed anymore, but still required due to historical reasons. Can use linux1.dtb renamed and placed here</li>
+</ul>
+<p>Start the NXP board:</p>
+<ol>
+<li>Adjust the dip switches to enable SD card boot mode: (1,2,3,4) = (ON,ON,OFF,OFF).</li>
+<li>Insert the SD card into the SD slot.</li>
+<li>Connect the development board to the host using a serial cable.</li>
+<li>Open the serial port with terminal software</li>
+</ol>
+<p>After starting the NXP board, there should be output on the serial port, restart the development board, immediately press and hold space to enter the command line terminal of uboot, execute the following commands:</p>
+<pre><code>setenv loadaddr 0x40400000; setenv fdt_addr 0x40000000; setenv zone0_kernel_addr 0xa0400000; setenv zone0_fdt_addr 0xa0000000; ext4load mmc 1:1 ${loadaddr} /home/arm64/hvisor.bin; ext4load mmc 1:1 ${fdt_addr} /home/arm64/OK8MP-C.dtb; ext4load mmc 1:1 ${zone0_kernel_addr} /home/arm64/Image; ext4load mmc 1:1 ${zone0_fdt_addr} /home/arm64/linux1.dtb; bootm ${loadaddr} - ${fdt_addr};
+</code></pre>
+<p>After execution, hvisor should start and automatically enter root linux.</p>
+<h2 id="6-start-non-root-linux"><a class="header" href="#6-start-non-root-linux">6. Start non-root linux</a></h2>
+<p>Starting non-root linux requires the use of hvisor-tool. Please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a> for details.</p>
+<h2 id="appendix-convenient-image-transfer-using-tftp"><a class="header" href="#appendix-convenient-image-transfer-using-tftp">Appendix. Convenient image transfer using tftp</a></h2>
+<p>Tftp facilitates data transfer between the development board and the host, eliminating the need to plug and unplug the SD card each time. The steps are as follows:</p>
+<h3 id="for-ubuntu-systems"><a class="header" href="#for-ubuntu-systems">For Ubuntu systems</a></h3>
+<p>If you are using an Ubuntu system, perform the following steps:</p>
+<ol>
+<li>
+<p>Install TFTP server software package</p>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install tftpd-hpa tftp-hpa
+</code></pre>
+</li>
+<li>
+<p>Configure the TFTP server</p>
+<p>Create a TFTP root directory and set permissions:</p>
+<pre><code class="language-bash">mkdir -p ~/tftp
+sudo chown -R $USER:$USER ~/tftp
+sudo chmod -R 755 ~/tftp
+</code></pre>
+<p>Edit the tftpd-hpa configuration file:</p>
+<pre><code class="language-bash">sudo nano /etc/default/tftpd-hpa
+</code></pre>
+<p>Modify as follows:</p>
+<pre><code class="language-plaintext"># /etc/default/tftpd-hpa
 
-struct {
-        struct jailhouse_cell_desc cell;
-        __u64 cpus[1];
-        struct jailhouse_memory mem_regions[15];
-        struct jailhouse_irqchip irqchips[2];
-        struct jailhouse_pci_device pci_devices[2];
-} __attribute__((packed)) config = {
-        .cell = {
-                .signature = JAILHOUSE_CELL_DESC_SIGNATURE,
-                .revision = JAILHOUSE_CONFIG_REVISION,
-                .name = "linux-inmate-demo",
-                .flags = JAILHOUSE_CELL_PASSIVE_COMMREG,
-
-                .cpu_set_size = sizeof(config.cpus),
-                .num_memory_regions = ARRAY_SIZE(config.mem_regions),
-                .num_irqchips = ARRAY_SIZE(config.irqchips),
-                .num_pci_devices = ARRAY_SIZE(config.pci_devices),
-                .vpci_irq_base = 154, /* Not include 32 base */
-        },
-
-        .cpus = {
-                0xc,
-        },
-
-        .mem_regions = {
-                /* IVHSMEM shared memory region for 00:00.0 (demo )*/ {
-                        .phys_start = 0xfd900000,
-                        .virt_start = 0xfd900000,
-                        .size = 0x1000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
-                },
-                {
-                        .phys_start = 0xfd901000,
-                        .virt_start = 0xfd901000,
-                        .size = 0x9000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
-                                JAILHOUSE_MEM_ROOTSHARED,
-                },
-                {
-                        .phys_start = 0xfd90a000,
-                        .virt_start = 0xfd90a000,
-                        .size = 0x2000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
-                },
-                {
-                        .phys_start = 0xfd90c000,
-                        .virt_start = 0xfd90c000,
-                        .size = 0x2000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_ROOTSHARED,
-                },
-                {
-                        .phys_start = 0xfd90e000,
-                        .virt_start = 0xfd90e000,
-                        .size = 0x2000,
-                        .flags = JAILHOUSE_MEM_READ | JAILHOUSE_MEM_WRITE |
-                                JAILHOUSE_MEM_ROOTSHARED,
-                },
-                /* IVSHMEM shared memory regions for 00:01.0 (networking) */
-                JAILHOUSE_SH</code></pre>
+TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/home/&lt;your-username&gt;/tftp"
+TFTP_ADDRESS=":69"
+TFTP_OPTIONS="-l -c -s"
+</code></pre>
+<p>Replace <code>&lt;your-username&gt;</code> with your actual username.</p>
+</li>
+<li>
+<p>Start/restart the TFTP service</p>
+<pre><code class="language-bash">sudo systemctl restart tftpd-hpa
+</code></pre>
+</li>
+<li>
+<p>Verify the TFTP server</p>
+<pre><code class="language-bash">echo "TFTP Server Test" &gt; ~/tftp/testfile.txt
+</code></pre>
+<pre><code class="language-bash">tftp localhost
+tftp&gt; get testfile.txt
+tftp&gt; quit
+cat testfile.txt
+</code></pre>
+<p>If "TFTP Server Test" is displayed, the TFTP server is working properly.</p>
+</li>
+<li>
+<p>Configure to start at boot:</p>
+<pre><code>sudo systemctl enable tftpd-hpa
+</code></pre>
+</li>
+<li>
+<p>Connect the development board's network port (choose the lower one of the two) to the host using an Ethernet cable. Configure the host's wired network card, IP: 192.169.137.2, netmask: 255.255.255.0.</p>
+</li>
+</ol>
+<p>After starting the development board, enter the uboot command line, and the command becomes:</p>
+<pre><code>setenv serverip 192.169.137.2; setenv ipaddr 192.169.137.3; setenv loadaddr 0x40400000; setenv fdt_addr 0x40000000; setenv zone0_kernel_addr 0xa0400000; setenv zone0_fdt_addr 0xa0000000; tftp ${loadaddr} ${serverip}:hvisor.bin; tftp ${fdt_addr} ${serverip}:OK8MP-C.dtb; tftp ${zone0_kernel_addr} ${serverip}:Image; tftp ${zone0_fdt_addr} ${serverip}:linux1.dtb; bootm ${loadaddr} - ${fdt_addr};
+</code></pre>
+<p>Explanation:</p>
+<ul>
+<li><code>setenv serverip 192.169.137.2</code>: Sets the IP address of the tftp server.</li>
+<li><code>setenv ipaddr 192.169.137.3</code>: Sets the IP address of the development board.</li>
+<li><code>setenv loadaddr 0x40400000</code>: Sets the load address for the hvisor image.</li>
+<li><code>setenv fdt_addr 0x40000000</code>: Sets the load address for the device tree file.</li>
+<li><code>setenv zone0_kernel_addr 0xa0400000</code>: Sets the load address for the guest Linux image.</li>
+<li><code>setenv zone0_fdt_addr 0xa0000000</code>: Sets the load address for the root Linux device tree file.</li>
+<li><code>tftp ${loadaddr} ${serverip}:hvisor.bin</code>: Downloads the hvisor image from the tftp server to the hvisor load address.</li>
+<li><code>tftp ${fdt_addr} ${serverip}:OK8MP-C.dtb</code>: Downloads the device tree file from the tftp server to the device tree file load address.</li>
+<li><code>tftp ${zone0_kernel_addr} ${serverip}:Image</code>: Downloads the guest Linux image from the tftp server to the guest Linux image load address.</li>
+<li><code>tftp ${zone0_fdt_addr} ${serverip}:linux1.dtb</code>: Downloads the root Linux device tree file from the tftp server to the root Linux device tree file load address.</li>
+<li><code>bootm ${loadaddr} - ${fdt_addr}</code>: Boots hvisor, loading the hvisor image and device tree file.</li>
+</ul>
+<h3 id="for-windows-systems"><a class="header" href="#for-windows-systems">For Windows systems</a></h3>
+<p>You can refer to this article: https://blog.csdn.net/qq_52192220/article/details/142693036</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fpga-zcu102"><a class="header" href="#fpga-zcu102">FPGA zcu102</a></h1>
 <p>Author: 杨竣轶 (Jerry) github.com/comet959</p>
 <pre><code class="language-shell"># Before, Install vivado 2022.2 software
