@@ -1124,95 +1124,9 @@ make install
 </ul>
 <p>The management tool of root Linux is responsible for reading the JSON configuration file and converting it into a C-style structure, which is then passed to hvisor to start the non-root zones.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="command-line-tool"><a class="header" href="#command-line-tool">Command Line Tool</a></h1>
-<p>The command line tool is a management tool affiliated with hvisor, used to create and shut down other virtual machines on the Root Linux of the virtual machine manager, and is responsible for starting the Virtio daemon to provide Virtio device emulation. The repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
-<h2 id="how-to-compile-1"><a class="header" href="#how-to-compile-1">How to Compile</a></h2>
-<p>The command line tool currently supports two architectures: arm64 and riscv, and needs to be used in conjunction with a kernel module. Cross-compilation on an x86 host can be done for different architectures.</p>
-<ul>
-<li>arm64 compilation</li>
-</ul>
-<p>Execute the following command in the hvisor-tool directory to obtain the command line tool hvisor and kernel module hvisorl.ko for the arm64 architecture.</p>
-<pre><code>make all ARCH=arm64 KDIR=xxx
-</code></pre>
-<p>Where KDIR is the Root Linux source path, used for compiling the kernel module.</p>
-<ul>
-<li>riscv compilation</li>
-</ul>
-<p>Compile the command line tool and kernel module for the riscv architecture:</p>
-<pre><code>make all ARCH=riscv KDIR=xxx
-</code></pre>
-<h2 id="managing-virtual-machines"><a class="header" href="#managing-virtual-machines">Managing Virtual Machines</a></h2>
-<h3 id="load-the-kernel-module"><a class="header" href="#load-the-kernel-module">Load the Kernel Module</a></h3>
-<p>Before using the command line tool, you need to load the kernel module to facilitate user-space programs to interact with Hypervisor:</p>
-<pre><code>insmod hvisor.ko
-</code></pre>
-<p>The operation to unload the kernel module is:</p>
-<pre><code>rmmod hvisor.ko
-</code></pre>
-<p>Where hvisor.ko is located in the hvisor-tool/driver directory.</p>
-<h3 id="start-a-virtual-machine"><a class="header" href="#start-a-virtual-machine">Start a Virtual Machine</a></h3>
-<p>On Root Linux, you can create a virtual machine with id 1 by the following command. This command will load the virtual machine's operating system image file <code>Image</code> to the real physical address <code>xxxa</code>, load the virtual machine's device tree file <code>linux2.dtb</code> to the real physical address <code>xxxb</code>, and start it.</p>
-<pre><code>./hvisor zone start --kernel Image,addr=xxxa --dtb linux2.dtb,addr=xxxb --id 1
-</code></pre>
-<h3 id="shut-down-a-virtual-machine"><a class="header" href="#shut-down-a-virtual-machine">Shut Down a Virtual Machine</a></h3>
-<p>Shut down the virtual machine with id 1:</p>
-<pre><code>./hvisor zone shutdown -id 1
-</code></pre>
+<p>The command line tool is an auxiliary management tool for hvisor, used to create and shut down other virtual machines on the managed virtual machine Root Linux, and is responsible for starting the Virtio daemon, providing Virtio device emulation. The repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>. For specific usage, please see the README.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="using-virtio-devices"><a class="header" href="#using-virtio-devices">Using VirtIO Devices</a></h1>
-<p>Currently, hvisor supports three types of Virtio devices: Virtio block, Virtio net, and Virtio Console, which are presented to virtual machines other than Root Linux via MMIO. The Virtio device source code repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, compiled and used together with the command-line tool. After creating a Virtio device through the command-line tool, the Virtio device becomes a daemon on Root Linux, and its log information is output to the nohup.out file.</p>
-<h2 id="creating-and-starting-virtio-devices"><a class="header" href="#creating-and-starting-virtio-devices">Creating and Starting Virtio Devices</a></h2>
-<p>Before creating a Virtio device through the command line, execute <code>insmod hvisor.ko</code> to load the kernel module.</p>
-<h3 id="virtio-blk-device"><a class="header" href="#virtio-blk-device">Virtio blk Device</a></h3>
-<p>Execute the following example command on the Root Linux console to create a Virtio blk device:</p>
-<pre><code class="language-shell">nohup ./hvisor virtio start \
-	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 &amp;
-</code></pre>
-<p><code>--device blk</code> indicates creating a Virtio disk device for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>, and corresponding disk image path <code>img</code>.</p>
-<blockquote>
-<p>Virtual machines using Virtio devices need to add information about the Virtio mmio node in the device tree.</p>
-</blockquote>
-<h3 id="virtio-net-device"><a class="header" href="#virtio-net-device">Virtio net Device</a></h3>
-<h4 id="creating-network-topology"><a class="header" href="#creating-network-topology">Creating Network Topology</a></h4>
-<p>Before using a Virtio net device, a network topology needs to be created in Root Linux to connect the Virtio net device with the real network card through a Tap device and bridge device. Execute the following commands in Root Linux:</p>
-<pre><code class="language-shell">mount -t proc proc /proc
-mount -t sysfs sysfs /sys
-ip link set eth0 up
-dhclient eth0
-brctl addbr br0
-brctl addif br0 eth0
-ifconfig eth0 0
-dhclient br0
-ip tuntap add dev tap0 mode tap
-brctl addif br0 tap0
-ip link set dev tap0 up
-</code></pre>
-<p>This creates a <code>tap0 device&lt;--&gt;bridge device&lt;--&gt;real network card</code> network topology.</p>
-<h4 id="starting-virtio-net"><a class="header" href="#starting-virtio-net">Starting Virtio net</a></h4>
-<p>Execute the following example command on the Root Linux console to create a Virtio net device:</p>
-<pre><code class="language-shell">nohup ./hvisor virtio start \
-	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 &amp;
-</code></pre>
-<p><code>--device net</code> indicates creating a Virtio network device for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>, and connected to a Tap device named <code>tap</code>.</p>
-<h3 id="virtio-console-device"><a class="header" href="#virtio-console-device">Virtio Console Device</a></h3>
-<p>Execute the following example command on the Root Linux console to create a Virtio console device:</p>
-<pre><code class="language-shell">nohup ./hvisor virtio start \
-	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &amp;
-</code></pre>
-<p><code>--device console</code> indicates creating a Virtio console for use by the virtual machine with id <code>zone_id</code>. The virtual machine will interact with the device through an MMIO region, starting at address <code>addr</code>, with length <code>len</code>, device interrupt number <code>irq</code>.</p>
-<p>Execute <code>cat nohup.out | grep "char device"</code>, and you will see the output <code>char device redirected to /dev/pts/xx</code>. On Root Linux, execute:</p>
-<pre><code>screen /dev/pts/xx
-</code></pre>
-<p>to enter the virtual console and interact with the virtual machine. Press the shortcut key <code>Ctrl +a d</code> to return to the Root Linux terminal. Execute <code>screen -r [session_id]</code> to re-enter the virtual console.</p>
-<h3 id="creating-multiple-virtio-devices"><a class="header" href="#creating-multiple-virtio-devices">Creating Multiple Virtio Devices</a></h3>
-<p>Execute the following command to simultaneously create Virtio blk, net, and console devices, all within one daemon process.</p>
-<pre><code class="language-shell">nohup ./hvisor virtio start \
-	--device blk,addr=0xa003c00,len=0x200,irq=78,zone_id=1,img=rootfs2.ext4 \
-	--device net,addr=0xa003600,len=0x200,irq=75,zone_id=1,tap=tap0 \
-	--device console,addr=0xa003800,len=0x200,irq=76,zone_id=1 &amp;
-</code></pre>
-<h2 id="closing-virtio-devices"><a class="header" href="#closing-virtio-devices">Closing Virtio Devices</a></h2>
-<p>Execute the following command to close the Virtio daemon and all created devices:</p>
-<pre><code>pkill hvisor
-</code></pre>
+<p>For specific usage tutorials, please refer to: <a href="https://github.com/syswonder/hvisor-tool?tab=readme-ov-file#readme">hvisor-tool-README</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="hvisor-overall-architecture"><a class="header" href="#hvisor-overall-architecture">hvisor Overall Architecture</a></h1>
 <ul>
 <li>
@@ -2775,28 +2689,29 @@ pub fn iommu_add_device(vm_id: usize, device_id: usize, root_pt: usize){
 }
 <span class="boring">}</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="virtio"><a class="header" href="#virtio">Virtio</a></h1>
+<p>Note that this document mainly introduces how Virtio is implemented in hvisor. For detailed usage tutorials, please refer to <a href="https://github.com/syswonder/hvisor-tool?tab=readme-ov-file#readme">hvisor-tool-README</a>.</p>
 <h2 id="introduction-to-virtio"><a class="header" href="#introduction-to-virtio">Introduction to Virtio</a></h2>
-<p>Virtio, proposed by Rusty Russell in 2008, is a device virtualization standard aimed at improving device performance and unifying various semi-virtual device schemes. Currently, Virtio includes over a dozen peripherals such as disks, network cards, consoles, GPUs, etc., and many operating systems including Linux have implemented frontend drivers for various Virtio devices. Therefore, the virtual machine monitor only needs to implement the Virtio backend device, and it can directly allow virtual machines that have implemented Virtio drivers, such as Linux, to use Virtio devices.</p>
-<p>The Virtio protocol defines a set of driver interfaces for semi-virtual IO devices, stipulating that the operating system of the virtual machine needs to implement the frontend driver, and the Hypervisor needs to implement the backend device. The virtual machine and Hypervisor communicate and interact through the data plane interface and control plane interface.</p>
+<p>Virtio, proposed by Rusty Russell in 2008, is a device virtualization standard aimed at improving device performance and unifying various semi-virtual device solutions. Currently, Virtio includes over a dozen peripherals such as disks, network cards, consoles, GPUs, etc., and many operating systems including Linux have implemented front-end drivers for various Virtio devices. Therefore, virtual machine monitors only need to implement Virtio backend devices to directly allow virtual machines that have implemented Virtio drivers, such as Linux, to use Virtio devices.</p>
+<p>The Virtio protocol defines a set of driver interfaces for semi-virtual IO devices, specifying that the operating system of the virtual machine needs to implement front-end drivers, and the Hypervisor needs to implement backend devices. The virtual machine and Hypervisor communicate and interact through the data plane interface and control plane interface.</p>
 <h3 id="data-plane-interface"><a class="header" href="#data-plane-interface">Data Plane Interface</a></h3>
-<p>The data plane interface refers to the method of IO data transfer between the driver and the device. For Virtio, the data plane interface refers to a shared memory area between the driver and the device called Virtqueue. Virtqueue is an important data structure in the Virtio protocol, a mechanism and abstract representation for batch data transfer of Virtio devices, used for various data transfer operations between the driver and the device. Virtqueue consists of three main components: Descriptor Table, Available Ring, and Used Ring, which function as follows:</p>
+<p>The data plane interface refers to the method of IO data transfer between the driver and the device. For Virtio, the data plane interface refers to a shared memory Virtqueue between the driver and the device. Virtqueue is an important data structure in the Virtio protocol, representing the mechanism and abstract representation of batch data transfer for Virtio devices, used for various data transfer operations between the driver and the device. Virtqueue consists of three main components: descriptor table, available ring, and used ring, which function as follows:</p>
 <ol>
 <li>
-<p>Descriptor Table: An array of descriptors. Each descriptor contains four fields: addr, len, flag, next. Descriptors can represent the address (addr), size (len), and attributes (flag) of a memory buffer, which may contain the command or data of an IO request (filled by the Virtio driver), or the result after the IO request is completed (filled by the Virtio device). Descriptors can be linked into a descriptor chain by the next field as needed, where a descriptor chain represents a complete IO request or result.</p>
+<p>Descriptor Table: An array of descriptors. Each descriptor contains four fields: addr, len, flag, next. Descriptors can represent the address (addr), size (len), and attributes (flag) of a memory buffer, which may contain IO request commands or data (filled by the Virtio driver) or the results after the completion of IO requests (filled by the Virtio device). Descriptors can be linked into a descriptor chain by the next field as needed, with one descriptor chain representing a complete IO request or result.</p>
 </li>
 <li>
-<p>Available Ring: A circular queue, each element in the queue represents the index of the IO request issued by the Virtio driver in the descriptor table, pointing to the starting descriptor of a descriptor chain.</p>
+<p>Available Ring: A circular queue, where each element represents the index of an IO request issued by the Virtio driver in the descriptor table, i.e., each element points to the starting descriptor of a descriptor chain.</p>
 </li>
 <li>
-<p>Used Ring: A circular queue, each element in the queue represents the index of the IO result written by the Virtio device in the descriptor table after completing the IO request.</p>
+<p>Used Ring: A circular queue, where each element represents the index of the IO result written by the Virtio device after completing the IO request in the descriptor table.</p>
 </li>
 </ol>
-<p>Thus, using these three data structures, a complete description of the commands, data, and results for IO data transfer requests between the driver and the device can be made. The Virtio driver is responsible for allocating the memory area where the Virtqueue is located and writing its address into the corresponding MMIO control registers to inform the Virtio device. After obtaining the addresses of the three components, the device can perform IO transfer with the driver through the Virtqueue.</p>
+<p>Using these three data structures, the commands, data, and results of IO data transfer requests between the driver and the device can be fully described. The Virtio driver is responsible for allocating the memory area where the Virtqueue is located and writing its address into the corresponding MMIO control registers to inform the Virtio device. This way, the device can obtain the addresses of the three and perform IO transfers with the driver through the Virtqueue.</p>
 <h3 id="control-plane-interface"><a class="header" href="#control-plane-interface">Control Plane Interface</a></h3>
-<p>The control plane interface refers to the way the driver discovers, configures, and manages the device. In the Hypervisor, the control plane interface of Virtio mainly refers to the MMIO registers based on memory mapping. The operating system first detects the MMIO-based Virtio device through the device tree, and by reading and writing these memory-mapped control registers, it can negotiate, configure, and notify the device. Among the more important registers are:</p>
+<p>The control plane interface refers to the way the driver discovers, configures, and manages the device. In hvisor, the control plane interface of Virtio mainly refers to the MMIO registers based on memory mapping. The operating system first detects MMIO-based Virtio devices through the device tree and negotiates, configures, and notifies the device by reading and writing these memory-mapped control registers. Some of the more important registers include:</p>
 <ul>
 <li>
-<p>QueueSel: Used to select the current operating Virtqueue. A device may contain multiple Virtqueues, and the driver indicates which queue it is operating by writing this register.</p>
+<p>QueueSel: Used to select the current Virtqueue being operated. A device may contain multiple Virtqueues, and the driver indicates which queue it is operating by writing this register.</p>
 </li>
 <li>
 <p>QueueDescLow, QueueDescHigh: Used to indicate the intermediate physical address IPA of the descriptor table. The driver writes these two 32-bit registers to inform the device of the 64-bit physical address of the descriptor table, used to establish shared memory.</p>
@@ -2811,61 +2726,59 @@ pub fn iommu_add_device(vm_id: usize, device_id: usize, root_pt: usize){
 <p>QueueNotify: When the driver writes this register, it indicates that there are new IO requests in the Virtqueue that need to be processed.</p>
 </li>
 </ul>
-<p>In addition to control registers, the MMIO memory area of each device also contains a device configuration space. For disk devices, the configuration space indicates the disk's capacity and block size; for network devices, it indicates the device's MAC address and connection status. For console devices, the configuration space provides console size information.</p>
-<p>For the MMIO memory area of the Virtio device, the Hypervisor does not map the second-stage address translation for the virtual machine. When the driver reads and writes this area, a page fault exception occurs causing a VM Exit into the Hypervisor, and the Hypervisor can determine the register accessed by the driver based on the access address causing the page fault exception, and make the corresponding processing, such as notifying the device to perform IO operations. After processing, the Hypervisor returns to the virtual machine through VM Entry.</p>
+<p>In addition to the control registers, the MMIO memory area of each device also contains a device configuration space. For disk devices, the configuration space indicates the disk capacity and block size; for network devices, the configuration space indicates the device's MAC address and connection status. For console devices, the configuration space provides console size information.</p>
+<p>For the MMIO memory area of Virtio devices, the Hypervisor does not map the second-stage address translation for the virtual machine. When the driver reads and writes this area, a page fault exception will occur, causing a VM Exit into the Hypervisor. The Hypervisor can determine the register accessed by the driver based on the access address that caused the page fault and take appropriate action, such as notifying the device to perform IO operations. After processing, the Hypervisor returns to the virtual machine through VM Entry.</p>
 <h3 id="io-process-of-virtio-devices"><a class="header" href="#io-process-of-virtio-devices">IO Process of Virtio Devices</a></h3>
-<p>A user process running on a virtual machine, from issuing an IO operation to obtaining the IO result, can generally be divided into the following four steps:</p>
+<p>The process from when a user process running on a virtual machine initiates an IO operation to when it obtains the IO result can be roughly divided into the following four steps:</p>
 <ol>
-<li>The user process initiates an IO operation, the Virtio driver in the operating system kernel receives the IO operation command, writes it into the Virtqueue, and writes the QueueNotify register to notify the Virtio device.</li>
-<li>After receiving the notification, the device parses the available ring and descriptor table to obtain the specific IO request and buffer address, and performs the actual IO operation.</li>
-<li>After completing the IO operation, the device writes the result into the used ring. If the driver program uses the method of polling the used ring to wait for the IO result, the driver can immediately receive the result information; otherwise, it needs to notify the driver program through an interrupt.</li>
+<li>The user process initiates an IO operation, and the Virtio driver in the operating system kernel receives the IO operation command, writes it into the Virtqueue, and writes to the QueueNotify register to notify the Virtio device.</li>
+<li>After receiving the notification, the device parses the available ring and descriptor table, obtains the specific IO request and buffer address, and performs the actual IO operation.</li>
+<li>After completing the IO operation, the device writes the result into the used ring. If the driver program uses the polling method to wait for the IO result in the used ring, the driver can immediately receive the result information; otherwise, it needs to notify the driver program through an interrupt.</li>
 <li>The driver program obtains the IO result from the used ring and returns it to the user process.</li>
 </ol>
-<h2 id="design-and-implementation-of-the-virtio-backend-mechanism"><a class="header" href="#design-and-implementation-of-the-virtio-backend-mechanism">Design and Implementation of the Virtio Backend Mechanism</a></h2>
-<p>The Virtio devices in hvisor follow the <a href="https://docs.oasis-open.org/virtio/virtio/v1.2/virtio-v1.2.pdf">Virtio v1.2</a> protocol for design and implementation. To maintain good device performance while ensuring the lightweight nature of hvisor, the two design points of the Virtio backend are:</p>
+<h2 id="design-and-implementation-of-virtio-backend-mechanism"><a class="header" href="#design-and-implementation-of-virtio-backend-mechanism">Design and Implementation of Virtio Backend Mechanism</a></h2>
+<p>Virtio devices in hvisor follow the <a href="https://docs.oasis-open.org/virtio/virtio/v1.2/virtio-v1.2.pdf">Virtio v1.2</a> protocol for design and implementation. To maintain good device performance while ensuring the lightness of hvisor, two design points of the Virtio backend are:</p>
 <ol>
 <li>
-<p>Adopting the microkernel design philosophy, moving the implementation of Virtio devices from the Hypervisor layer to the management virtual machine user space. The management virtual machine runs the Linux operating system, known as Root Linux. Physical devices such as disks and network cards are directly passed through to Root Linux, while Virtio devices act as daemons on Root Linux, providing device emulation for other virtual machines (Non Root Linux). This ensures the lightweight nature of the Hypervisor layer and facilitates formal verification.</p>
+<p>Adopting a microkernel design philosophy, moving the implementation of Virtio devices from the Hypervisor layer to the management virtual machine user space. The management virtual machine runs the Linux operating system, known as Root Linux. Physical devices such as disks and network cards are passed through to Root Linux, while Virtio devices serve as daemons on Root Linux, providing device emulation for other virtual machines (Non Root Linux). This ensures the lightness of the Hypervisor layer, facilitating formal verification.</p>
 </li>
 <li>
-<p>The Virtio drivers located on other virtual machines and the Virtio devices on Root Linux interact directly through shared memory. The shared memory area that stores interaction information is called a communication springboard and adopts the producer-consumer model, shared by the Virtio device backend and Hypervisor. This reduces the interaction overhead between the driver and the device, enhancing the device's performance.</p>
+<p>The Virtio driver programs located on other virtual machines and the Virtio devices on Root Linux interact directly through shared memory. The shared memory area stores interaction information, known as the communication springboard, and adopts a producer-consumer model, shared by the Virtio device backend and Hypervisor. This reduces the interaction overhead between the driver and the device, enhancing the device's performance.</p>
 </li>
 </ol>
 <p>Based on the above two design points, the implementation of the Virtio backend device will be divided into three parts: communication springboard, Virtio daemon, and kernel service module:</p>
-<p><img src="chap04/subchap03/VirtIO/./img/architecture.svg" alt="architecture" /></p>
 <h3 id="communication-springboard"><a class="header" href="#communication-springboard">Communication Springboard</a></h3>
-<p>To achieve efficient interaction between drivers and devices distributed across different virtual machines, this paper designs a communication springboard as a bridge for passing control plane interaction information between the driver and the device. It is essentially a shared memory area containing two circular queues: the request submission queue and the request result queue, which store interaction requests issued by the driver and results returned by the device, respectively. Both queues are located in the memory area shared by the Hypervisor and the Virtio daemon and adopt the producer-consumer model. The Hypervisor acts as the producer of the request submission queue and the consumer of the request result queue, while the Virtio daemon acts as the consumer of the request submission queue and the producer of the request result queue. This facilitates the transfer of Virtio control plane interaction information between Root Linux and other virtual machines. It should be noted that the request submission queue and request result queue are different from the Virtqueue. The Virtqueue is the data plane interface between the driver and the device, used for data transfer, and essentially contains information about the data buffer's address and structure. The communication springboard, on the other hand, is used for control plane interaction and communication between the driver and the device.</p>
-<div align=center><img src="chap04/subchap03/VirtIO/./img/ps_module.svg" alt="ps_module" style="zoom:75%;" /></div>
+<p>To achieve efficient interaction between drivers and devices distributed across different virtual machines, this document designs a communication springboard as a bridge for passing control plane interaction information between the driver and the device. It is essentially a shared memory area containing two circular queues: the request submission queue and the request result queue, which store interaction requests issued by the driver and results returned by the device, respectively. Both queues are located in the memory area shared by the Hypervisor and the Virtio daemon and adopt a producer-consumer model. The Hypervisor acts as the producer of the request submission queue and the consumer of the request result queue, while the Virtio daemon acts as the consumer of the request submission queue and the producer of the request result queue. This facilitates the transfer of Virtio control plane interaction information between Root Linux and other virtual machines. It should be noted that the request submission queue and the request result queue are not the same as the Virtqueue. The Virtqueue is the data plane interface between the driver and the device, used for data transfer and essentially containing information about the data buffer's address and structure. The communication springboard, on the other hand, is used for control plane interaction and communication between the driver and the device.</p>
 <ul>
 <li>Communication Springboard Structure</li>
 </ul>
-<p>The communication springboard is represented by the struct virtio_bridge, where req_list is the request submission queue, and res_list and cfg_values together form the request result queue. The device_req struct represents interaction requests sent by the driver to the device, and the device_res struct represents interrupt information to be injected by the device, used to notify the virtual machine driver that the IO operation has been completed.</p>
-<pre><code class="language-c">// Communication Springboard Structure:
+<p>The communication springboard is represented by the virtio_bridge structure, where req_list is the request submission queue, and res_list and cfg_values together form the request result queue. The device_req structure represents interaction requests sent by the driver to the device, and the device_res structure represents interrupt information to be injected by the device to notify the virtual machine driver program that the IO operation is complete.</p>
+<pre><code class="language-c">// Communication springboard structure:
 struct virtio_bridge {
-	__u32 req_front;
-	__u32 req_rear;
+    __u32 req_front;
+    __u32 req_rear;
     __u32 res_front;
     __u32 res_rear;
     // Request submission queue
-	struct device_req req_list[MAX_REQ]; 
+    struct device_req req_list[MAX_REQ]; 
     // res_list, cfg_flags, and cfg_values together form the request result queue
     struct device_res res_list[MAX_REQ];
-	__u64 cfg_flags[MAX_CPUS]; 
-	__u64 cfg_values[MAX_CPUS];
-	__u64 mmio_addrs[MAX_DEVS];
-	__u8 mmio_avail;
-	__u8 need_wakeup;
+    __u64 cfg_flags[MAX_CPUS]; 
+    __u64 cfg_values[MAX_CPUS];
+    __u64 mmio_addrs[MAX_DEVS];
+    __u8 mmio_avail;
+    __u8 need_wakeup;
 };
 // Interaction requests sent by the driver to the device
 struct device_req {
-	__u64 src_cpu;
-	__u64 address; // zone's ipa
-	__u64 size;
-	__u64 value;
-	__u32 src_zone;
-	__u8 is_write;
-	__u8 need_interrupt;
-	__u16 padding;
+    __u64 src_cpu;
+    __u64 address; // zone's ipa
+    __u64 size;
+    __u64 value;
+    __u32 src_zone;
+    __u8 is_write;
+    __u8 need_interrupt;
+    __u16 padding;
 };
 // Interrupt information to be injected by the device
 struct device_res {
@@ -2874,37 +2787,37 @@ struct device_res {
 };
 </code></pre>
 <h4 id="request-submission-queue"><a class="header" href="#request-submission-queue">Request Submission Queue</a></h4>
-<p>The request submission queue is used for the driver to send control plane interaction requests to the device. When the driver reads and writes the MMIO memory area of the Virtio device, since the Hypervisor does not perform second-stage address mapping for this memory area in advance, the CPU executing the driver program will receive a page fault exception and fall into the Hypervisor. The Hypervisor will combine the current CPU number, the address of the page fault exception, the address width, the value to be written (ignored if it is a read), the virtual machine ID, whether it is a write operation, etc., into a structure called device_req, and add it to the request submission queue req_list. At this time, the Virtio daemon monitoring the request submission queue will retrieve and process the request.</p>
-<p>To facilitate communication between the Virtio daemon and the Hypervisor based on shared memory, the request submission queue req_list is implemented as a circular queue. The head index req_front is updated only by the Virtio process after retrieving the request, and the tail index req_rear is updated only by the Hypervisor after adding the request. If the head and tail indices are equal, the queue is empty; if the tail index plus 1 modulo the head index is equal, the queue is full, and the driver needs to block in place when adding more requests, waiting for the queue to become available. To ensure that the Hypervisor and the Virtio process have real-time observation and mutual exclusion access to shared memory, the Hypervisor needs to perform a write memory barrier after adding a request to the queue, then update the tail index, ensuring that the Virtio process can correctly retrieve the request in the queue when observing the tail index update. After the Virtio daemon retrieves the request from the queue, it needs to perform a write memory barrier to ensure that the Hypervisor can immediately observe the update of the head index. By using this producer-consumer model and circular queue method, along with the necessary memory barriers, the mutual exclusion problem of shared memory under different privilege levels is solved. Since multiple virtual machines may have multiple CPUs simultaneously adding requests to the request submission queue, the CPU needs to first acquire a mutex lock before operating the request submission queue; however, only the main thread of the Virtio daemon operates the request submission queue, so no lock is needed. This solves the mutual exclusion problem of shared memory under the same privilege level.</p>
+<p>The request submission queue is used for the driver to send control plane interaction requests to the device. When the driver reads and writes the MMIO memory area of the Virtio device, since the Hypervisor does not perform second-stage address mapping for this memory area in advance, the CPU executing the driver program will receive a page fault exception and fall into the Hypervisor. The Hypervisor will combine the current CPU number, page fault address, address width, value to be written (ignored if it is a read), virtual machine ID, and whether it is a write operation into a structure called device_req and add it to the request submission queue req_list. At this point, the Virtio daemon monitoring the request submission queue will retrieve the request for processing.</p>
+<p>To facilitate communication between the Virtio daemon and the Hypervisor based on shared memory, the request submission queue req_list is implemented as a circular queue. The head index req_front is updated only by the Virtio process after retrieving the request, and the tail index req_rear is updated only by the Hypervisor after adding the request. If the head and tail indexes are equal, the queue is empty; if the tail index plus one modulo the queue size equals the head index, the queue is full, and the driver needs to block in place when adding requests, waiting for the queue to become available. To ensure that the Hypervisor and Virtio process have real-time observation and mutual exclusion access to shared memory, the Hypervisor needs to perform a write memory barrier after adding a request to the queue, then update the tail index, ensuring that the Virtio process correctly retrieves the request in the queue when observing the tail index update. After the Virtio daemon retrieves a request from the queue, it needs to perform a write memory barrier to ensure that the Hypervisor can immediately observe the head index update. This producer-consumer model and circular queue method, combined with necessary memory barriers, solve the mutual exclusion problem of shared memory under different privilege levels. Since multiple virtual machines may have multiple CPUs adding requests to the request submission queue simultaneously, CPUs need to acquire a mutex lock first before operating the request submission queue. In contrast, only the main thread of the Virtio daemon operates the request submission queue, so no locking is required. This solves the mutual exclusion problem of shared memory under the same privilege level.</p>
 <h4 id="request-result-queue"><a class="header" href="#request-result-queue">Request Result Queue</a></h4>
-<p>When the Virtio daemon completes the processing of a request, it will put the related information into the request result queue and notify the driver program. To improve communication efficiency, based on the classification of Virtio interaction information, the request result queue is divided into two sub-queues:</p>
+<p>After the Virtio daemon completes the processing of a request, it will put the related information into the request result queue and notify the driver program. To improve communication efficiency, based on the classification of Virtio interaction information, the request result queue is divided into two sub-queues:</p>
 <ul>
 <li>Data Plane Result Sub-queue</li>
 </ul>
-<p>The data plane result queue, represented by the res_list structure, is used to store information for injecting interrupts. When the driver program writes to the Queue Notify register in the device memory area, it indicates that there is new data in the available ring, requiring the device to perform IO operations. Since IO operations take too long, Linux, to avoid unnecessary blocking and improve CPU utilization, requires the Hypervisor to submit the IO request to the device, and the CPU needs to immediately return from the Hypervisor to the virtual machine to perform other tasks. Therefore, after completing the IO operation and updating the used ring, the Virtio process will combine the device's interrupt number irq_id and the virtual machine ID of the device into a device_res structure, add it to the data plane result sub-queue res_list, and fall into the Hypervisor through ioctl and hvc. The data plane result queue res_list is similar to the request submission queue, being a circular queue. The queue length can be determined by the head index res_front and the tail index res_rear. The Hypervisor will retrieve all elements from res_list and add them to the interrupt injection table VIRTIO_IRQS. The interrupt injection table is a key-value pair collection based on a B-tree, where the key is the CPU number, and the value is an array. The first element of the array indicates the effective length of the array, and the subsequent elements indicate the interrupts to be injected into this CPU. To prevent multiple CPUs from simultaneously operating the interrupt injection table, the CPU needs to first acquire a global mutex lock to access the interrupt injection table. Through the interrupt injection table, the CPU can determine which interrupts need to be injected into itself based on its own CPU number. Subsequently, the Hypervisor will send IPI inter-core interrupts to these CPUs needing interrupt injection. The CPUs receiving the inter-core interrupts will traverse the interrupt injection table and inject interrupts into themselves. The diagram below describes the entire process, where the black solid triangle arrows represent operations executed by CPUs running other virtual machines, and the black ordinary arrows represent operations executed by CPUs running Root Linux.</p>
+<p>The data plane result queue, represented by the res_list structure, is used to store interrupt information. When the driver program writes to the Queue Notify register of the device memory area, it indicates that there is new data in the available ring, and the device needs to perform IO operations. Since IO operations take too long, Linux requires the Hypervisor to submit the IO request to the device and then immediately return the CPU from the Hypervisor to the virtual machine to execute other tasks, improving CPU utilization. Therefore, after the Virtio process completes the IO operation and updates the used ring, it will combine the device's interrupt number irq_id and the virtual machine ID of the device into a device_res structure, add it to the data plane result sub-queue res_list, and fall into the Hypervisor through ioctl and hvc. The data plane result queue res_list is similar to the request submission queue, being a circular queue, with the head index res_front and tail index res_rear determining the queue length. The Hypervisor will retrieve all elements from res_list and add them to the interrupt injection table VIRTIO_IRQS. The interrupt injection table is a key-value pair collection based on a B-tree, where the key is the CPU number, and the value is an array. The first element of the array indicates the valid length of the array, and the subsequent elements indicate the interrupts to be injected into this CPU. To prevent multiple CPUs from simultaneously operating the interrupt injection table, CPUs need to acquire a global mutex lock before accessing the interrupt injection table. Through the interrupt injection table, CPUs can determine which interrupts need to be injected into themselves based on their CPU number. Subsequently, the Hypervisor will send IPI inter-core interrupts to these CPUs needing interrupt injection. CPUs receiving the inter-core interrupts will traverse the interrupt injection table and inject interrupts into themselves. The following diagram describes the entire process, where the black solid triangle arrows represent operations executed by CPUs running other virtual machines, and the black ordinary arrows represent operations executed by CPUs running Root Linux.</p>
 <img src="chap04/subchap03/VirtIO/./img/data_plane_queue.svg" alt="data_plane_queue"  />
 <ul>
 <li>Control Plane Result Sub-queue</li>
 </ul>
-<p>The control plane result queue, represented by the cfg_values and cfg_flags arrays, where the array index is the CPU number, i.e., each CPU uniquely corresponds to the same position in the two arrays. cfg_values is used to store the results of control plane interface interactions, and cfg_flags are used to indicate whether the device has completed the control plane interaction request. When the driver program reads and writes the registers in the device memory area (except the Queue Notify register), it sends out configuration and negotiation-related control plane interaction requests. After such an interaction request is added to the request submission queue, the CPU that fell into the Hypervisor due to the driver needs to wait for the result to return before it can return to the virtual machine. Since the Virtio daemon does not need to perform IO operations for this type of request, it only needs to query related information, so it can quickly complete the processing of the request and does not need to update the used ring. After completing the request, the daemon will write the result value into cfg_values[id] (for read requests) according to the driver's CPU number id, perform a write memory barrier, then increment cfg_flags[id], and perform a second write memory barrier to ensure that when the driver-side CPU observes changes in cfg_flags[id], cfg_values[id] has already saved the correct result value. When the driver-side CPU observes changes in cfg_flags[id], it can determine that the device has returned the result, directly retrieve the value from cfg_values[id], and return to the virtual machine. This allows the Virtio device to avoid executing ioctl and hvc, causing unnecessary CPU context switches, thereby enhancing the device's performance. The diagram below describes the entire process, where the black solid triangle arrows represent operations executed by CPUs running other virtual machines, and the black ordinary arrows represent operations executed by CPUs running Root Linux.</p>
+<p>The control plane result queue, represented by the cfg_values and cfg_flags arrays, uniquely corresponds to the same position of the two arrays for each CPU, i.e., each CPU uniquely corresponds to the same position of the two arrays. cfg_values is used to store the results of control plane interface interactions, and cfg_flags indicate whether the device has completed the control plane interaction request. When the driver program reads and writes the registers of the device memory area (excluding the Queue Notify register), it sends configuration and negotiation-related control plane interaction requests. After such interaction requests are added to the request submission queue, the CPU that falls into the Hypervisor due to the driver needs to wait for the result to return before returning to the virtual machine. Since the Virtio daemon does not need to perform IO operations for these requests, it can quickly complete the request processing and does not need to update the used ring. After completing the request, the daemon will write the result value into cfg_values[id] (for read requests) according to the driver's CPU number id, perform a write memory barrier, then increment cfg_flags[id], and perform a second write memory barrier, ensuring that the driver-side CPU observes the correct result value in cfg_values[id] when observing changes in cfg_flags[id]. When the driver-side CPU observes changes in cfg_flags[id], it can determine that the device has returned the result, directly retrieve the value from cfg_values[id], and return to the virtual machine. This way, the Virtio device can avoid executing ioctl and hvc, causing unnecessary CPU context switches, thereby enhancing the device's performance. The following diagram describes the entire process, where the black solid triangle arrows represent operations executed by CPUs running other virtual machines, and the black ordinary arrows represent operations executed by CPUs running Root Linux.</p>
 <p><img src="chap04/subchap03/VirtIO/./img/control_plane_queue.svg" alt="control_plane_queue" /></p>
 <h3 id="kernel-service-module"><a class="header" href="#kernel-service-module">Kernel Service Module</a></h3>
-<p>Since the Virtio daemon located in the Root Linux user space needs to communicate with hvisor, this paper uses the kernel module hvisor.ko in Root Linux as a bridge for communication. In addition to being used by command-line tools, this module also undertakes the following tasks:</p>
+<p>Since the Virtio daemon located in Root Linux user space needs to communicate with hvisor, this document uses the kernel module hvisor.ko in Root Linux as the communication bridge. In addition to being used by command-line tools, this module also undertakes the following tasks:</p>
 <ol>
-<li>Establishing the shared memory area where the communication springboard is located between the Virtio daemon and the Hypervisor during Virtio device initialization.</li>
+<li>When the Virtio device is initialized, it establishes the shared memory area where the communication springboard is located between the Virtio daemon and the Hypervisor.</li>
 </ol>
-<p>When the Virtio daemon initializes, it requests the kernel module to allocate the shared memory where the communication springboard is located through ioctl. At this time, the kernel module allocates a page of continuous physical memory as shared memory through the memory allocation function <code>__get_free_pages</code>, and sets the page attribute to the reserved state through the <code>SetPageReserved</code> function to avoid the page being swapped to disk due to Linux's page recycling mechanism. Subsequently, the kernel module needs to make this memory accessible to both the Virtio daemon and the Hypervisor. For the Hypervisor, the kernel module executes hvc to notify the Hypervisor and passes the physical address of the shared memory as a parameter. For the Virtio daemon, the process calls mmap on /dev/hvisor, and the kernel module maps the shared memory to a free virtual memory area of the Virtio process in the hvisor_map function. The starting address of this area is returned as the return value of mmap.</p>
+<p>When the Virtio daemon is initialized, it requests the kernel module to allocate the shared memory where the communication springboard is located through ioctl. At this time, the kernel module allocates a page of continuous physical memory as shared memory through the memory allocation function <code>__get_free_pages</code> and sets the page attribute to the reserved state through the <code>SetPageReserved</code> function to avoid the page being swapped to disk due to Linux's page recycling mechanism. Subsequently, the kernel module needs to make both the Virtio daemon and the Hypervisor able to access this memory. For the Hypervisor, the kernel module executes hvc to notify the Hypervisor and passes the physical address of the shared memory as a parameter. For the Virtio daemon, the process calls mmap on /dev/hvisor, and the kernel module maps the shared memory to a free virtual memory area of the Virtio process in the hvisor_map function. The starting address of this area is returned as the return value of mmap.</p>
 <ol start="2">
 <li>
 <p>When the Virtio backend device needs to inject device interrupts into other virtual machines, it notifies the kernel module through ioctl, and the kernel module calls the system interface provided by the Hypervisor through the hvc command to notify the Hypervisor to perform the corresponding operations.</p>
 </li>
 <li>
-<p>Waking up the Virtio daemon.</p>
+<p>Wake up the Virtio daemon.</p>
 </li>
 </ol>
-<p>When the driver accesses the device's MMIO area, it falls into EL2 and enters the mmio_virtio_handler function. This function determines whether it needs to wake up the Virtio daemon based on the need_wakeup flag in the communication springboard. If the flag is 1, it sends an SGI interrupt with event id IPI_EVENT_WAKEUP_VIRTIO_DEVICE to Root Linux's CPU 0. CPU 0, upon receiving the SGI interrupt, falls into EL2 and injects the interrupt number of the hvisor_device node in the Root Linux device tree into itself. When CPU 0 returns to the virtual machine, it receives the injected interrupt and enters the interrupt handling function previously registered by the kernel service module. This function sends the SIGHVI signal to the Virtio daemon through the send_sig_info function. The Virtio daemon, previously blocked in the sig_wait function, receives the SIGHVI signal, polls the request submission queue, and sets the need_wakeup flag to 0.</p>
+<p>When the driver accesses the MMIO area of the device, it falls into EL2 and enters the mmio_virtio_handler function. This function determines whether to wake up the Virtio daemon based on the need_wakeup flag in the communication springboard. If the flag is 1, it sends an SGI interrupt with event id IPI_EVENT_WAKEUP_VIRTIO_DEVICE to Root Linux's CPU 0. When CPU 0 receives the SGI interrupt, it falls into EL2 and injects the interrupt number of the hvisor_device node in the Root Linux device tree into itself. When CPU 0 returns to the virtual machine, it receives the interrupt injected into itself and enters the interrupt handling function pre-registered by the kernel service module. This function sends the SIGHVI signal to the Virtio daemon through the send_sig_info function. The Virtio daemon, previously blocked in the sig_wait function, receives the SIGHVI signal, polls the request submission queue, and sets the need_wakeup flag to 0.</p>
 <h3 id="virtio-daemon"><a class="header" href="#virtio-daemon">Virtio Daemon</a></h3>
-<p>To ensure the lightweight nature of the Hypervisor, this paper</p>
+<p>To ensure the lightness of the Hypervisor, this document does not adopt the traditional implementation method of Virtio devices in the Hypervisor layer but moves it to the user space of Root Linux as a daemon providing device emulation services. The daemon consists of two parts</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="virtio-block"><a class="header" href="#virtio-block">Virtio Block</a></h1>
 <p>The implementation of Virtio disk devices follows the conventions of the Virtio specification and adopts the MMIO device access method for discovery and use by other virtual machines. Currently, it supports five features: <code>VIRTIO_BLK_F_SEG_MAX</code>, <code>VIRTIO_BLK_F_SIZE_MAX</code>, <code>VIRTIO_F_VERSION_1</code>, <code>VIRTIO_RING_F_INDIRECT_DESC</code>, and <code>VIRTIO_RING_F_EVENT_IDX</code>.</p>
 <h2 id="top-level-description-of-virtio-devices---virtiodevice"><a class="header" href="#top-level-description-of-virtio-devices---virtiodevice">Top-level description of Virtio devices - VirtIODevice</a></h2>
@@ -2968,9 +2881,9 @@ struct blkp_req {
 <p>After obtaining the task, the worker thread reads and writes the disk image corresponding to img_fd using the preadv and pwritev functions according to the IO operation information indicated by blkp_req. After completing the read/write operation, it first updates the last descriptor of the descriptor chain, which describes the completion result of the IO request, such as success, failure, or unsupported operation. Then it updates the used ring and writes the first descriptor of the descriptor chain to a new entry. Subsequently, it injects an interrupt to notify other virtual machines.</p>
 <p>The establishment of the worker thread effectively distributes time-consuming operations to other CPU cores, improving the efficiency and throughput of the main thread in dispatching requests and enhancing device performance.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="virtio-network-device"><a class="header" href="#virtio-network-device">Virtio Network Device</a></h1>
-<p>The Virtio network device is essentially a virtual network card. Currently supported features include <code>VIRTIO_NET_F_MAC</code>, <code>VIRTIO_NET_F_STATUS</code>, <code>VIRTIO_F_VERSION_1</code>, <code>VIRTIO-RING_F_INDIRECT_DESC</code>, <code>VIRTIO_RING_F_EVENT_IDX</code>.</p>
+<p>Virtio network device is essentially a virtual network card. Currently supported features include <code>VIRTIO_NET_F_MAC</code>, <code>VIRTIO_NET_F_STATUS</code>, <code>VIRTIO_F_VERSION_1</code>, <code>VIRTIO-RING_F_INDIRECT_DESC</code>, <code>VIRTIO_RING_F_EVENT_IDX</code>.</p>
 <h2 id="description-of-virtio-network-device"><a class="header" href="#description-of-virtio-network-device">Description of Virtio Network Device</a></h2>
-<p>For the Virtio network device, the type field in VirtIODevice is VirtioTNet, vqs_len is 2, indicating there are 2 Virtqueues, which are the Receive Queue and the Transmit Queue, respectively. The dev pointer points to the virtio_net_dev structure that describes specific information about the network device. In Virtio_net_dev, config is used to represent the MAC address and connection status of the network card, tapfd is the file descriptor of the Tap device corresponding to the device, rx_ready indicates whether the receive queue is available, and event is used for the receive packet thread to monitor the Tap device's readable events through epoll.</p>
+<p>For Virtio network devices, the type field in VirtIODevice is VirtioTNet, vqs_len is 2, indicating there are 2 Virtqueues, namely the Receive Queue and the Transmit Queue. The dev pointer points to the virtio_net_dev structure that describes specific information about the network device. In Virtio_net_dev, config is used to represent the MAC address and connection status of the network card, tapfd is the file descriptor for the Tap device corresponding to the device, rx_ready indicates whether the receive queue is available, and event is used for the receive packet thread to monitor the Tap device's readable events through epoll.</p>
 <pre><code class="language-c">typedef struct virtio_net_dev {
     NetConfig config;
     int tapfd;
@@ -2979,24 +2892,66 @@ struct blkp_req {
 } NetDev;
 
 struct hvisor_event {
-    void        (*handler)(int, int, void *);
-    void        *param;
-    int         fd;
-    int         epoll_type;
+    void		(*handler)(int, int, void *);
+    void		*param;
+    int			fd;
+    int 		epoll_type;
 };
 </code></pre>
 <h2 id="tap-device-and-bridge-device"><a class="header" href="#tap-device-and-bridge-device">Tap Device and Bridge Device</a></h2>
-<p>The implementation of the Virtio network device is based on two virtual devices provided by the Linux kernel: Tap device and bridge device.</p>
-<p>A Tap device is an Ethernet device implemented in software by the Linux kernel, and Ethernet frames can be simulated by reading and writing to the Tap device in user space. Specifically, when a process or kernel performs a write operation on the Tap device, it is equivalent to sending a packet to the Tap device. When a read operation is performed on the Tap device, it is equivalent to receiving a packet from the Tap device. Thus, by performing read and write operations on the Tap device, packet transfer between the kernel and the process can be achieved.</p>
-<p>The command to create a tap device is: <code>ip tuntap add dev tap0 mode tap</code>. This command creates a tap device named tap0. If a process wants to use this device, it needs to first open the /dev/net/tun device, obtain a file descriptor tun_fd, and call ioctl(TUNSETIFF) on it to link the process to the tap0 device. Afterwards, tun_fd actually becomes the file descriptor of the tap0 device, and it can be read, written, and polled.</p>
-<p>A bridge device is a virtual device provided by the Linux kernel that functions similarly to a switch. When other network devices are connected to the bridge device, those devices become ports of the bridge device, and the bridge device takes over the packet sending and receiving process of all devices. When other devices receive packets, they are sent directly to the bridge device, which forwards them to other ports based on the MAC address. Therefore, all devices connected to the bridge can communicate with each other.</p>
-<p>The command to create a bridge device is: <code>brctl addbr br0</code>. The command to connect the physical network card eth0 to br0 is: brctl addif br0 eth0. The command to connect the tap0 device to br0 is: brctl addif br0 tap0.</p>
-<p>Before the Virtio network device starts, Root Linux needs to create and start the tap device and bridge device in advance from the command line, and connect the tap device and the physical network card on Root Linux to the bridge device respectively. Each Virtio network device needs to connect to a tap device, ultimately forming a network topology diagram as shown below. In this way, the Virtio network device can transmit packets to the external network by reading and writing to the tap device.</p>
+<p>The implementation of Virtio network devices is based on two types of virtual devices provided by the Linux kernel: Tap devices and bridge devices.</p>
+<p>A Tap device is an Ethernet device implemented in software by the Linux kernel. Reading and writing to the Tap device in user space can simulate the reception and transmission of Ethernet frames. Specifically, when a process or kernel performs a write operation on the Tap device, it is equivalent to sending a packet to the Tap device. Performing a read operation on the Tap device is equivalent to receiving a packet from the Tap device. Thus, by reading and writing to the Tap device, packet transfer between the kernel and the process can be achieved.</p>
+<p>The command to create a tap device is: <code>ip tuntap add dev tap0 mode tap</code>. This command creates a tap device named tap0. If a process wants to use this device, it needs to first open the /dev/net/tun device, obtain a file descriptor tun_fd, and call ioctl(TUNSETIFF) on it to link the process to the tap0 device. Afterward, tun_fd actually becomes the file descriptor for the tap0 device, and it can be read, written, and polled.</p>
+<p>A bridge device is a virtual device provided by the Linux kernel that functions similarly to a switch. When other network devices are connected to a bridge device, those devices become ports of the bridge device, which takes over the packet sending and receiving process of all devices. When other devices receive packets, they are sent directly to the bridge device, which forwards them to other ports based on MAC addresses. Therefore, all devices connected to the bridge can communicate with each other.</p>
+<p>The command to create a bridge device is: <code>brctl addbr br0</code>. The command to connect the physical network card eth0 to br0 is: <code>brctl addif br0 eth0</code>. The command to connect the tap0 device to br0 is: <code>brctl addif br0 tap0</code>.</p>
+<p>Before the Virtio network device starts, Root Linux needs to create and start the tap device and bridge device in advance through the command line, and connect the tap device and Root Linux's physical network card to the bridge device, respectively. Each Virtio network device needs to connect to a tap device, ultimately forming a network topology as shown in the following diagram. In this way, the Virtio network device can transmit packets with the external network by reading and writing to the tap device.</p>
 <p><img src="chap04/subchap03/VirtIO/./img/hvisor-virtio-net.svg" alt="hvisor-virtio-net" /></p>
 <h2 id="sending-packets"><a class="header" href="#sending-packets">Sending Packets</a></h2>
-<p>The Transmit Virtqueue of the Virtio network device is used to store the send buffer. When the device receives a request from the driver to write to the QueueNotify register, if the QueueSel register points to the Transmit Queue at this time, it indicates that the driver is notifying the device that there is a new packet to send. The Virtio-net device will take out a descriptor chain from the available ring, each descriptor chain corresponds to a packet, and the memory buffer it points to contains the packet data to be sent. The packet data includes 2 parts, the first part is the packet header virtio_net_hdr_v1 structure specified by the Virtio protocol, which contains some description information of the packet, and the second part is the Ethernet frame. To send a packet, just write the Ethernet frame part to the Tap device through the writev function. After the Tap device receives the frame, it will forward it to the bridge device, and the bridge device will forward it to the external network through the physical network card based on the MAC address.</p>
+<p>The Transmit Virtqueue of the Virtio network device is used to store the send buffer. When the device receives a request from the driver to write to the QueueNotify register, if the QueueSel register points to the Transmit Queue at that time, it indicates that the driver has informed the device that there is a new packet to send. The Virtio-net device will take out a descriptor chain from the available ring, each descriptor chain corresponds to a packet, and the memory buffer it points to contains the packet data to be sent. The packet data includes 2 parts, the first part is the packet header virtio_net_hdr_v1 structure specified by the Virtio protocol, which contains some description information of the packet, and the second part is the Ethernet frame. To send a packet, only the Ethernet frame part needs to be written into the Tap device through the writev function. After the Tap device receives the frame, it will forward it to the bridge device, which will forward it to the external network through the physical network card based on the MAC address.</p>
 <h2 id="receiving-packets"><a class="header" href="#receiving-packets">Receiving Packets</a></h2>
-<p>When initializing, the Virtio network device adds the file descriptor of the Tap device to the interest list of the event monitor thread epoll instance. The event monitor thread will loop and call the epoll_wait function to monitor the readable events of the tap device. Once a readable event occurs, indicating that the tap device has received a packet from the kernel, the epoll_wait function returns and executes the packet reception processing function. The processing function will take out a descriptor chain from the available ring of the Receive Virtqueue, read the tap device, write the data into the memory buffer pointed to by the descriptor chain, and update the used ring. The processing function will repeat this step until reading the tap device returns a negative value and errno is EWOULDBLOCK, indicating that there are no new packets in the tap device, and then interrupt to notify other virtual machines to receive packets.</p>
+<p>When initializing, the Virtio network device adds the file descriptor of the Tap device to the interest list of the event monitor thread epoll instance. The event monitor thread will loop and call the epoll_wait function to monitor the readable events of the tap device. Once a readable event occurs, indicating that the tap device has received a packet from the kernel, the epoll_wait function returns and executes the packet reception processing function. The processing function will take out a descriptor chain from the available ring of the Receive Virtqueue and read from the tap device, writing the data into the memory buffer pointed to by the descriptor chain, and updating the used ring. The processing function will repeat this step until reading from the tap device returns a negative value and errno is EWOULDBLOCK, indicating that there are no new packets in the tap device, after which it will interrupt to notify other virtual machines to receive packets.</p>
+<h2 id="configuring-the-environment"><a class="header" href="#configuring-the-environment">Configuring the Environment</a></h2>
+<h3 id="requirements-for-disk-images"><a class="header" href="#requirements-for-disk-images">Requirements for Disk Images</a></h3>
+<p>The disk image of root Linux needs to install at least the following packages:</p>
+<pre><code>apt-get install git sudo vim bash-completion \
+kmod net-tools iputils-ping resolvconf ntpdate
+</code></pre>
+<h3 id="requirements-for-the-linux-image"><a class="header" href="#requirements-for-the-linux-image">Requirements for the Linux Image</a></h3>
+<p>Before compiling the root Linux image, change the CONFIG_IPV6 and CONFIG_BRIDGE configs to y in the .config file to support creating bridge and tap devices in root Linux. For example:</p>
+<pre><code class="language-shell">cd linux
+# Add a line in .config
+CONFIG_BLK_DEV_RAM=y
+# Modify two CONFIG parameters in .config
+CONFIG_IPV6=y
+CONFIG_BRIDGE=y
+# Then compile Linux
+</code></pre>
+<h3 id="creating-a-network-topology"><a class="header" href="#creating-a-network-topology">Creating a Network Topology</a></h3>
+<p>Before using Virtio net devices, you need to create a network topology in root Linux so that Virtio net devices can connect to real network cards through Tap devices and bridge devices. Execute the following commands in root Linux:</p>
+<pre><code class="language-shell">mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+ip link set eth0 up
+dhclient eth0
+brctl addbr br0
+brctl addif br0 eth0
+ifconfig eth0 0
+dhclient br0
+ip tuntap add dev tap0 mode tap
+brctl addif br0 tap0
+ip link set dev tap0 up
+</code></pre>
+<p>This will create a <code>tap0 device &lt;-&gt; bridge device &lt;-&gt; real network card</code> network topology.</p>
+<h3 id="testing-non-root-linux-network-connectivity"><a class="header" href="#testing-non-root-linux-network-connectivity">Testing Non-root Linux Network Connectivity</a></h3>
+<p>Execute the following commands in the non-root Linux command line to start the network card:</p>
+<pre><code class="language-shell">mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+ip link set eth0 up
+dhclient eth0
+</code></pre>
+<p>You can test network connectivity with the following commands:</p>
+<pre><code>curl www.baidu.com
+ping www.baidu.com
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="virtio-console"><a class="header" href="#virtio-console">Virtio Console</a></h1>
 <p>The Virtio Console device is essentially a virtual console device used for input and output of data, and can serve as a virtual terminal for other virtual machines. Currently, hvisor supports the <code>VIRTIO_CONSOLE_F_SIZE</code> and <code>VIRTIO_F_VERSION_1</code> features.</p>
 <h2 id="description-of-the-virtio-console-device"><a class="header" href="#description-of-the-virtio-console-device">Description of the Virtio Console Device</a></h2>

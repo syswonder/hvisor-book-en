@@ -156,39 +156,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="command-line-tool"><a class="header" href="#command-line-tool">Command Line Tool</a></h1>
-<p>The command line tool is a management tool affiliated with hvisor, used to create and shut down other virtual machines on the Root Linux of the virtual machine manager, and is responsible for starting the Virtio daemon to provide Virtio device emulation. The repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
-<h2 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h2>
-<p>The command line tool currently supports two architectures: arm64 and riscv, and needs to be used in conjunction with a kernel module. Cross-compilation on an x86 host can be done for different architectures.</p>
-<ul>
-<li>arm64 compilation</li>
-</ul>
-<p>Execute the following command in the hvisor-tool directory to obtain the command line tool hvisor and kernel module hvisorl.ko for the arm64 architecture.</p>
-<pre><code>make all ARCH=arm64 KDIR=xxx
-</code></pre>
-<p>Where KDIR is the Root Linux source path, used for compiling the kernel module.</p>
-<ul>
-<li>riscv compilation</li>
-</ul>
-<p>Compile the command line tool and kernel module for the riscv architecture:</p>
-<pre><code>make all ARCH=riscv KDIR=xxx
-</code></pre>
-<h2 id="managing-virtual-machines"><a class="header" href="#managing-virtual-machines">Managing Virtual Machines</a></h2>
-<h3 id="load-the-kernel-module"><a class="header" href="#load-the-kernel-module">Load the Kernel Module</a></h3>
-<p>Before using the command line tool, you need to load the kernel module to facilitate user-space programs to interact with Hypervisor:</p>
-<pre><code>insmod hvisor.ko
-</code></pre>
-<p>The operation to unload the kernel module is:</p>
-<pre><code>rmmod hvisor.ko
-</code></pre>
-<p>Where hvisor.ko is located in the hvisor-tool/driver directory.</p>
-<h3 id="start-a-virtual-machine"><a class="header" href="#start-a-virtual-machine">Start a Virtual Machine</a></h3>
-<p>On Root Linux, you can create a virtual machine with id 1 by the following command. This command will load the virtual machine's operating system image file <code>Image</code> to the real physical address <code>xxxa</code>, load the virtual machine's device tree file <code>linux2.dtb</code> to the real physical address <code>xxxb</code>, and start it.</p>
-<pre><code>./hvisor zone start --kernel Image,addr=xxxa --dtb linux2.dtb,addr=xxxb --id 1
-</code></pre>
-<h3 id="shut-down-a-virtual-machine"><a class="header" href="#shut-down-a-virtual-machine">Shut Down a Virtual Machine</a></h3>
-<p>Shut down the virtual machine with id 1:</p>
-<pre><code>./hvisor zone shutdown -id 1
-</code></pre>
+<p>The command line tool is an auxiliary management tool for hvisor, used to create and shut down other virtual machines on the managed virtual machine Root Linux, and is responsible for starting the Virtio daemon, providing Virtio device emulation. The repository is located at <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>. For specific usage, please see the README.</p>
 
                     </main>
 
