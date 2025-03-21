@@ -6,23 +6,25 @@
 
 - [hvisor Overview](./chap01/Overview.md)
 
-- [hvisor Supported Instruction Sets and Processors](./chap01/ISA.md)
+- [Instruction Sets and Processors Supported by hvisor](./chap01/ISA.md)
 
-- [hvisor Supported Hardware Platforms](./chap01/Board.md)
+- [Hardware Platforms Supported by hvisor](./chap01/Board.md)
+
+- [hvisor Hardware Adaptation Development Manual 🧑🏻‍💻](./chap01/PlatformDev.md)
 
 # hvisor Quick Start Guide
 
-- [Qemu AArch64 Quick Start](./chap02/QemuAArch64.md)
+- [Quick Start with Qemu AArch64](./chap02/QemuAArch64.md)
 
-- [Qemu RISC-V Quick Start](./chap02/QemuRISC-V.md)
+- [Quick Start with Qemu RISC-V](./chap02/QemuRISC-V.md)
 
-- [NXP i.MX 8 Quick Start](./chap02/NXPIMX8.md)
+- [Quick Start with NXP i.MX 8](./chap02/NXPIMX8.md)
 
-- [FPGA-Rockechip Quick Start](./chap02/FPGA-Rockechip.md)
+- [Quick Start with FPGA-Rockechip](./chap02/FPGA-Rockechip.md)
 
-- [Loongson 3A5000 hvisor Quick Start](./chap02/Loongson-3A5000.md)
+- [Quick Start with Loongson 3A5000 hvisor](./chap02/Loongson-3A5000.md)
 
-- [Xilinx ZCU102 hvisor Quick Start](./chap02/subchap01/Xilinx-ZCU102.md)
+- [Quick Start with Xilinx ZCU102 hvisor](./chap02/subchap01/Xilinx-ZCU102.md)
 
 	- [Qemu ZCU102 hvisor Boot](./chap02/subchap01/Qemu-ZCU102.md)
 	
@@ -32,7 +34,8 @@
 	
     - [UBOOT FIT Image Creation, Loading and Booting](./chap02/subchap01/UbootFitImage-ZCU102.md)
 
-- [FPGA Xiangshan Kunming Lake Quick Start]()
+- [Quick Start with FPGA Xiangshan Kunming Lake]()
+
 
 # hvisor User Manual
 
@@ -91,6 +94,6 @@
   
     - [Hypercall](./chap04/subchap04/HyperCall.md)
 
-# hvisor's Planning
+# hvisor's Plans
 
 - [TODO]()

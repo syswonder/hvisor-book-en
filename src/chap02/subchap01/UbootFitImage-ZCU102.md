@@ -1,12 +1,12 @@
 # UBOOT FIT Image Creation, Loading, and Booting
 
-wheatfox (enkerewpo@hotmail.com)
+wheatfox (wheatfox17@icloud.com)
 
 This article introduces the basic knowledge related to FIT images, as well as how to create, load, and boot FIT images.
 
 ## ITS Source File
-ITS is the source code used by uboot to generate FIT images (FIT Image), i.e., Image Tree Source, which uses the Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
-In the ZCU102 port of hvisor, FIT images are used to package hvisor, root linux, root dtb, and other files into one fitImage, facilitating booting on QEMU and actual hardware.
+ITS is the source code used by uboot to generate FIT images (FIT Image), which is Image Tree Source, using Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
+In the ZCU102 port of hvisor, a FIT image is used to package hvisor, root linux, root dtb, etc. into one fitImage, which facilitates booting on QEMU and actual hardware.
 The ITS file for the ZCU102 platform is located at `scripts/zcu102-aarch64-fit.its`:
 
 ```c
@@ -49,9 +49,9 @@ The ITS file for the ZCU102 platform is located at `scripts/zcu102-aarch64-fit.i
 };
 ```
 
-Here, `__ROOT_LINUX_IMAGE__`, `__ROOT_LINUX_DTB__`, `__HVISOR_TMP_PATH__` will be replaced with actual paths by the `sed` command in the Makefile. In the ITS source code, it mainly consists of images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. During UBOOT booting, the files specified in the default configuration in configurations will be automatically loaded to the specified address. Multiple configurations can be set to support the loading of different image configurations at boot time.
+Here, `__ROOT_LINUX_IMAGE__`, `__ROOT_LINUX_DTB__`, `__HVISOR_TMP_PATH__` will be replaced with actual paths by the `sed` command in the Makefile. In the ITS source code, it is mainly divided into images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. At UBOOT boot time, the files specified in the configurations will be automatically loaded to the designated address according to the default configuration, and multiple configurations can be set to support loading different configurations of images at boot time.
 
-The corresponding mkimage command in the Makefile:
+Makefile mkimage corresponding command:
 
 ```Makefile
 .PHONY: gen-fit
@@ -75,9 +75,9 @@ gen-fit: $(hvisor_bin) dtb
 
 ## Booting hvisor and root linux through FIT image in petalinux qemu
 
-Since a fitImage includes all the necessary files, for qemu, it only needs to load this file into a suitable position in memory through the loader.
+Since a fitImage includes all the necessary files, for qemu, it only needs to load this file into an appropriate position in memory through the loader.
 
-Then, qemu boots and enters UBOOT, where the following command can be used to boot (please modify the specific addresses according to the actual situation, and during actual use, all lines can be copied into one line and pasted into UBOOT for booting, or saved to the environment variable `bootcmd`, which requires UBOOT to mount a persistent flash for environment variable storage):
+Then, when qemu starts and enters UBOOT, you can use the following command to boot (please modify the specific address according to the actual situation, when actually using, you can write all lines into one line and copy it to UBOOT for booting, or save it to the environment variable `bootcmd`, which requires UBOOT to mount a persistent flash for environment variable storage):
 
 ```bash
 setenv fit_addr 0x10000000; setenv root_linux_load 0x200000;
