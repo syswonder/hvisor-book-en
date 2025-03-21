@@ -182,34 +182,162 @@
 <li><strong>Development and Testing</strong>: Developers can quickly create and destroy virtual machine environments for software development and testing.</li>
 <li><strong>Security Research</strong>: Provides an isolated environment for security research and malware analysis.</li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="hvisor-currently-supported-hardware-platforms"><a class="header" href="#hvisor-currently-supported-hardware-platforms">hvisor currently supported hardware platforms</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="hvisor-supported-hardware-platforms"><a class="header" href="#hvisor-supported-hardware-platforms">hvisor supported hardware platforms</a></h1>
+<p>2025.3.18</p>
+<h2 id="aarch64"><a class="header" href="#aarch64">aarch64</a></h2>
 <ul>
 <li><input disabled="" type="checkbox" checked=""/>
-QEMU</li>
-</ul>
-<h1 id="hvisor-upcoming-hardware-platforms"><a class="header" href="#hvisor-upcoming-hardware-platforms">hvisor upcoming hardware platforms</a></h1>
-<ul>
+QEMU virt aarch64</li>
+<li><input disabled="" type="checkbox" checked=""/>
+NXP i.MX8MP</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Xilinx Ultrascale+ MPSoC ZCU102</li>
 <li><input disabled="" type="checkbox"/>
-OKMX8MP-C</li>
+Rockchip RK3588</li>
+<li><input disabled="" type="checkbox"/>
+Rockchip RK3568</li>
+<li><input disabled="" type="checkbox"/>
+Forlinx OK6254-C</li>
+</ul>
+<h2 id="riscv64"><a class="header" href="#riscv64">riscv64</a></h2>
+<ul>
+<li><input disabled="" type="checkbox" checked=""/>
+QEMU virt riscv64</li>
+<li><input disabled="" type="checkbox"/>
+FPGA Xiangshan (Kunming Lake) on S2C Prodigy S7-19PS-2</li>
+<li><input disabled="" type="checkbox"/>
+FPGA RocketChip on Xilinx Ultrascale+ MPSoC ZCU102</li>
+</ul>
+<h2 id="loongarch64"><a class="header" href="#loongarch64">loongarch64</a></h2>
+<ul>
+<li><input disabled="" type="checkbox" checked=""/>
+Loongson 3A5000+7A2000</li>
+<li><input disabled="" type="checkbox"/>
+Loongson 3A6000</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="hvisor-hardware-adaptation-development-manual-"><a class="header" href="#hvisor-hardware-adaptation-development-manual-">hvisor Hardware Adaptation Development Manual 🧑🏻‍💻</a></h1>
+<p>wheatfox (wheatfox17@icloud.com) 2025.3.17</p>
+<h2 id="design-principles"><a class="header" href="#design-principles">Design Principles</a></h2>
+<ol>
+<li><strong>Code and board configuration separation</strong>: No <code>platform_xxx</code> related <code>cfg</code> should appear inside <code>src</code> of hvisor itself.</li>
+<li><strong>Platform independence</strong>: Introduce the previous hvisor-deploy architecture, orderly store information about various architectures and boards in the <code>platform</code> directory.</li>
+<li><strong>Board directory index</strong>:
+<ul>
+<li>Uniformly use <code>platform/$ARCH/$BOARD</code> as the dedicated directory for the board.</li>
+<li>Each board's unique <strong>BID (Board ID)</strong> adopts the <code>ARCH/BOARD</code> format, such as <code>aarch64/qemu-gicv3</code>.</li>
+</ul>
+</li>
+<li><strong>Simplified compilation</strong>: Support using <code>BID=xxx/xxx</code> to directly specify the board, while also compatible with <code>ARCH=xxx BOARD=xxx</code> style.</li>
+<li><strong>Structured configuration</strong>: Each board directory contains the following files:
+<ul>
+<li><code>linker.ld</code> - Link script</li>
+<li><code>platform.mk</code> - QEMU startup Makefile and <code>hvisor.bin</code> handling</li>
+<li><code>board.rs</code> - Board definition Rust code</li>
+<li><code>configs/</code> - JSON configurations for hvisor-tool startup zones</li>
+<li><code>cargo/</code>
+<ul>
+<li><code>features</code> - Specific cargo features corresponding to the board, including drivers, functions, etc.</li>
+<li><code>config.template.toml</code> - Template for <code>.cargo/config</code>, maintained by each board</li>
+</ul>
+</li>
+<li><code>test/</code> - (Optional) QEMU related test code, including unit tests, system tests, etc.</li>
+<li><code>image/</code> - Startup file directory, containing multiple subdirectories:
+<ul>
+<li><code>bootloader/</code> - (Optional) Used for local QEMU operation and unittest/systemtest testing</li>
+<li><code>dts/</code> - (Optional) Device tree source files for zones 0, 1, 2, …</li>
+<li><code>its/</code> - (Optional) Used for generating U-Boot FIT image (hvisor aarch64 zcu102)</li>
+<li><code>acpi/</code> - (Optional) ACPI device tree source code for x86 platform (hvisor x86_64)</li>
+<li><code>kernel/</code> - (Optional) Kernel Image suitable for the target platform</li>
+<li><code>virtdisk/</code> - (Optional) Virtual disk files, such as rootfs, etc.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="code-implementation-details"><a class="header" href="#code-implementation-details">Code Implementation Details</a></h2>
+<h3 id="auto-generate-cargoconfigtoml"><a class="header" href="#auto-generate-cargoconfigtoml">Auto-generate <code>.cargo/config.toml</code></a></h3>
+<ul>
+<li>Generated by <code>tools/gen_cargo_config.sh</code>, ensuring dynamic updates to the <code>linker.ld</code> configuration.</li>
+<li><code>config.template.toml</code> uses placeholders like <code>__ARCH__</code>, <code>__BOARD__</code>, replaced by <code>gen_cargo_config.sh</code> to generate <code>.cargo/config.toml</code>.</li>
+</ul>
+<h3 id="buildrs-automatically-symlink-boardrs"><a class="header" href="#buildrs-automatically-symlink-boardrs"><code>build.rs</code> Automatically Symlink <code>board.rs</code></a></h3>
+<ul>
+<li><code>build.rs</code> is responsible for symlinking <code>platform/$ARCH/$BOARD/board.rs</code> to <code>src/platform/__board.rs</code>.</li>
+<li>Avoids Makefile handling, triggered only when <code>env</code> variables change, reducing unnecessary full recompilations.</li>
+</ul>
+<h3 id="select-drivers-through-cargo-features"><a class="header" href="#select-drivers-through-cargo-features">Select drivers through Cargo features</a></h3>
+<ul>
+<li><strong>Avoid <code>platform_xxx</code> directly appearing in <code>src/</code></strong>, switch to configuration based on <code>features</code>.</li>
+<li><code>cargo/features</code> uniformly stores configurations of board drivers, functions, etc.</li>
+</ul>
+<h2 id="overview-of-features-corresponding-to-each-board"><a class="header" href="#overview-of-features-corresponding-to-each-board">Overview of <code>features</code> Corresponding to Each Board</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>BOARD ID</th><th>FEATURES</th></tr></thead><tbody>
+<tr><td><code>aarch64/qemu-gicv3</code></td><td><code>gicv3</code> <code>pl011</code> <code>iommu</code> <code>pci</code> <code>pt_layout_qemu</code></td></tr>
+<tr><td><code>aarch64/qemu-gicv2</code></td><td><code>gicv2</code> <code>pl011</code> <code>iommu</code> <code>pci</code> <code>pt_layout_qemu</code></td></tr>
+<tr><td><code>aarch64/imx8mp</code></td><td><code>gicv3</code> <code>imx_uart</code></td></tr>
+<tr><td><code>aarch64/zcu102</code></td><td><code>gicv2</code> <code>xuartps</code></td></tr>
+<tr><td><code>riscv64/qemu-plic</code></td><td><code>plic</code></td></tr>
+<tr><td><code>riscv64/qemu-aia</code></td><td><code>aia</code></td></tr>
+<tr><td><code>loongarch64/ls3a5000</code></td><td><code>loongson_chip_7a2000</code> <code>loongson_uart</code> <code>loongson_cpu_3a5000</code></td></tr>
+<tr><td><code>loongarch64/ls3a6000</code></td><td><code>loongson_chip_7a2000</code> <code>loongson_uart</code> <code>loongson_cpu_3a6000</code></td></tr>
+<tr><td><code>aarch64/rk3588</code></td><td><code>gicv3</code> <code>uart_16550</code> <code>uart_addr_rk3588</code> <code>pt_layout_rk</code></td></tr>
+<tr><td><code>aarch64/rk3568</code></td><td><code>gicv3</code> <code>uart_16550</code> <code>uart_addr_rk3568</code> <code>pt_layout_rk</code></td></tr>
+<tr><td><code>x86_64/qemu         </code></td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="development-and-compilation-guide"><a class="header" href="#development-and-compilation-guide">Development and Compilation Guide</a></h2>
+<h3 id="compile-different-boards"><a class="header" href="#compile-different-boards">Compile Different Boards</a></h3>
+<pre><code class="language-bash">make ARCH=aarch64 BOARD=qemu-gicv3
+make BID=aarch64/qemu-gicv3  # Use BID shorthand
+make BID=aarch64/imx8mp
+make BID=loongarch64/ls3a5000
+make BID=x86_64/qemu
+</code></pre>
+<h3 id="adapt-new-boards"><a class="header" href="#adapt-new-boards">Adapt New Boards</a></h3>
+<ol>
+<li><strong>Determine <code>features</code></strong>: Refer to existing <code>features</code> for classification, add required drivers and configurations.</li>
+<li><strong>Create <code>platform/$ARCH/$BOARD</code> directory</strong>:
+<ul>
+<li>Add <code>linker.ld</code>, <code>board.rs</code>, <code>features</code>, etc.</li>
+</ul>
+</li>
+<li><strong>Compile Test</strong>:</li>
+</ol>
+<pre><code class="language-bash">make BID=xxx/new_board
+</code></pre>
+<h3 id="features-design-principles"><a class="header" href="#features-design-principles"><code>features</code> Design Principles</a></h3>
+<ul>
+<li><strong>Minimize hierarchy</strong>:
+<ul>
+<li>For example, <code>cpu-a72</code> instead of <code>board_xxx</code>, to facilitate reuse across multiple boards.</li>
+</ul>
+</li>
+<li><strong>Clear driver/function classification</strong>:
+<ul>
+<li><code>irqchip</code> (<code>gicv3</code>, <code>plic</code>, ...)</li>
+<li><code>uart</code> (<code>pl011</code>, <code>imx_uart</code>, ...)</li>
+<li><code>iommu</code>, <code>pci</code>, <code>pt_layout_xxx</code>, ...</li>
+</ul>
+</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="running-hvisor-on-qemu"><a class="header" href="#running-hvisor-on-qemu">Running hvisor on QEMU</a></h1>
-<h2 id="1-install-cross-compiler-aarch64-none-linux-gnu--103"><a class="header" href="#1-install-cross-compiler-aarch64-none-linux-gnu--103">1. Install Cross Compiler aarch64-none-linux-gnu- 10.3</a></h2>
+<h2 id="1-install-cross-compiler-aarch64-none-linux-gnu-103"><a class="header" href="#1-install-cross-compiler-aarch64-none-linux-gnu-103">1. Install Cross Compiler aarch64-none-linux-gnu-10.3</a></h2>
 <p>URL: <a href="https://developer.arm.com/downloads/-/gnu-a">https://developer.arm.com/downloads/-/gnu-a</a></p>
-<p>Tool Selection: AArch64 GNU/Linux target (aarch64-none-linux-gnu)</p>
-<p>Download Link: <a href="https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC">https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC</a></p>
+<p>Tool selection: AArch64 GNU/Linux target (aarch64-none-linux-gnu)</p>
+<p>Download link: <a href="https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC">https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz?rev=1cb9c51b94f54940bdcccd791451cec3&amp;hash=B380A59EA3DC5FDC0448CA6472BF6B512706F8EC</a></p>
 <pre><code class="language-bash">wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
 tar xvf gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu.tar.xz
 ls gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/
 </code></pre>
-<p>After installation, remember the path, for example: /home/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-, which will be used later.</p>
+<p>Installation complete, remember the path, for example: /home/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-, this path will be used later.</p>
 <h2 id="2-compile-and-install-qemu-901"><a class="header" href="#2-compile-and-install-qemu-901">2. Compile and Install QEMU 9.0.1</a></h2>
-<p><strong>Note, QEMU needs to be changed from 7.2.12 to 9.0.1 to properly use PCI virtualization</strong></p>
-<pre><code># Install required packages for compilation
+<p><strong>Note, QEMU needs to be switched from 7.2.12 to 9.0.1 for proper use of PCI virtualization</strong></p>
+<pre><code># Install required dependencies for compilation
 sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \
               gawk build-essential bison flex texinfo gperf libtool patchutils bc \
               zlib1g-dev libexpat-dev pkg-config  libglib2.0-dev libpixman-1-dev libsdl2-dev \
               git tmux python3 python3-pip ninja-build
-# Download the source code
+# Download source code
 wget https://download.qemu.org/qemu-9.0.1.tar.xz
 # Extract
 tar xvJf qemu-9.0.1.tar.xz
@@ -223,23 +351,23 @@ make -j$(nproc)
 <pre><code># Please note, the parent directory of qemu-9.0.1 can be flexibly adjusted according to your actual installation location. Also, it needs to be placed at the beginning of the $PATH variable.
 export PATH=/path/to/qemu-7.2.12/build:$PATH
 </code></pre>
-<p>Then you can update the system path in the current terminal with <code>source ~/.bashrc</code>, or directly restart a new terminal. At this point, you can confirm the qemu version, if it displays qemu-9.0.1, then the installation was successful:</p>
+<p>Afterward, you can update the system path in the current terminal by <code>source ~/.bashrc</code> or simply restart a new terminal. At this point, you can confirm the qemu version, if it displays qemu-9.0.1, it means the installation was successful:</p>
 <pre><code>qemu-system-aarch64 --version   # Check version
 </code></pre>
 <blockquote>
-<p>Note, the above packages may not be complete, for example:</p>
+<p>Note, the above dependency packages may not be complete, for example:</p>
 <ul>
-<li>If you encounter <code>ERROR: pkg-config binary 'pkg-config' not found</code>, you can install the <code>pkg-config</code> package;</li>
-<li>If you encounter <code>ERROR: glib-2.48 gthread-2.0 is required to compile QEMU</code>, you can install the <code>libglib2.0-dev</code> package;</li>
-<li>If you encounter <code>ERROR: pixman &gt;= 0.21.8 not present</code>, you can install the <code>libpixman-1-dev</code> package.</li>
+<li>If <code>ERROR: pkg-config binary 'pkg-config' not found</code> appears, you can install the <code>pkg-config</code> package;</li>
+<li>If <code>ERROR: glib-2.48 gthread-2.0 is required to compile QEMU</code> appears, you can install the <code>libglib2.0-dev</code> package;</li>
+<li>If <code>ERROR: pixman &gt;= 0.21.8 not present</code> appears, you can install the <code>libpixman-1-dev</code> package.</li>
 </ul>
 </blockquote>
 <blockquote>
-<p>If you encounter an error ERROR: Dependency "slirp" not found, tried pkgconfig when generating the configuration file:</p>
-<p>Download the <a href="https://gitlab.freedesktop.org/slirp/libslirp">https://gitlab.freedesktop.org/slirp/libslirp</a> package and install according to the readme.</p>
+<p>If you encounter an error ERROR: Dependency "slirp" not found, tried pkgconfig during the generation of the configuration file:</p>
+<p>Download the <a href="https://gitlab.freedesktop.org/slirp/libslirp">https://gitlab.freedesktop.org/slirp/libslirp</a> package and install it according to the readme.</p>
 </blockquote>
 <h2 id="3-compile-linux-kernel-54"><a class="header" href="#3-compile-linux-kernel-54">3. Compile Linux Kernel 5.4</a></h2>
-<p>Before compiling the root linux image, change the CONFIG_IPV6 and CONFIG_BRIDGE config in the .config file to y, to support creating bridges and tap devices in root linux. Specific operations are as follows:</p>
+<p>Before compiling the root linux image, change the CONFIG_IPV6 and CONFIG_BRIDGE config in the .config file to y, to support creating bridges and tap devices in root linux. The specific operations are as follows:</p>
 <pre><code>git clone https://github.com/torvalds/linux -b v5.4 --depth=1
 cd linux
 git checkout v5.4
@@ -257,28 +385,28 @@ make ARCH=arm64 CROSS_COMPILE=/root/gcc-arm-10.3-2021.07-x86_64-aarch64-none-lin
 <p>If you encounter an error during the compilation of linux:</p>
 <pre><code>/usr/bin/ld: scripts/dtc/dtc-parser.tab.o:(.bss+0x20): multiple definition of `yylloc'; scripts/dtc/dtc-lexer.lex.o:(.bss+0x0): first defined here
 </code></pre>
-<p>Then modify the <code>scripts/dtc/dtc-lexer.lex.c</code> file under the linux folder, add <code>extern</code> before <code>YYLTYPE yylloc;</code>. Recompile, and if you encounter the error: openssl/bio.h: No such file or directory, execute <code>sudo apt install libssl-dev</code></p>
+<p>Then modify <code>scripts/dtc/dtc-lexer.lex.c</code> under the linux folder, add <code>extern</code> before <code>YYLTYPE yylloc;</code>. Recompile, if you encounter an error: openssl/bio.h: No such file or directory, then execute <code>sudo apt install libssl-dev</code></p>
 </blockquote>
-<p>After compilation, the kernel file is located at: arch/arm64/boot/Image. Remember the entire path of the linux folder, for example: home/korwylee/lgw/hypervisor/linux, we will use this path again in step 7.</p>
+<p>After compilation, the kernel file is located at: arch/arm64/boot/Image. Remember the entire linux folder's path, for example: home/korwylee/lgw/hypervisor/linux, we will use this path again in step 7.</p>
 <h2 id="4-build-file-system-based-on-ubuntu-2204-arm64-base"><a class="header" href="#4-build-file-system-based-on-ubuntu-2204-arm64-base">4. Build File System Based on Ubuntu 22.04 Arm64 Base</a></h2>
 <blockquote>
-<p>You can skip this part and directly download the ready-made disk image. https://blog.syswonder.org/#/2024/20240415_Virtio_devices_tutorial</p>
+<p>You can skip this part and directly download the ready-made disk image for use. https://blog.syswonder.org/#/2024/20240415_Virtio_devices_tutorial</p>
 </blockquote>
-<p>We use Ubuntu 22.04 to build the root file system.</p>
+<p>We use ubuntu 22.04 to build the root file system.</p>
 <blockquote>
-<p><strong>Ubuntu 20.04</strong> can also be used, but it will report a low glibc version error when running. You can refer to the solution in the comment section of <a href="https://blog.syswonder.org/#/2023/20230421_ARM64-QEMU-jailhouse">ARM64-qemu-jailhouse</a>.</p>
+<p><strong>Ubuntu 20.04</strong> can also be used, but it will report an error of low glibc version when running, you can refer to the solution in the comment section of <a href="https://blog.syswonder.org/#/2023/20230421_ARM64-QEMU-jailhouse">ARM64-qemu-jailhouse</a>.</p>
 </blockquote>
 <pre><code class="language-bash">wget http://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04.5-base-arm64.tar.gz
 
 mkdir rootfs
-# Create a 1G ubuntu.img, you can modify the count to change the img size
+# Create a 1G size ubuntu.img, you can modify the count to change the img size
 dd if=/dev/zero of=rootfs1.img bs=1M count=1024 oflag=direct
 mkfs.ext4 rootfs1.img
 # Put ubuntu.tar.gz into the ubuntu.img that has been mounted to rootfs
 sudo mount -t ext4 rootfs1.img rootfs/
 sudo tar -xzf ubuntu-base-22.04.5-base-arm64.tar.gz -C rootfs/
 
-# Bind rootfs to get some information and hardware from the physical machine
+# Let rootfs bind and get some information and hardware from the physical machine
 # qemu-path is your qemu path
 sudo cp qemu-path/build/qemu-system-aarch64 rootfs/usr/bin/
 sudo cp /etc/resolv.conf rootfs/etc/resolv.conf
@@ -293,7 +421,7 @@ apt-get update
 apt-get install git sudo vim bash-completion \
 		kmod net-tools iputils-ping resolvconf ntpdate screen
 
-# The following content surrounded by # can be done or not
+# The following content surrounded by # can be done or not done
 ###################
 adduser arm64
 adduser arm64 sudo
@@ -311,9 +439,9 @@ sudo umount rootfs/dev/pts
 sudo umount rootfs/dev
 sudo umount rootfs
 </code></pre>
-<p>Finally, unmount the mount to complete the production of the root file system.</p>
+<p>Finally, unmount the mounts to complete the production of the root file system.</p>
 <blockquote>
-<p>When executing <code>sudo chroot .</code>, if you encounter the error <code>chroot: failed to run command ‘/bin/bash’: Exec format error</code>, you can execute the command:</p>
+<p>When executing <code>sudo chroot .</code>, if an error <code>chroot: failed to run command ‘/bin/bash’: Exec format error</code> occurs, you can execute the command:</p>
 <pre><code>sudo apt-get install qemu-user-static
 sudo update-binfmts --enable qemu-aarch64
 </code></pre>
@@ -321,40 +449,40 @@ sudo update-binfmts --enable qemu-aarch64
 <h2 id="5-rust-environment-configuration"><a class="header" href="#5-rust-environment-configuration">5. Rust Environment Configuration</a></h2>
 <p>Please refer to: <a href="https://course.rs/first-try/intro.html">Rust Language Bible</a></p>
 <h2 id="6-compile-and-run-hvisor"><a class="header" href="#6-compile-and-run-hvisor">6. Compile and Run hvisor</a></h2>
-<p>First, pull the <a href="https://github.com/KouweiLee/hvisor">hvisor code repository</a> locally, then switch to the dev branch, and in the hvisor/images/aarch64 folder, put the previously compiled root file system and Linux kernel image in the virtdisk and kernel directories respectively, and rename them to rootfs1.ext4 and Image.</p>
-<p>Second, prepare the configuration files. Taking the <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/qemu-aarch64/with_virtio_blk_console">virtio-blk&amp;console example</a> as an example, this directory contains 6 files, perform the following operations on these 6 files:</p>
+<p>First, pull the <a href="https://github.com/KouweiLee/hvisor">hvisor code repository</a> to the local machine, then switch to the dev branch, and in the hvisor/images/aarch64 folder, put the previously compiled root file system and Linux kernel image respectively in the virtdisk and kernel directories, and rename them to rootfs1.ext4 and Image respectively.</p>
+<p>Second, prepare the configuration files. Take the <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/qemu-aarch64/with_virtio_blk_console">virtio-blk&amp;console example</a> as an example, this directory contains 6 files, perform the following operations on these 6 files:</p>
 <ul>
-<li>linux1.dts: Root Linux's device tree, used by hvisor at startup.</li>
-<li>linux2.dts: Zone1 Linux's device tree, needed by hvisor-tool when starting zone1. Replace linux1.dts and linux2.dts in the devicetree directory with the same name files, and execute <code>make all</code> to compile, obtaining linux1.dtb and linux2.dtb.</li>
-<li>qemu_aarch64.rs and qemu-aarch64.mk directly replace the files with the same name in the hvisor repository.</li>
+<li>linux1.dts: Root Linux's device tree, hvisor will use it when starting.</li>
+<li>linux2.dts: Zone1 Linux's device tree, hvisor-tool will need it when starting zone1. Replace linux1.dts and linux2.dts in the devicetree directory with the same name files, and execute <code>make all</code> to compile, obtaining linux1.dtb and linux2.dtb.</li>
+<li>qemu_aarch64.rs, qemu-aarch64.mk directly replace the files with the same name in the hvisor repository.</li>
 </ul>
 <p>Then, in the hvisor directory, execute:</p>
-<pre><code>make ARCH=aarch64 BOARD=qemu FEATURES=platform_qemu,gicv3 LOG=info run
+<pre><code class="language-bash">make ARCH=aarch64 LOG=info BOARD=qemu-gicv3 run # or use BOARD=qemu-gicv2
 </code></pre>
-<p>Afterward, you will enter the uboot startup interface. In this interface, execute:</p>
+<p>Afterward, you will enter the uboot startup interface, under this interface execute:</p>
 <pre><code>bootm 0x40400000 - 0x40000000
 </code></pre>
-<p>This boot command will start hvisor from the physical address <code>0x40400000</code>. <code>0x40000000</code> is essentially no longer used, but is still retained for historical reasons. When hvisor starts, it will automatically start root linux (Linux used for management), and enter the shell interface of root linux. Root linux is zone0, which undertakes management tasks.</p>
+<p>This boot command will start hvisor from the physical address <code>0x40400000</code>, <code>0x40000000</code> is essentially no longer used, but is still retained for historical reasons. When hvisor starts, it will automatically start root linux (used for management), and enter the shell interface of root linux, root linux is zone0, taking on management tasks.</p>
 <blockquote>
-<p>If you are missing <code>dtc</code>, you can execute the command:</p>
+<p>When prompted for missing <code>dtc</code>, you can execute the command:</p>
 <pre><code>sudo apt install device-tree-compiler
 </code></pre>
 </blockquote>
-<h2 id="7-use-hvisor-tool-to-start-zone1-linux"><a class="header" href="#7-use-hvisor-tool-to-start-zone1-linux">7. Use hvisor-tool to Start Zone1-linux</a></h2>
-<p>First, complete the compilation of the latest version of hvisor-tool. For specific details, please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>. For example, if you want to compile a command-line tool for arm64, and the source code of the Linux image in the Hvisor environment is compiled from the source code directory located at <code>~/linux</code>, you can execute</p>
+<h2 id="7-start-zone1-linux-using-hvisor-tool"><a class="header" href="#7-start-zone1-linux-using-hvisor-tool">7. Start zone1-linux Using hvisor-tool</a></h2>
+<p>First, complete the compilation of the latest version of hvisor-tool. For specific instructions, please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>. For example, if you want to compile a command-line tool for arm64, and the source code of the Linux image in the Hvisor environment is located at <code>~/linux</code>, you can execute</p>
 <pre><code>make all ARCH=arm64 LOG=LOG_WARN KDIR=~/linux
 </code></pre>
 <blockquote>
-<p>Please make sure that the Root Linux image in Hvisor is compiled from the Linux source code directory specified in the compilation options of hvisor-tool.</p>
+<p>Please make sure that the Root Linux image in Hvisor is compiled from the Linux source directory specified in the options when compiling hvisor-tool.</p>
 </blockquote>
-<p>After compilation, copy driver/hvisor.ko and tools/hvisor to the directory where zone1 linux starts in the image/virtdisk/rootfs1.ext4 root file system (for example, /same_path/); then put the kernel image of zone1 (if it is the same Linux as zone0, just copy a copy of image/aarch64/kernel/Image) and the device tree (image/aarch64/linux2.dtb) in the same directory (/same_path/), and rename them to Image and linux2.dtb.</p>
-<p>Then you need to create a root file system for Zone1 linux. You can copy a copy of image/aarch64/virtdisk/rootfs1.ext4, or repeat step 4 (preferably reduce the image size), and rename it to rootfs2.etx4. Then put rootfs2.ext4 in the same directory (/same_path/) as rootfs1.ext4.</p>
+<p>After compilation, copy driver/hvisor.ko, tools/hvisor to the directory where zone1 linux starts in the image/virtdisk/rootfs1.ext4 root file system (for example, /same_path/); then put the kernel image of zone1 (if it is the same Linux as zone0, just copy a copy of image/aarch64/kernel/Image), and the device tree (image/aarch64/linux2.dtb) in the same directory (/same_path/), and rename them to Image and linux2.dtb.</p>
+<p>Then you need to create a root file system for Zone1 linux. You can copy a copy of rootfs1.ext4 in image/aarch64/virtdisk, or repeat step 4 (preferably reduce the image size), and rename it to rootfs2.etx4. Then put rootfs2.ext4 in the same directory as rootfs1.ext4 (/same_path/).</p>
 <blockquote>
 <p>If the capacity of rootfs1.ext4 is not enough, you can refer to <a href="https://blog.syswonder.org/#/2023/20230421_ARM64-QEMU-jailhouse?id=_2-img%e6%89%a9%e5%ae%b9">img expansion</a> to expand rootfs1.ext4.</p>
 </blockquote>
-<p>Then you can start zone1-linux on QEMU through root linux-zone0.</p>
+<p>Then on QEMU, you can start zone1-linux through root linux-zone0.</p>
 <blockquote>
-<p>For detailed steps on starting zone1-linux, refer to the README of hvisor-tool and the <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/qemu-aarch64/with_virtio_blk_console/README.md">startup example</a></p>
+<p>For detailed steps to start zone1-linux, refer to the README of hvisor-tool and the <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/qemu-aarch64/with_virtio_blk_console/README.md">startup example</a></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="install-qemu"><a class="header" href="#install-qemu">Install qemu</a></h1>
 <p>Install QEMU 9.0.2:</p>
@@ -727,94 +855,97 @@ class UintrConfig extends Config(
 )
 
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="starting-hvisor-on-loongson-3a5000-motherboard-7a2000"><a class="header" href="#starting-hvisor-on-loongson-3a5000-motherboard-7a2000">Starting hvisor on Loongson 3A5000 motherboard (7A2000)</a></h1>
-<p>Han Yulu <a href="mailto:chap02/enkerewpo@hotmail.com">enkerewpo@hotmail.com</a></p>
-<p>Updated: 2024.12.4</p>
-<h2 id="step-1-obtain-hvisor-source-code-and-compile"><a class="header" href="#step-1-obtain-hvisor-source-code-and-compile">Step 1: Obtain hvisor source code and compile</a></h2>
-<p>Clone the code locally:</p>
-<pre><code class="language-bash">git clone -b dev-loongarch https://github.com/syswonder/hvisor # dev-loongarch branch
-make ARCH=loongarch64
+<div style="break-before: page; page-break-before: always;"></div><h1 id="booting-hvisor-on-loongson-3a5000-motherboard-7a2000"><a class="header" href="#booting-hvisor-on-loongson-3a5000-motherboard-7a2000">Booting hvisor on Loongson 3A5000 motherboard (7A2000)</a></h1>
+<p>Han Yulu <a href="mailto:chap02/wheatfox17@icloud.com">wheatfox17@icloud.com</a></p>
+<p>Updated: 2025.3.3</p>
+<h2 id="step-1-obtain-the-hvisor-source-code-and-compile-it"><a class="header" href="#step-1-obtain-the-hvisor-source-code-and-compile-it">Step 1: Obtain the hvisor source code and compile it</a></h2>
+<p>First, you need to install the <code>loongarch64-unknown-linux-gnu-</code> toolchain. Please download it from <a href="https://github.com/sunhaiyong1978/CLFS-for-LoongArch/releases/download/8.0/loongarch64-clfs-8.0-cross-tools-gcc-full.tar.xz">https://github.com/sunhaiyong1978/CLFS-for-LoongArch/releases/download/8.0/loongarch64-clfs-8.0-cross-tools-gcc-full.tar.xz</a> and extract it locally. Then add the <code>cross-tools/bin</code> directory to your <code>PATH</code> environment variable to ensure tools like <code>loongarch64-unknown-linux-gnu-gcc</code> can be directly called by the shell.</p>
+<p>Next, clone the code locally:</p>
+<pre><code class="language-bash">git clone -b dev https://github.com/syswonder/hvisor
+make BID=loongarch64/ls3a5000
 </code></pre>
-<p>After compiling, you can find the stripped hvisor.bin in the target directory (the file path will be displayed in the last line of the compilation output).</p>
-<h2 id="obtain-vmlinuxbin-image"><a class="header" href="#obtain-vmlinuxbin-image">Obtain vmlinux.bin image</a></h2>
-<p>Please download the latest released hvisor default Loongson Linux image from <a href="https://github.com/enkerewpo/linux-hvisor-loongarch64/releases">https://github.com/enkerewpo/linux-hvisor-loongarch64/releases</a> (including root linux kernel + root linux dtb + root linux rootfs, where root linux rootfs includes non-root linux + nonroot linux dtb + nonroot linux rootfs). If you need to compile the Linux kernel and rootfs yourself, refer to the <code>arch/loongarch</code> directory in the repository for hvisor-related device trees and the buildroot environment I ported for 3A5000 (<a href="https://github.com/enkerewpo/buildroot-loongarch64">https://github.com/enkerewpo/buildroot-loongarch64</a>). If you need to manually compile hvisor-tool, please refer to <a href="https://github.com/enkerewpo/hvisor-tool">https://github.com/enkerewpo/hvisor-tool</a>, for the compilation order and script invocation process of all environments, refer to the code within the <code>world</code> target in the <code>Makefile.1</code> file (<a href="https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1">https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1</a>), and compile everything by running the <code>./make_world</code> script. If you need to manually compile these, you need to modify the corresponding code path variables in Makefile.1, including:</p>
+<p>After compilation, you can find the stripped <code>hvisor.bin</code> in the target directory (the file path will be displayed in the last line of the compilation output).</p>
+<h2 id="obtain-vmlinuxbin-and-other-files"><a class="header" href="#obtain-vmlinuxbin-and-other-files">Obtain <code>vmlinux.bin</code> and other files</a></h2>
+<p>Please download the latest released hvisor default Loongson Linux image from <a href="https://github.com/enkerewpo/linux-hvisor-loongarch64/releases">https://github.com/enkerewpo/linux-hvisor-loongarch64/releases</a> (including root Linux kernel + root Linux dtb + root Linux rootfs, where root Linux rootfs includes non-root Linux + nonroot Linux dtb + nonroot Linux rootfs). If you need to compile the Linux kernel and rootfs yourself, refer to the <code>arch/loongarch</code> directory in that repository for hvisor-related device trees and the buildroot environment I ported for 3A5000 (<a href="https://github.com/enkerewpo/buildroot-loongarch64">https://github.com/enkerewpo/buildroot-loongarch64</a>). If you need to manually compile the hvisor-tool, refer to <a href="https://github.com/enkerewpo/hvisor-tool">https://github.com/enkerewpo/hvisor-tool</a>. For the compilation order and script invocation process of all environments, refer to the code within the <code>world</code> target in the <code>Makefile.1</code> file (<a href="https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1">https://github.com/enkerewpo/hvisor_uefi_packer/blob/main/Makefile.1</a>), and compile everything by running the <code>./make_world</code> script. If you need to manually compile these, you will need to modify the corresponding code path variables in <code>Makefile.1</code>, including:</p>
 <pre><code>HVISOR_LA64_LINUX_DIR = ../hvisor-la64-linux
 BUILDROOT_DIR = ../buildroot-loongarch64
 HVISOR_TOOL_DIR = ../hvisor-tool
 </code></pre>
-<p>Then run <code>./make_world</code>, please note that the first time compiling Linux and buildroot may take quite a long time (possibly up to several tens of minutes, depending on your machine performance).</p>
+<p>Then run <code>./make_world</code>. Please note that the first time compiling Linux and buildroot may take a long time (possibly up to several tens of minutes, depending on your machine performance).</p>
 <h2 id="obtain-hvisor-uefi-image-packer"><a class="header" href="#obtain-hvisor-uefi-image-packer">Obtain hvisor UEFI Image Packer</a></h2>
-<p>Since the 3A5000 and subsequent 3 series CPUs' motherboards all use UEFI boot, hvisor can only be started through the efi image method, clone the repository <a href="https://github.com/enkerewpo/hvisor_uefi_packer">https://github.com/enkerewpo/hvisor_uefi_packer</a> locally:</p>
+<p>Since the 3A5000 and later series CPUs' motherboards use UEFI boot, hvisor can only be started via an EFI image method. Clone the repository <a href="https://github.com/enkerewpo/hvisor_uefi_packer">https://github.com/enkerewpo/hvisor_uefi_packer</a> locally:</p>
 <pre><code class="language-bash">make menuconfig # Configure for your local loongarch64 gcc toolchain prefix, hvisor.bin path, vmlinux.bin path
-# Modify make_image in HVISOR_SRC_DIR=../hvisor to your actual saved hvisor source code path, then run the script
-./make_image
-# Get BOOTLOONGARCH64.EFI file
+# 1. Modify the HVISOR_SRC_DIR in make_image to the actual path where you saved the hvisor source code, then run the script
+# 2. Modify BOARD=ls3a5000/ls3a6000
+./make_loongarch64
+# Obtain the BOOTLOONGARCH64.EFI file
 </code></pre>
-<p>The obtained <code>BOOTLOONGARCH64.EFI</code> must be placed in the <code>/EFI/BOOT/BOOTLOONGARCH64.EFI</code> position of the first FAT32 partition of the USB drive. Then insert the USB drive to boot into hvisor and automatically start root linux.</p>
-<p>Since the metadata related to root linux (loading address, memory area, etc.) is hard-coded in the hvisor source code (<code>src/platform/ls3a5000_loongarch64.rs</code>), if you are manually compiling the Linux kernel, you need to modify the configuration here and recompile hvisor.</p>
-<h2 id="board-boot"><a class="header" href="#board-boot">Board boot</a></h2>
-<p>Power on the motherboard, press <strong>F12</strong> to enter the UEFI Boot Menu, select the inserted USB drive and press Enter, hvisor will automatically start and enter the root linux bash environment.</p>
+<p>The obtained <code>BOOTLOONGARCH64.EFI</code> must be placed in the first FAT32 partition of the USB drive at <code>/EFI/BOOT/BOOTLOONGARCH64.EFI</code>. Then insert the USB drive to boot and enter hvisor, which will automatically start root Linux.</p>
+<p>Since the metadata related to root Linux (loading address, memory area, etc.) is hardcoded in the hvisor source code (<code>src/platform/ls3a5000_loongarch64.rs</code>), if you are manually compiling the Linux kernel, you need to modify this configuration and recompile hvisor.</p>
+<h2 id="booting-on-the-board"><a class="header" href="#booting-on-the-board">Booting on the board</a></h2>
+<p>Power on the motherboard, press <strong>F12</strong> to enter the UEFI Boot Menu, select the inserted USB drive and press Enter. hvisor will automatically start and enter the bash environment of root Linux.</p>
 <h2 id="start-nonroot"><a class="header" href="#start-nonroot">Start nonroot</a></h2>
-<p>If you are using the related images provided in the release, after starting, enter in the root linux bash:</p>
+<p>If you are using the related images provided in the release, after booting, enter in the bash of root Linux:</p>
 <pre><code class="language-bash">./daemon.sh
-./linux2_virtio.sh
+./start.sh # Start nonroot, then please manually run screen /dev/pts/0
+./start.sh -s # Start nonroot and automatically enter screen
 </code></pre>
-<p>Afterward, nonroot will automatically start (some related configuration files are located in the root linux <code>/tool</code> directory, including the nonroot zone configuration json and virtio configuration json files provided to hvisor-tool), then a screen process connected to nonroot linux's virtio-console will automatically open, and you will see a bash printed with the nonroot label appear, you can use the CTRL+A D shortcut key to detach during screen (please remember the displayed screen session name), at this point you will return to root linux, if you want to return to nonroot linux, run</p>
-<pre><code class="language-bash">screen -r {the full name of the session just now or just enter the first few digits}
+<p>Afterward, nonroot will automatically start (some related configuration files are located in the <code>/tool</code> directory of root Linux, including the nonroot zone configuration JSON and virtio configuration JSON files provided to hvisor-tool). A screen process will automatically open connecting to the virtio-console of nonroot Linux, displaying a bash with the nonroot label. You can use the <code>CTRL+A D</code> shortcut key to detach during screen usage (remember the displayed screen session name / ID). You will return to root Linux. If you want to return to nonroot Linux, run:</p>
+<pre><code class="language-bash">screen -r {the full name of the session just now or just enter the front ID}
 </code></pre>
-<p>Afterward, you will return to the nonroot linux bash.</p>
+<p>You will then return to the bash of nonroot Linux.</p>
 <div style="break-before: page; page-break-before: always;"></div><p>This catalog is mainly related to ZCU102, and the introduction is as follows:</p>
 <ol>
 <li>How to use Qemu to simulate Xilinx ZynqMP ZCU102</li>
 <li>How to boot hvisor root linux and nonroot linux on Qemu ZCU102 and ZCU102 physical development board.</li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-zcu102-hvisor-boot"><a class="header" href="#qemu-zcu102-hvisor-boot">Qemu ZCU102 hvisor Boot</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-zcu102-hvisor-startup"><a class="header" href="#qemu-zcu102-hvisor-startup">Qemu ZCU102 hvisor Startup</a></h1>
 <h2 id="install-petalinux"><a class="header" href="#install-petalinux">Install Petalinux</a></h2>
 <ol>
 <li>Install <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">Petalinux 2024.1</a>
-Please note that this article uses 2024.1 as an example, which does not mean that other versions are not possible, but other versions have not been verified, and it has been found that Petalinux has a strong dependency on the operating system. Please install the version of Petalinux suitable for your operating system.</li>
-<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions to it, and then directly run the installer with <code>./petalinux.run</code>.</li>
-<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, which can be installed one by one with <code>apt install</code>.</li>
-<li>After installation, before using Petalinux each time, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables. If it's too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
+Please note that this article uses 2024.1 as an example for introduction. It does not mean that other versions cannot be used, but other versions have not been verified, and it has been found in testing that Petalinux has a strong dependency on the operating system. Please install the version of Petalinux suitable for your own operating system.</li>
+<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions, and then directly run the installer with <code>./petalinux.run</code>.</li>
+<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, just <code>apt install</code> them one by one.</li>
+<li>After installation, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables before using Petalinux each time. If it is too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
 </ol>
 <h2 id="install-zcu102-bsp"><a class="header" href="#install-zcu102-bsp">Install ZCU102 BSP</a></h2>
 <ol>
 <li>Download the BSP corresponding to the Petalinux version, in the example it is <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">ZCU102 BSP 2024.1</a></li>
-<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, run <code>source settings.sh</code>.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, <code>source settings.sh</code>.</li>
 <li>Create a Petalinux Project based on the BSP: <code>petalinux-create -t project -s xilinx-zcu102-v2024.1-05230256.bsp</code></li>
 <li>This will create a <code>xilinx-zcu102-2024.1</code> folder, which contains the parameters required for QEMU to simulate ZCU102 (device tree), as well as precompiled Linux images, device trees, Uboot, etc., that can be directly loaded onto the board.</li>
 </ol>
 <h2 id="compile-hvisor"><a class="header" href="#compile-hvisor">Compile Hvisor</a></h2>
-<p>Refer to "Running Hvisor on Qemu" for setting up the environment required to compile Hvisor, then in the hvisor directory, execute:</p>
-<pre><code>make ARCH=aarch64 LOG=info FEATURES=platform_zcu102,gicv2 cp
+<p>Refer to "Running Hvisor on Qemu" to configure the environment required for compiling Hvisor, then in the hvisor directory, execute:</p>
+<pre><code>make ARCH=aarch64 LOG=info BOARD=zcu102 cp
 </code></pre>
-<p>to compile. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> contains the required hvisor image.</p>
+<p>to perform the compilation. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> will contain the required hvisor image.</p>
 <h2 id="prepare-device-tree"><a class="header" href="#prepare-device-tree">Prepare Device Tree</a></h2>
 <h3 id="use-existing-device-tree"><a class="header" href="#use-existing-device-tree">Use Existing Device Tree</a></h3>
-<p>In the image/devicetree directory of Hvisor, there is zcu102-root-aarch64.dts, which is a device tree file tested for booting RootLinux, compile it as follows:</p>
+<p>In the Hvisor image/devicetree directory, there is a zcu102-root-aarch64.dts, which is a device tree file that has been tested for booting RootLinux. Compile it as follows:</p>
 <pre><code>dtc -I dts -O dtb -o zcu102-root-aarch64.dtb zcu102-root-aarch64.dts
 </code></pre>
 <p>If the dtc command is invalid, install device-tree-compiler.</p>
 <pre><code>sudo apt-get install device-tree-compiler
 </code></pre>
 <h3 id="prepare-device-tree-yourself"><a class="header" href="#prepare-device-tree-yourself">Prepare Device Tree Yourself</a></h3>
-<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get a complete device tree, based on <code>zcu102-root-aarch64.dts</code> for modifications.</p>
+<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get the complete device tree, based on <code>zcu102-root-aarch64.dts</code> for additions and deletions.</p>
 <h2 id="prepare-image"><a class="header" href="#prepare-image">Prepare Image</a></h2>
 <h3 id="use-existing-image"><a class="header" href="#use-existing-image">Use Existing Image</a></h3>
-<p>It is recommended to use the <code>pre-built/linux/images/Image</code> from the ZCU102 BSP as the Linux kernel to boot on ZCU102, as its driver configuration is complete.</p>
+<p>It is recommended to directly use the <code>pre-built/linux/images/Image</code> from the ZCU102 BSP as the Linux kernel to boot on ZCU102, as its driver configuration is complete.</p>
 <h3 id="compile-yourself"><a class="header" href="#compile-yourself">Compile Yourself</a></h3>
-<p>After testing, the support for ZYNQMP in the Linux source code before 5.15 is not comprehensive, it is not recommended to use versions before this for compilation. For later versions, you can compile directly according to the general compilation process, as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
+<p>Through testing, it has been found that the support for ZYNQMP in the Linux source code before version 5.15 is not comprehensive, so it is not recommended to use versions before this for compilation. When compiling with later versions, you can follow the general compilation process as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
 <ol>
 <li>Visit the <a href="https://github.com/Xilinx/linux-xlnx/tags?after=xilinx-v2023.1">linux-xlnx</a> official website to download the Linux source code, it is best to download <code>zynqmp-soc-for-v6.3</code>.</li>
-<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to extract the source code</li>
+<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to extract the source code.</li>
 <li>Enter the extracted directory, execute the following command using the default configuration, <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</code></li>
 <li>Compile: <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image -j$(nproc)</code></li>
-<li>After compilation, the directory <code>arch/arm64/boot/Image</code> contains the required image.</li>
+<li>After compilation, the directory <code>arch/arm64/boot/Image</code> will contain the required image.</li>
 </ol>
 <h2 id="enable-qemu-simulation"><a class="header" href="#enable-qemu-simulation">Enable QEMU Simulation</a></h2>
 <ol>
-<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, run <code>source settings.sh</code>.</li>
-<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, where the file paths need to be modified according to your actual situation.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, <code>source settings.sh</code>.</li>
+<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, the file paths need to be modified according to your actual situation.</li>
 </ol>
 <pre><code># QEMU parameter passing
 petalinux-boot --qemu --prebuilt 2 --qemu-args '-device loader,file=hvisor,addr=0x40400000,force-raw=on -device loader,
@@ -885,11 +1016,11 @@ screen /dev/pts/0
 </code></pre>
 <p>For more operation details, refer to <a href="https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md">hvisor-tool Readme</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="uboot-fit-image-creation-loading-and-booting"><a class="header" href="#uboot-fit-image-creation-loading-and-booting">UBOOT FIT Image Creation, Loading, and Booting</a></h1>
-<p>wheatfox (enkerewpo@hotmail.com)</p>
+<p>wheatfox (wheatfox17@icloud.com)</p>
 <p>This article introduces the basic knowledge related to FIT images, as well as how to create, load, and boot FIT images.</p>
 <h2 id="its-source-file"><a class="header" href="#its-source-file">ITS Source File</a></h2>
-<p>ITS is the source code used by uboot to generate FIT images (FIT Image), i.e., Image Tree Source, which uses the Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
-In the ZCU102 port of hvisor, FIT images are used to package hvisor, root linux, root dtb, and other files into one fitImage, facilitating booting on QEMU and actual hardware.
+<p>ITS is the source code used by uboot to generate FIT images (FIT Image), which is Image Tree Source, using Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
+In the ZCU102 port of hvisor, a FIT image is used to package hvisor, root linux, root dtb, etc. into one fitImage, which facilitates booting on QEMU and actual hardware.
 The ITS file for the ZCU102 platform is located at <code>scripts/zcu102-aarch64-fit.its</code>:</p>
 <pre><code class="language-c">/dts-v1/;
 / {
@@ -929,8 +1060,8 @@ The ITS file for the ZCU102 platform is located at <code>scripts/zcu102-aarch64-
     };
 };
 </code></pre>
-<p>Here, <code>__ROOT_LINUX_IMAGE__</code>, <code>__ROOT_LINUX_DTB__</code>, <code>__HVISOR_TMP_PATH__</code> will be replaced with actual paths by the <code>sed</code> command in the Makefile. In the ITS source code, it mainly consists of images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. During UBOOT booting, the files specified in the default configuration in configurations will be automatically loaded to the specified address. Multiple configurations can be set to support the loading of different image configurations at boot time.</p>
-<p>The corresponding mkimage command in the Makefile:</p>
+<p>Here, <code>__ROOT_LINUX_IMAGE__</code>, <code>__ROOT_LINUX_DTB__</code>, <code>__HVISOR_TMP_PATH__</code> will be replaced with actual paths by the <code>sed</code> command in the Makefile. In the ITS source code, it is mainly divided into images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. At UBOOT boot time, the files specified in the configurations will be automatically loaded to the designated address according to the default configuration, and multiple configurations can be set to support loading different configurations of images at boot time.</p>
+<p>Makefile mkimage corresponding command:</p>
 <pre><code class="language-Makefile">.PHONY: gen-fit
 gen-fit: $(hvisor_bin) dtb
 	@if [ ! -f scripts/zcu102-aarch64-fit.its ]; then \
@@ -950,8 +1081,8 @@ gen-fit: $(hvisor_bin) dtb
 	@echo "Generated FIT image: $(TARGET_FIT_IMAGE)"
 </code></pre>
 <h2 id="booting-hvisor-and-root-linux-through-fit-image-in-petalinux-qemu"><a class="header" href="#booting-hvisor-and-root-linux-through-fit-image-in-petalinux-qemu">Booting hvisor and root linux through FIT image in petalinux qemu</a></h2>
-<p>Since a fitImage includes all the necessary files, for qemu, it only needs to load this file into a suitable position in memory through the loader.</p>
-<p>Then, qemu boots and enters UBOOT, where the following command can be used to boot (please modify the specific addresses according to the actual situation, and during actual use, all lines can be copied into one line and pasted into UBOOT for booting, or saved to the environment variable <code>bootcmd</code>, which requires UBOOT to mount a persistent flash for environment variable storage):</p>
+<p>Since a fitImage includes all the necessary files, for qemu, it only needs to load this file into an appropriate position in memory through the loader.</p>
+<p>Then, when qemu starts and enters UBOOT, you can use the following command to boot (please modify the specific address according to the actual situation, when actually using, you can write all lines into one line and copy it to UBOOT for booting, or save it to the environment variable <code>bootcmd</code>, which requires UBOOT to mount a persistent flash for environment variable storage):</p>
 <pre><code class="language-bash">setenv fit_addr 0x10000000; setenv root_linux_load 0x200000;
 imxtract ${fit_addr} root_linux ${root_linux_load}; bootm ${fit_addr};
 </code></pre>

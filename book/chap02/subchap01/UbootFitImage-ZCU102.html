@@ -156,11 +156,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="uboot-fit-image-creation-loading-and-booting"><a class="header" href="#uboot-fit-image-creation-loading-and-booting">UBOOT FIT Image Creation, Loading, and Booting</a></h1>
-<p>wheatfox (enkerewpo@hotmail.com)</p>
+<p>wheatfox (wheatfox17@icloud.com)</p>
 <p>This article introduces the basic knowledge related to FIT images, as well as how to create, load, and boot FIT images.</p>
 <h2 id="its-source-file"><a class="header" href="#its-source-file">ITS Source File</a></h2>
-<p>ITS is the source code used by uboot to generate FIT images (FIT Image), i.e., Image Tree Source, which uses the Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
-In the ZCU102 port of hvisor, FIT images are used to package hvisor, root linux, root dtb, and other files into one fitImage, facilitating booting on QEMU and actual hardware.
+<p>ITS is the source code used by uboot to generate FIT images (FIT Image), which is Image Tree Source, using Device Tree Source (DTS) syntax format. FIT images can be generated using the mkimage tool provided by uboot.
+In the ZCU102 port of hvisor, a FIT image is used to package hvisor, root linux, root dtb, etc. into one fitImage, which facilitates booting on QEMU and actual hardware.
 The ITS file for the ZCU102 platform is located at <code>scripts/zcu102-aarch64-fit.its</code>:</p>
 <pre><code class="language-c">/dts-v1/;
 / {
@@ -200,8 +200,8 @@ The ITS file for the ZCU102 platform is located at <code>scripts/zcu102-aarch64-
     };
 };
 </code></pre>
-<p>Here, <code>__ROOT_LINUX_IMAGE__</code>, <code>__ROOT_LINUX_DTB__</code>, <code>__HVISOR_TMP_PATH__</code> will be replaced with actual paths by the <code>sed</code> command in the Makefile. In the ITS source code, it mainly consists of images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. During UBOOT booting, the files specified in the default configuration in configurations will be automatically loaded to the specified address. Multiple configurations can be set to support the loading of different image configurations at boot time.</p>
-<p>The corresponding mkimage command in the Makefile:</p>
+<p>Here, <code>__ROOT_LINUX_IMAGE__</code>, <code>__ROOT_LINUX_DTB__</code>, <code>__HVISOR_TMP_PATH__</code> will be replaced with actual paths by the <code>sed</code> command in the Makefile. In the ITS source code, it is mainly divided into images and configurations sections. The images section defines the files to be packaged, and the configurations section defines how to combine these files. At UBOOT boot time, the files specified in the configurations will be automatically loaded to the designated address according to the default configuration, and multiple configurations can be set to support loading different configurations of images at boot time.</p>
+<p>Makefile mkimage corresponding command:</p>
 <pre><code class="language-Makefile">.PHONY: gen-fit
 gen-fit: $(hvisor_bin) dtb
 	@if [ ! -f scripts/zcu102-aarch64-fit.its ]; then \
@@ -221,8 +221,8 @@ gen-fit: $(hvisor_bin) dtb
 	@echo "Generated FIT image: $(TARGET_FIT_IMAGE)"
 </code></pre>
 <h2 id="booting-hvisor-and-root-linux-through-fit-image-in-petalinux-qemu"><a class="header" href="#booting-hvisor-and-root-linux-through-fit-image-in-petalinux-qemu">Booting hvisor and root linux through FIT image in petalinux qemu</a></h2>
-<p>Since a fitImage includes all the necessary files, for qemu, it only needs to load this file into a suitable position in memory through the loader.</p>
-<p>Then, qemu boots and enters UBOOT, where the following command can be used to boot (please modify the specific addresses according to the actual situation, and during actual use, all lines can be copied into one line and pasted into UBOOT for booting, or saved to the environment variable <code>bootcmd</code>, which requires UBOOT to mount a persistent flash for environment variable storage):</p>
+<p>Since a fitImage includes all the necessary files, for qemu, it only needs to load this file into an appropriate position in memory through the loader.</p>
+<p>Then, when qemu starts and enters UBOOT, you can use the following command to boot (please modify the specific address according to the actual situation, when actually using, you can write all lines into one line and copy it to UBOOT for booting, or save it to the environment variable <code>bootcmd</code>, which requires UBOOT to mount a persistent flash for environment variable storage):</p>
 <pre><code class="language-bash">setenv fit_addr 0x10000000; setenv root_linux_load 0x200000;
 imxtract ${fit_addr} root_linux ${root_linux_load}; bootm ${fit_addr};
 </code></pre>
