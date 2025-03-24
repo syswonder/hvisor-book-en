@@ -28,14 +28,13 @@
 
 	- [Qemu ZCU102 hvisor Boot](./chap02/subchap01/Qemu-ZCU102.md)
 	
-	- [Board ZCU102 hvisor Multi-mode Boot](./chap02/subchap01/Board-ZCU102.md)
+	- [Board ZCU102 hvisor Multi-Mode Boot](./chap02/subchap01/Board-ZCU102.md)
 	
 	- [ZCU102 Nonroot Boot](./chap02/subchap01/Nonroot-ZCU102.md)
 	
-    - [UBOOT FIT Image Creation, Loading and Booting](./chap02/subchap01/UbootFitImage-ZCU102.md)
+    - [UBOOT FIT Image Creation, Loading, and Booting](./chap02/subchap01/UbootFitImage-ZCU102.md)
 
 - [Quick Start with FPGA Xiangshan Kunming Lake]()
-
 
 # hvisor User Manual
 
@@ -69,20 +68,20 @@
 - [Memory Virtualization](./chap04/MemVirtualization.md)
 - [Interrupt Virtualization](./chap04/subchap02/InterruptVirtualization.md)
 
-    - [ARM Interrupt Control GIC](./chap04/subchap02/ARM-GIC.md)
+    - [ARM Interrupt Controller GIC](./chap04/subchap02/ARM-GIC.md)
 
-    - [RISC-V Interrupt Control PLIC](./chap04/subchap02/RISC-PLIC.md) 
+    - [RISC-V Interrupt Controller PLIC](./chap04/subchap02/RISC-PLIC.md) 
 
-    - [RISC-V Interrupt Control AIA](./chap04/subchap02/RISC-AIA.md)
+    - [RISC-V Interrupt Controller AIA](./chap04/subchap02/RISC-AIA.md)
 
-    - [LoongArch Interrupt Control](./chap04/subchap02/LoongArch-Controller.md)
+    - [LoongArch Interrupt Controller](./chap04/subchap02/LoongArch-Controller.md)
 - [I/O Virtualization](./chap04/subchap03/IO-Virtualization.md)
 
     - [IOMMU](./chap04/subchap03/IOMMU/IOMMU-Define.md)
 
-        - [ARM SMMU Implementation](./chap04/subchap03/IOMMU/ARM-SMMU.md)
+        - [Implementation of ARM SMMU](./chap04/subchap03/IOMMU/ARM-SMMU.md)
 
-        - [RISC-V IOMMU Standard Implementation](./chap04/subchap03/IOMMU/RISC-IOMMU.md)
+        - [Implementation of RISC-V IOMMU Standard](./chap04/subchap03/IOMMU/RISC-IOMMU.md)
 - [VirtIO](./chap04/subchap03/VirtIO/VirtIO-Define.md)
   
     - [Block](./chap04/subchap03/VirtIO/BlockDevice.md)
@@ -90,10 +89,10 @@
     - [Console](./chap04/subchap03/VirtIO/ConsoleDevice.md)
     - [GPU](./chap04/subchap03/VirtIO/GPUDevice.md)
 - [PCI Virtualization](./chap04/subchap03/PCI-Virtualization.md)
-- [Hvisor Management Tools](./chap04/subchap04/ManageTools.md)
+- [hvisor Management Tools](./chap04/subchap04/ManageTools.md)
   
     - [Hypercall](./chap04/subchap04/HyperCall.md)
 
-# hvisor's Plans
+# hvisor's Plan
 
 - [TODO]()

@@ -8,5 +8,5 @@ Local Deployment:
 
 ```bash
 cargo install mdbook
-mdbook serve --open  
+mdbook serve --open
 ```
