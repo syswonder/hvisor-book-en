@@ -571,24 +571,24 @@ mkdir -p /dev/pts
 mount -t devpts devpts /dev/pts
 nohup ./hvisor zone start linux2-aia.json &amp;&amp; cat nohup.out | grep "char device" &amp;&amp; script /dev/null
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="starting-hvisor-on-nxp-imx8mp"><a class="header" href="#starting-hvisor-on-nxp-imx8mp">Starting hvisor on NXP-IMX8MP</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="booting-hvisor-on-nxp-imx8mp"><a class="header" href="#booting-hvisor-on-nxp-imx8mp">Booting hvisor on NXP-IMX8MP</a></h1>
 <p>Date: 2024/2/25</p>
-<p>Update Date: 2025/3/7</p>
+<p>Updated: 2025/3/7</p>
 <p>Authors: Yang Junyi, Chen Xingyu, Li Guowei, Chen Linkun</p>
 <h2 id="1-download-the-linux-source-code-provided-by-the-manufacturer"><a class="header" href="#1-download-the-linux-source-code-provided-by-the-manufacturer">1. Download the Linux source code provided by the manufacturer</a></h2>
 <p>https://pan.baidu.com/s/1XimrhPBQIG5edY4tPN9_pw?pwd=kdtk
 Extraction code: kdtk</p>
-<p>Enter the <code>Linux/sources/</code> directory, download the <code>OK8MP-linux-sdk.tar.bz2.0*</code> three compressed packages, after downloading, execute:</p>
+<p>Enter the <code>Linux/sources/</code> directory, download the three compressed files <code>OK8MP-linux-sdk.tar.bz2.0*</code>, and after downloading, execute:</p>
 <pre><code>cd Linux/sources
 
-# Merge split compressed packages
+# Merge split compressed files
 cat OK8MP-linux-sdk.tar.bz2.0* &gt; OK8MP-linux-sdk.tar.bz2
 
-# Unzip the merged compressed package
+# Unzip the merged compressed file
 tar -xvjf OK8MP-linux-sdk.tar.bz2
 
 </code></pre>
-<p>After decompression, the <code>OK8MP-linux-kernel</code> directory is the Linux source code directory.</p>
+<p>After unzipping, the <code>OK8MP-linux-kernel</code> directory is the Linux source code directory.</p>
 <h2 id="2-compile-linux-source-code"><a class="header" href="#2-compile-linux-source-code">2. Compile Linux source code</a></h2>
 <h3 id="install-cross-compilation-tools"><a class="header" href="#install-cross-compilation-tools">Install cross-compilation tools</a></h3>
 <ol>
@@ -629,8 +629,8 @@ cp arch/arm64/boot/Image ~/tftp/
 </code></pre>
 </li>
 </ol>
-<p>This creates a tftp directory, convenient for later image organization and for using tftp to transfer images in the appendix.</p>
-<h2 id="3-create-an-sd-card"><a class="header" href="#3-create-an-sd-card">3. Create an SD card</a></h2>
+<p>Create a tftp directory here for later image organization and for using tftp to transfer images as mentioned in the appendix.</p>
+<h2 id="3-prepare-the-sd-card"><a class="header" href="#3-prepare-the-sd-card">3. Prepare the SD card</a></h2>
 <ol>
 <li>
 <p>Insert the SD card into the card reader and connect it to the host.</p>
@@ -639,11 +639,11 @@ cp arch/arm64/boot/Image ~/tftp/
 <p>Switch to the Linux/Images directory.</p>
 </li>
 <li>
-<p>Execute the following commands to partition:</p>
+<p>Execute the following commands for partitioning:</p>
 <pre><code class="language-bash">fdisk &lt;$DRIVE&gt;
 d  # Delete all partitions
 n  # Create a new partition
-p  # Select primary partition
+p  # Choose primary partition
 1  # Partition number 1
 16384  # Starting sector
 t  # Change partition type
@@ -657,12 +657,12 @@ w  # Save and exit
 </code></pre>
 </li>
 <li>
-<p>Format the first partition of the SD card boot disk as ext4 format:</p>
+<p>Format the first partition of the SD card boot disk as ext4:</p>
 <pre><code class="language-bash">mkfs.ext4 &lt;$DRIVE&gt;1
 </code></pre>
 </li>
 <li>
-<p>Remove the SD card reader, reconnect it. Extract the root file system rootfs.tar to the 1st partition of the SD card, rootfs.tar can be made by referring to <a href="https://hvisor.syswonder.org/chap02/QemuAArch64.html">qemu-aarch64</a>, or use the image below.</p>
+<p>Remove the SD card reader and reconnect. Extract the root file system rootfs.tar to the first partition of the SD card. The rootfs.tar can be made by referring to <a href="https://hvisor.syswonder.org/chap02/QemuAArch64.html">qemu-aarch64</a> or using the image below.</p>
 <pre><code class="language-bash">tar -xvf rootfs.tar -C &lt;path/to/mounted/SD/card/partition&gt;
 </code></pre>
 </li>
@@ -678,41 +678,41 @@ Filename: rootfs.tar
 <ol>
 <li>Organize the configuration files</li>
 </ol>
-<p>Place the configuration files where they belong, sample configuration files can be referred to <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/nxp-aarch64/gpu_on_root">here</a>.</p>
+<p>Place the configuration files where they belong. Sample configuration files can be referred to <a href="https://github.com/syswonder/hvisor-tool/tree/main/examples/nxp-aarch64/gpu_on_root">here</a>.</p>
 <ol start="2">
 <li>Compile hvisor</li>
 </ol>
-<p>Enter the hvisor directory, switch to the main branch or dev branch, execute the compilation command:</p>
+<p>Enter the hvisor directory, switch to the main branch or dev branch, and execute the compilation command:</p>
 <pre><code class="language-makefile">make ARCH=aarch64 FEATURES=platform_imx8mp,gicv3 LOG=info all
 
 # Put the compiled hvisor image into tftp
 make cp
 </code></pre>
-<h2 id="5-start-hvisor-and-root-linux"><a class="header" href="#5-start-hvisor-and-root-linux">5. Start hvisor and root linux</a></h2>
-<p>Before starting the NXP board, you need to put the files from the tftp directory onto the SD card, such as into the /home/arm64 directory of the SD card, files in the tftp directory include:</p>
+<h2 id="5-boot-hvisor-and-root-linux"><a class="header" href="#5-boot-hvisor-and-root-linux">5. Boot hvisor and root linux</a></h2>
+<p>Before booting the NXP board, transfer the files from the tftp directory to the SD card, such as to the /home/arm64 directory on the SD card. The files in the tftp directory include:</p>
 <ul>
 <li>Image: root linux image, can also be used as non-root linux image</li>
 <li>linux1.dtb, linux2.dtb: device trees for root linux and non-root linux</li>
 <li>hvisor.bin: hvisor image</li>
-<li>OK8MP-C.dtb: this is essentially not needed anymore, but still required due to historical reasons. Can use linux1.dtb renamed and placed here</li>
+<li>OK8MP-C.dtb: This is used for some checks during uboot boot, essentially useless, can be obtained from here <a href="https://github.com/KouweiLee/tftp/blob/82545a7c83460747056ca35022de94c2ea365d29/OK8MP-C.dts">OK8MP-C.dts</a></li>
 </ul>
-<p>Start the NXP board:</p>
+<p>Boot the NXP board:</p>
 <ol>
 <li>Adjust the dip switches to enable SD card boot mode: (1,2,3,4) = (ON,ON,OFF,OFF).</li>
 <li>Insert the SD card into the SD slot.</li>
 <li>Connect the development board to the host using a serial cable.</li>
 <li>Open the serial port with terminal software</li>
 </ol>
-<p>After starting the NXP board, there should be output on the serial port, restart the development board, immediately press and hold space to enter the command line terminal of uboot, execute the following commands:</p>
+<p>After booting the NXP board, there should be output on the serial port. Restart the development board, immediately press and hold the spacebar to make uboot enter the command line terminal, and execute the following command:</p>
 <pre><code>setenv loadaddr 0x40400000; setenv fdt_addr 0x40000000; setenv zone0_kernel_addr 0xa0400000; setenv zone0_fdt_addr 0xa0000000; ext4load mmc 1:1 ${loadaddr} /home/arm64/hvisor.bin; ext4load mmc 1:1 ${fdt_addr} /home/arm64/OK8MP-C.dtb; ext4load mmc 1:1 ${zone0_kernel_addr} /home/arm64/Image; ext4load mmc 1:1 ${zone0_fdt_addr} /home/arm64/linux1.dtb; bootm ${loadaddr} - ${fdt_addr};
 </code></pre>
-<p>After execution, hvisor should start and automatically enter root linux.</p>
-<h2 id="6-start-non-root-linux"><a class="header" href="#6-start-non-root-linux">6. Start non-root linux</a></h2>
-<p>Starting non-root linux requires the use of hvisor-tool. Please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a> for details.</p>
+<p>After execution, hvisor should boot and automatically enter root linux.</p>
+<h2 id="6-boot-non-root-linux"><a class="header" href="#6-boot-non-root-linux">6. Boot non-root linux</a></h2>
+<p>Booting non-root linux requires hvisor-tool. For details, please refer to the README of <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>.</p>
 <h2 id="appendix-convenient-image-transfer-using-tftp"><a class="header" href="#appendix-convenient-image-transfer-using-tftp">Appendix. Convenient image transfer using tftp</a></h2>
-<p>Tftp facilitates data transfer between the development board and the host, eliminating the need to plug and unplug the SD card each time. The steps are as follows:</p>
+<p>Tftp facilitates data transfer between the development board and the host without the need to plug and unplug the SD card each time. The specific steps are as follows:</p>
 <h3 id="for-ubuntu-systems"><a class="header" href="#for-ubuntu-systems">For Ubuntu systems</a></h3>
-<p>If you are using an Ubuntu system, perform the following steps:</p>
+<p>If you are using Ubuntu, execute the following steps in sequence:</p>
 <ol>
 <li>
 <p>Install TFTP server software package</p>
@@ -721,8 +721,8 @@ sudo apt-get install tftpd-hpa tftp-hpa
 </code></pre>
 </li>
 <li>
-<p>Configure the TFTP server</p>
-<p>Create a TFTP root directory and set permissions:</p>
+<p>Configure TFTP server</p>
+<p>Create TFTP root directory and set permissions:</p>
 <pre><code class="language-bash">mkdir -p ~/tftp
 sudo chown -R $USER:$USER ~/tftp
 sudo chmod -R 755 ~/tftp
@@ -741,12 +741,12 @@ TFTP_OPTIONS="-l -c -s"
 <p>Replace <code>&lt;your-username&gt;</code> with your actual username.</p>
 </li>
 <li>
-<p>Start/restart the TFTP service</p>
+<p>Start/restart TFTP service</p>
 <pre><code class="language-bash">sudo systemctl restart tftpd-hpa
 </code></pre>
 </li>
 <li>
-<p>Verify the TFTP server</p>
+<p>Verify TFTP server</p>
 <pre><code class="language-bash">echo "TFTP Server Test" &gt; ~/tftp/testfile.txt
 </code></pre>
 <pre><code class="language-bash">tftp localhost
@@ -757,30 +757,30 @@ cat testfile.txt
 <p>If "TFTP Server Test" is displayed, the TFTP server is working properly.</p>
 </li>
 <li>
-<p>Configure to start at boot:</p>
+<p>Configure to start on boot:</p>
 <pre><code>sudo systemctl enable tftpd-hpa
 </code></pre>
 </li>
 <li>
-<p>Connect the development board's network port (choose the lower one of the two) to the host using an Ethernet cable. Configure the host's wired network card, IP: 192.169.137.2, netmask: 255.255.255.0.</p>
+<p>Connect the development board's network port (there are two, please choose the one below) to the host using a network cable. And configure the host's wired network card, ip: 192.169.137.2, netmask: 255.255.255.0.</p>
 </li>
 </ol>
-<p>After starting the development board, enter the uboot command line, and the command becomes:</p>
+<p>After booting the development board, enter the uboot command line, and the command becomes:</p>
 <pre><code>setenv serverip 192.169.137.2; setenv ipaddr 192.169.137.3; setenv loadaddr 0x40400000; setenv fdt_addr 0x40000000; setenv zone0_kernel_addr 0xa0400000; setenv zone0_fdt_addr 0xa0000000; tftp ${loadaddr} ${serverip}:hvisor.bin; tftp ${fdt_addr} ${serverip}:OK8MP-C.dtb; tftp ${zone0_kernel_addr} ${serverip}:Image; tftp ${zone0_fdt_addr} ${serverip}:linux1.dtb; bootm ${loadaddr} - ${fdt_addr};
 </code></pre>
 <p>Explanation:</p>
 <ul>
-<li><code>setenv serverip 192.169.137.2</code>: Sets the IP address of the tftp server.</li>
-<li><code>setenv ipaddr 192.169.137.3</code>: Sets the IP address of the development board.</li>
-<li><code>setenv loadaddr 0x40400000</code>: Sets the load address for the hvisor image.</li>
-<li><code>setenv fdt_addr 0x40000000</code>: Sets the load address for the device tree file.</li>
-<li><code>setenv zone0_kernel_addr 0xa0400000</code>: Sets the load address for the guest Linux image.</li>
-<li><code>setenv zone0_fdt_addr 0xa0000000</code>: Sets the load address for the root Linux device tree file.</li>
-<li><code>tftp ${loadaddr} ${serverip}:hvisor.bin</code>: Downloads the hvisor image from the tftp server to the hvisor load address.</li>
-<li><code>tftp ${fdt_addr} ${serverip}:OK8MP-C.dtb</code>: Downloads the device tree file from the tftp server to the device tree file load address.</li>
-<li><code>tftp ${zone0_kernel_addr} ${serverip}:Image</code>: Downloads the guest Linux image from the tftp server to the guest Linux image load address.</li>
-<li><code>tftp ${zone0_fdt_addr} ${serverip}:linux1.dtb</code>: Downloads the root Linux device tree file from the tftp server to the root Linux device tree file load address.</li>
-<li><code>bootm ${loadaddr} - ${fdt_addr}</code>: Boots hvisor, loading the hvisor image and device tree file.</li>
+<li><code>setenv serverip 192.169.137.2</code>: Set the IP address of the tftp server.</li>
+<li><code>setenv ipaddr 192.169.137.3</code>: Set the IP address of the development board.</li>
+<li><code>setenv loadaddr 0x40400000</code>: Set the load address for the hvisor image.</li>
+<li><code>setenv fdt_addr 0x40000000</code>: Set the load address for the device tree file.</li>
+<li><code>setenv zone0_kernel_addr 0xa0400000</code>: Set the load address for the guest Linux image.</li>
+<li><code>setenv zone0_fdt_addr 0xa0000000</code>: Set the load address for the root Linux device tree file.</li>
+<li><code>tftp ${loadaddr} ${serverip}:hvisor.bin</code>: Download the hvisor image from the tftp server to the hvisor load address.</li>
+<li><code>tftp ${fdt_addr} ${serverip}:OK8MP-C.dtb</code>: Download the device tree file from the tftp server to the device tree file load address.</li>
+<li><code>tftp ${zone0_kernel_addr} ${serverip}:Image</code>: Download the guest Linux image from the tftp server to the guest Linux image load address.</li>
+<li><code>tftp ${zone0_fdt_addr} ${serverip}:linux1.dtb</code>: Download the root Linux device tree file from the tftp server to the root Linux device tree file load address.</li>
+<li><code>bootm ${loadaddr} - ${fdt_addr}</code>: Boot hvisor, load the hvisor image and device tree file.</li>
 </ul>
 <h3 id="for-windows-systems"><a class="header" href="#for-windows-systems">For Windows systems</a></h3>
 <p>You can refer to this article: https://blog.csdn.net/qq_52192220/article/details/142693036</p>
