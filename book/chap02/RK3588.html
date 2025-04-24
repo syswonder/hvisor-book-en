@@ -1,0 +1,310 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Quick Start with RK3588 hvisor - hvisor Manual</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="hvisor Manual">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">hvisor Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/syswonder/hvisor" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p>Ren Hangqi (2572131118@qq.com)</p>
+<p>Update Time: 2025.4.23</p>
+<h1 id="operations-needed-for-the-new-board"><a class="header" href="#operations-needed-for-the-new-board">Operations needed for the new board</a></h1>
+<p>If the board is a newly acquired RK3588, it may not have anything written inside, including the bootloader, so you first need to preliminarily write to the board, writing Uboot, Linux, Rootfs, etc. It is recommended to write using <a href="https://download.t-firefly.com/product/Board/RK3588/Tool/Window/RKDevTool_Release_v3.31.zip">RKDevTool</a> on Windows.</p>
+<p>You can directly download the update.img from <a href="https://bhpan.buaa.edu.cn/link/AA6F31C943712347DEB8D04FF1E5975F86">this link</a>. This image packages all the above content. Directly writing this image can achieve everything in one step, the specific operations are as follows:</p>
+<ol>
+<li>Connect the board to the computer via USB using the Type-C port.</li>
+<li>First, put the board in MaskRoom or Loader mode (can be recognized in RKDevTool)
+<ul>
+<li>Loader mode: While powered on, press RST and BOOT buttons simultaneously, or enter <code>reboot loader</code> in Uboot, Linux.</li>
+<li>MaskRoom mode: New boards default to this mode.</li>
+</ul>
+</li>
+<li>Operate in RKDevTool as shown below</li>
+</ol>
+<p><img src="./img/update.png" alt="update.png" /></p>
+<h1 id="obtain-rk3588-kernel-image"><a class="header" href="#obtain-rk3588-kernel-image">Obtain RK3588 Kernel Image</a></h1>
+<p>RK3588 has a dedicated kernel image, the source code can be obtained through <a href="https://bhpan.buaa.edu.cn/link/AA7E3F2C1C703F48A7A6CE1FF74741753D">this link</a>.</p>
+<p>For ease and quick start, this kernel is already compiled, so the file is large. You can directly obtain the image through <code>kernel/arch/arm64/boot/Image</code> or use the existing <code>.config</code> to customize the required image.</p>
+<p>Of course, if you are not concerned about the kernel source code, you can directly obtain the Image through <a href="https://bhpan.buaa.edu.cn/link/AAAAF1803AEC0F4710BF322C54804F72DC">this link</a>.</p>
+<h1 id="serial-port-connection"><a class="header" href="#serial-port-connection">Serial Port Connection</a></h1>
+<p>RK3588's serial port is quite special, you need to purchase a USB to TTL converter for connection.</p>
+<p><img src="./img/usb%E8%BD%ACttl.png" alt="usb转ttl" /></p>
+<p>Connect RT-TX, TX-RD, GND-GND when connecting, and the baud rate of the serial port is 1500000 after connecting to the computer.</p>
+<h1 id="re-write-uboot"><a class="header" href="#re-write-uboot">Re-write Uboot</a></h1>
+<p>To start hvisor, the original Uboot has no waiting time and will directly start Linux. Uboot needs to be rewritten, and a copy of Uboot and its writing tool is already prepared, which can be obtained through <a href="https://bhpan.buaa.edu.cn/link/AA6220C0C619A840DEAC44F1F813FC0109">Uboot</a>, <a href="https://bhpan.buaa.edu.cn/link/AA285131D2DDD14AD79A030AB2A38F4D63">Upgrade-tool</a>.</p>
+<p>Under the Linux system, also connect the board and the computer with USB and put it in Loader mode:</p>
+<pre><code>chmod +777 /path/to/upgrade_tool
+sudo upgrade_tool di -u /path/to/uboot.img
+</code></pre>
+<h1 id="compile-hvisor-and-device-tree"><a class="header" href="#compile-hvisor-and-device-tree">Compile Hvisor and Device Tree</a></h1>
+<ol>
+<li>Similar to other development boards, pull the latest code of hvisor from the repository: https://github.com/syswonder/hvisor. Enter the directory and compile hvisor:
+<pre><code>make BID=aarch64/rk3588
+</code></pre>
+</li>
+<li>Enter <code>/images/aarch64/devicetree/</code>, <code>rk3588-root-aarch64-sdmmc.dts</code> is the device tree used by RK3588 RootLinux, <code>rk3588-nonroot-aarch64.dts</code> is the device tree used by RK3588 NonRootLinux. You can compile them using the following commands:
+<pre><code>dtc -I dts -O dtb rk3588-nonroot-aarch64.dts -o ./linux1.dtb
+dtc -I dts -O dtb rk3588-root-aarch64-sdmmc.dts -o ./zone0.dtb
+</code></pre>
+</li>
+</ol>
+<h1 id="create-file-system"><a class="header" href="#create-file-system">Create File System</a></h1>
+<p>Prepare an SD card, partition it into two, the first one in FAT32 format, size 1GB; the second one in EXT4 format.</p>
+<p>Download the <a href="https://bhpan.buaa.edu.cn/link/AA91FB720EDBF949FA909538CC6093C8D0">file system</a>, unzip this file system to the EXT4 formatted partition.</p>
+<p>Of course, you can also make it yourself, refer to <a href="https://foreveryolo.top/posts/60156/">Building a file system based on ubuntu_base</a>.</p>
+<h1 id="start-rootlinux"><a class="header" href="#start-rootlinux">Start RootLinux</a></h1>
+<h1 id="tftp"><a class="header" href="#tftp">TFTP</a></h1>
+<p>If a TFTP server is already set up, then you can start RootLinux in a convenient way, specifically:</p>
+<ol>
+<li>Copy Image, zone0.dtb, hvisor.bin to the ~/tftp folder</li>
+<li>Connect the host and the development board with an Ethernet cable, configure the host IP to <code>192.168.137.2</code>, subnet mask <code>255.255.255.0</code>.</li>
+<li>Simply power on and connect the serial port, uboot will automatically download the content from the tftp folder and start.</li>
+</ol>
+<p>If you need to set up, you can refer to <a href="https://foreveryolo.top/posts/17937/">Rapid Development on Embedded Platforms - Tftp Server Setup and Configuration</a>.</p>
+<h1 id="without-tftp"><a class="header" href="#without-tftp">Without TFTP</a></h1>
+<p>At this time, the first FAT32 partition on the SD card comes into play, copy Image, zone0.dtb, hvisor.bin to this partition</p>
+<ol>
+<li>Start the development board, connect the serial port.</li>
+<li>Interrupt Uboot's automatic start.</li>
+<li>Enter the following commands to start RootLinux
+<pre><code>fatload mmc 0:1 0x00480000 hvisor.bin;fatload mmc 0:1 0x10000000 zone0.dtb;fatload mmc 0:1 0x09400000 Image;bootm 0x00480000 - 0x10000000
+</code></pre>
+</li>
+</ol>
+<h1 id="start-nonrootlinux"><a class="header" href="#start-nonrootlinux">Start NonRootLinux</a></h1>
+<h1 id="download-ready-made-configuration-files"><a class="header" href="#download-ready-made-configuration-files">Download Ready-Made Configuration Files</a></h1>
+<p>Through <a href="https://bhpan.buaa.edu.cn/link/AAC7FF42BDBBE44ABEBB512459C379BCE4">this link</a> you can download usable NonRoot configurations, including Image, configuration files, rootfs, etc., unzip them to the RootLinux file system, which can help quickly start Nonroot, mainly starting devices like virtio-blk and virtio-console, or you can pass through devices according to your own needs.</p>
+<div class="warning">
+    <h1 id="tips"><a class="header" href="#tips"> Tips: </a></h1>
+    <p> Please do not arbitrarily change the Image used for Rootlinux, as this will cause Nonroot to fail to start! </p>
+</div>
+<h1 id="compile-hvisor-tool"><a class="header" href="#compile-hvisor-tool">Compile hvisor-tool</a></h1>
+<p>Pull the latest code of Hvisor-tool: https://github.com/syswonder/hvisor-tool/tree/main, and compile:</p>
+<pre><code>make all ARCH=aarch64 LOG=LOG_WARN KDIR=RK3588 kernel source VIRTIO_GPU=n
+</code></pre>
+<p>For more details, please refer to the Readme.md of hvisor-tool.</p>
+<p>Note, the kernel source must have been compiled, otherwise hvisor-tool will report an error because it cannot find the compiled product.</p>
+<div class="warning">
+    <h1 id="tips-1"><a class="header" href="#tips-1"> Tips: </a></h1>
+    <p> The glibc version used when compiling hvisor-tool needs to ensure that the Rootlinux file system also supports it, otherwise hvisor-tool will not work properly! </p>
+</div>
+<p>For example, the Rootlinux Rootfs given in this article is Ubuntu 24.04. The Glibc version of the compiling machine should not be higher than the Glibc version of Ubuntu24.04, which is generally satisfied here since Ubuntu24.04 is newer.</p>
+<p>Of course, the above operation is completed by aligning the glibc versions used by the two file systems, or you can directly compile hvisor-tool in the Rootlinux file system, or specify the Rootlinux file system directory on the compiling machine, so that the compilation link directly links the glibc of the Rootlinux file system, specifically as follows:</p>
+<pre><code>make all ARCH=aarch64 LOG=LOG_WARN KDIR=RK3588 kernel source VIRTIO_GPU=n \
+ROOT=/path/to/target_rootfs
+</code></pre>
+<h1 id="start"><a class="header" href="#start">Start</a></h1>
+<p>Execute the following commands under Rootlinux</p>
+<pre><code>insmod hvisor.ko
+nohup ./hvisor virtio start virtio_cfg.json &amp;
+./hvisor zone start zone1_linux.json
+screen /dev/pts/0
+</code></pre>
+<p>You can then see the output of the second virtual machine (Nonroot).</p>
+<div class="warning">
+    <h1 id="tips-2"><a class="header" href="#tips-2"> Tips: </a></h1>
+    <p> If you do not configure the Rootlinux file system according to the above process, or with version iterations, there may be situations where the ready-made configuration files are not usable, in which case you need to update the configuration yourself, and we will also follow up as soon as possible.
+    <p> For the latest configuration format, you can refer to the example under hvisor-tool.</p>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chap02/subchap01/UbootFitImage-ZCU102.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chap03/Compile.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chap02/subchap01/UbootFitImage-ZCU102.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chap03/Compile.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../assets/fzf.umd.js"></script>
+        <script src="../assets/elasticlunr.js"></script>
+
+
+    </div>
+    </body>
+</html>

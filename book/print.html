@@ -967,52 +967,53 @@ ARCH=loongarch64 BOARD=ls3a5000 ./make_image
 <li>How to boot hvisor root linux and nonroot linux on Qemu ZCU102 and ZCU102 physical development board.</li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-zcu102-hvisor-startup"><a class="header" href="#qemu-zcu102-hvisor-startup">Qemu ZCU102 hvisor Startup</a></h1>
+<p>Ren Hangqi (2572131118@qq.com)</p>
 <h2 id="install-petalinux"><a class="header" href="#install-petalinux">Install Petalinux</a></h2>
 <ol>
 <li>Install <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">Petalinux 2024.1</a>
-Please note that this article uses 2024.1 as an example for introduction. It does not mean that other versions cannot be used, but other versions have not been verified, and it has been found in testing that Petalinux has a strong dependency on the operating system. Please install the version of Petalinux suitable for your own operating system.</li>
-<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions, and then directly run the installer with <code>./petalinux.run</code>.</li>
-<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, just <code>apt install</code> them one by one.</li>
-<li>After installation, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables before using Petalinux each time. If it is too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
+Please note that this article uses 2024.1 as an example, which does not mean that other versions cannot be used, but other versions have not been verified, and it has been found in tests that Petalinux has a strong dependency on the operating system. Please install the version of Petalinux suitable for your operating system.</li>
+<li>Place the downloaded <code>petalinux.run</code> file in the directory where you want to install it, add execution permissions to it, and then run the installer directly with <code>./petalinux.run</code>.</li>
+<li>The installer will automatically detect the required environment, and if it does not meet the requirements, it will prompt for the missing environment, which can be installed one by one with <code>apt install</code>.</li>
+<li>After installation, you need to enter the installation directory and manually <code>source settings.sh</code> to add environment variables before using Petalinux each time. If it's too troublesome, you can add this command to <code>~/.bashrc</code>.</li>
 </ol>
 <h2 id="install-zcu102-bsp"><a class="header" href="#install-zcu102-bsp">Install ZCU102 BSP</a></h2>
 <ol>
 <li>Download the BSP corresponding to the Petalinux version, in the example it is <a href="https://china.xilinx.com/support/download/index.html/content/xilinx/zh/downloadNav/embedded-design-tools/2024-1.html">ZCU102 BSP 2024.1</a></li>
-<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, <code>source settings.sh</code>.</li>
-<li>Create a Petalinux Project based on the BSP: <code>petalinux-create -t project -s xilinx-zcu102-v2024.1-05230256.bsp</code></li>
-<li>This will create a <code>xilinx-zcu102-2024.1</code> folder, which contains the parameters required for QEMU to simulate ZCU102 (device tree), as well as precompiled Linux images, device trees, Uboot, etc., that can be directly loaded onto the board.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory <code>source settings.sh</code>.</li>
+<li>Create a Petalinux Project based on BSP: <code>petalinux-create -t project -s xilinx-zcu102-v2024.1-05230256.bsp</code></li>
+<li>This will create a <code>xilinx-zcu102-2024.1</code> folder, which contains the parameters needed for QEMU to simulate ZCU102 (device tree), as well as pre-compiled Linux images, device trees, Uboot, etc., that can be directly loaded onto the board.</li>
 </ol>
 <h2 id="compile-hvisor"><a class="header" href="#compile-hvisor">Compile Hvisor</a></h2>
-<p>Refer to "Running Hvisor on Qemu" to configure the environment required for compiling Hvisor, then in the hvisor directory, execute:</p>
+<p>Refer to "Running Hvisor on Qemu" for configuring the environment required to compile Hvisor, then in the hvisor directory, execute:</p>
 <pre><code>make ARCH=aarch64 LOG=info BOARD=zcu102 cp
 </code></pre>
-<p>to perform the compilation. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> will contain the required hvisor image.</p>
+<p>to compile. The directory <code>/target/aarch64-unknown-none (may vary)/debug/hvisor</code> contains the required hvisor image.</p>
 <h2 id="prepare-device-tree"><a class="header" href="#prepare-device-tree">Prepare Device Tree</a></h2>
 <h3 id="use-existing-device-tree"><a class="header" href="#use-existing-device-tree">Use Existing Device Tree</a></h3>
-<p>In the Hvisor image/devicetree directory, there is a zcu102-root-aarch64.dts, which is a device tree file that has been tested for booting RootLinux. Compile it as follows:</p>
+<p>In the Hvisor's image/devicetree directory, there is zcu102-root-aarch64.dts, which is a device tree file that has been tested for booting RootLinux. Compile it as follows:</p>
 <pre><code>dtc -I dts -O dtb -o zcu102-root-aarch64.dtb zcu102-root-aarch64.dts
 </code></pre>
-<p>If the dtc command is invalid, install device-tree-compiler.</p>
+<p>If the dtc command is invalid, install the device-tree-compiler.</p>
 <pre><code>sudo apt-get install device-tree-compiler
 </code></pre>
 <h3 id="prepare-device-tree-yourself"><a class="header" href="#prepare-device-tree-yourself">Prepare Device Tree Yourself</a></h3>
-<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get the complete device tree, based on <code>zcu102-root-aarch64.dts</code> for additions and deletions.</p>
+<p>If you have custom requirements for the device, it is recommended to prepare the device tree yourself. You can decompile the <code>pre-built/linux/images/system.dtb</code> in the ZCU102 BSP to get a complete device tree, and modify based on <code>zcu102-root-aarch64.dts</code>.</p>
 <h2 id="prepare-image"><a class="header" href="#prepare-image">Prepare Image</a></h2>
 <h3 id="use-existing-image"><a class="header" href="#use-existing-image">Use Existing Image</a></h3>
-<p>It is recommended to directly use the <code>pre-built/linux/images/Image</code> from the ZCU102 BSP as the Linux kernel to boot on ZCU102, as its driver configuration is complete.</p>
+<p>It is recommended to use the <code>pre-built/linux/images/Image</code> from the ZCU102 BSP as the Linux kernel to boot on ZCU102, as its driver configuration is complete.</p>
 <h3 id="compile-yourself"><a class="header" href="#compile-yourself">Compile Yourself</a></h3>
-<p>Through testing, it has been found that the support for ZYNQMP in the Linux source code before version 5.15 is not comprehensive, so it is not recommended to use versions before this for compilation. When compiling with later versions, you can follow the general compilation process as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
+<p>After testing, the support for ZYNQMP in the Linux source code before version 5.15 is not comprehensive, it is not recommended to use versions before this for compilation. For later versions, you can compile directly following the general compilation process, as the basic support for ZYNQMP in the source code is enabled by default. Specific compilation operations are as follows:</p>
 <ol>
 <li>Visit the <a href="https://github.com/Xilinx/linux-xlnx/tags?after=xilinx-v2023.1">linux-xlnx</a> official website to download the Linux source code, it is best to download <code>zynqmp-soc-for-v6.3</code>.</li>
-<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to extract the source code.</li>
-<li>Enter the extracted directory, execute the following command using the default configuration, <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</code></li>
+<li><code>tar -xvf zynqmp-soc-for-v6.3</code> to unzip the source code</li>
+<li>Enter the unzipped directory, execute the following command using the default configuration, <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</code></li>
 <li>Compile: <code>make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image -j$(nproc)</code></li>
-<li>After compilation, the directory <code>arch/arm64/boot/Image</code> will contain the required image.</li>
+<li>After compilation, the directory <code>arch/arm64/boot/Image</code> contains the required image.</li>
 </ol>
 <h2 id="enable-qemu-simulation"><a class="header" href="#enable-qemu-simulation">Enable QEMU Simulation</a></h2>
 <ol>
-<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory, <code>source settings.sh</code>.</li>
-<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, the file paths need to be modified according to your actual situation.</li>
+<li>Activate the Petalinux environment, i.e., in the Petalinux installation directory <code>source settings.sh</code>.</li>
+<li>Enter the <code>xilinx-zcu102-2024.1</code> folder, use the following command to start hvisor on the QEMU-simulated ZCU102, where the file paths need to be modified according to your actual situation.</li>
 </ol>
 <pre><code># QEMU parameter passing
 petalinux-boot --qemu --prebuilt 2 --qemu-args '-device loader,file=hvisor,addr=0x40400000,force-raw=on -device loader,
@@ -1022,66 +1023,68 @@ file=rootfs.ext4'
 # Start hvisor
 bootm 0x40400000 - 0x40000000
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="zcu102-board-hvisor-multi-mode-boot"><a class="header" href="#zcu102-board-hvisor-multi-mode-boot">ZCU102 Board hvisor Multi-mode Boot</a></h1>
-<h2 id="booting-hvisor-on-zcu102-development-board-in-sd-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-sd-mode">Booting Hvisor on ZCU102 Development Board in SD mode</a></h2>
-<h3 id="prepare-sd-card"><a class="header" href="#prepare-sd-card">Prepare SD Card</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="zcu102-board-hvisor-multi-mode-boot"><a class="header" href="#zcu102-board-hvisor-multi-mode-boot">ZCU102 Board hvisor Multi-Mode Boot</a></h1>
+<p>Ren Hangqi (2572131118@qq.com)</p>
+<h2 id="booting-hvisor-on-zcu102-development-board-in-sd-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-sd-mode">Booting Hvisor on ZCU102 Development Board in SD Mode</a></h2>
+<h3 id="prepare-the-sd-card"><a class="header" href="#prepare-the-sd-card">Prepare the SD Card</a></h3>
 <ol>
-<li>Prepare a standard SD card, partition it into a Boot partition (FAT32) and the rest as file system partitions (EXT4). For partitioning in Windows, you can use <a href="https://www.diskgenius.cn/download.php">DiskGenius</a>, and for Linux, you can use <a href="https://www.cnblogs.com/renshengdezheli/p/13941563.html">fdisk</a> or <a href="https://blog.csdn.net/linkedin_35878439/article/details/82020925">mkfs</a>.</li>
-<li>Prepare a file system and copy its contents into any file system partition. You can refer to "NXPIMX8" for creating an Ubuntu file system or directly use the file system from the ZCU102 BSP.</li>
-<li>Copy <code>zcu102-root-aarch64.dtb</code>, <code>Image</code>, and <code>hvisor</code> to the Boot partition.</li>
-<li>In SD mode, it is necessary to provide ATF and Uboot from the SD card, therefore copy <code>pre-built/linux/images/boot.scr</code> and <code>BOOT.BIN</code> from the ZCU102 BSP to the BOOT partition.</li>
+<li>Prepare a standard SD card, partition it into one Boot partition (FAT32) and the rest as file system partitions (EXT4). Windows partitions can be managed using <a href="https://www.diskgenius.cn/download.php">DiskGenius</a>, and Linux partitions can be managed using <a href="https://www.cnblogs.com/renshengdezheli/p/13941563.html">fdisk</a>, <a href="https://blog.csdn.net/linkedin_35878439/article/details/82020925">mkfs</a>.</li>
+<li>Prepare a file system and copy its contents to any file system partition, refer to "NXPIMX8" for creating an Ubuntu file system, or directly use the file system in the ZCU102 BSP.</li>
+<li>Copy <code>zcu102-root-aarch64.dtb</code>, <code>Image</code>, <code>hvisor</code> to the Boot partition.</li>
+<li>In SD mode, ATF and Uboot need to be provided from the SD card, thus copy <code>boot.scr</code> and <code>BOOT.BIN</code> from the ZCU102 BSP into the BOOT partition.</li>
 </ol>
 <h4 id="booting-zcu102"><a class="header" href="#booting-zcu102">Booting ZCU102</a></h4>
 <ol>
-<li>Set the ZCU102 to SD mode, insert the SD card, connect the serial port, and power on.</li>
-<li>Press any key to interrupt the Uboot auto script execution and run the following commands to boot hvisor and root linux:</li>
+<li>Set ZCU102 to SD mode, insert the SD card, connect the serial port, and power on.</li>
+<li>Press any key to interrupt the Uboot auto script execution, run the following commands to start hvisor and root Linux:</li>
 </ol>
 <pre><code>fatload mmc 0:1 0x40400000 hvisor;fatload mmc 0:1 0x40000000 zcu102-root-aarch64.dtb
 fatload mmc 0:1 0x04000000 zcu102-root-aarch64.dtb;fatload mmc 0:1 0x00200000 Image;bootm 0x40400000 - 0x40000000
 </code></pre>
 <ol start="3">
-<li>If successfully booted, you will see hvisor and linux information on the serial port and eventually enter the file system.</li>
+<li>If successful, hvisor and Linux information will be visible on the serial port, ultimately entering the file system.</li>
 </ol>
-<h2 id="booting-hvisor-on-zcu102-development-board-in-jtag-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-jtag-mode">Booting Hvisor on ZCU102 Development Board in Jtag mode</a></h2>
-<p>First, connect the two cables that come with the board to the JTAG and UART interfaces of the board, and the other end to the PC via USB.</p>
-<p>Then, open a petalinux project in the command line, ensure the project has been compiled and has generated the corresponding boot files (vmlinux, BOOT.BIN, etc.), and then run from the project root directory:</p>
+<h2 id="booting-hvisor-on-zcu102-development-board-in-jtag-mode"><a class="header" href="#booting-hvisor-on-zcu102-development-board-in-jtag-mode">Booting Hvisor on ZCU102 Development Board in Jtag Mode</a></h2>
+<p>First, connect the two cables that come with the board to the JTAG and UART interfaces on the board, and the other end to the PC via USB.</p>
+<p>Then, open a petalinux project in the command line, ensure the project has been compiled and generated the corresponding boot files (vmlinux, BOOT.BIN, etc.), then enter the project root directory and run:</p>
 <pre><code class="language-bash">petalinux-boot --jtag --prebuilt 2
 </code></pre>
 <p>Where prebuilt represents the boot level:</p>
 <ul>
 <li><strong>Level 1</strong>: Only download the FPGA bitstream, boot FSBL and PMUFW</li>
-<li><strong>Level 2</strong>: Download FPGA bitstream and boot UBOOT, and start FSBL, PMUFW, and TF-A (Trusted Firmware-A)</li>
-<li><strong>Level 3</strong>: Download and boot linux, and load or boot FPGA bitstream, FSBL, PMUFW, TF-A, UBOOT</li>
+<li><strong>Level 2</strong>: Download the FPGA bitstream and boot UBOOT, and start FSBL, PMUFW, and TF-A (Trusted Firmware-A)</li>
+<li><strong>Level 3</strong>: Download and boot Linux, and load or boot FPGA bitstream, FSBL, PMUFW, TF-A, UBOOT</li>
 </ul>
-<p>Afterwards, JTAG will download the corresponding files to the board (save to the designated memory address) and boot the corresponding bootloader. For the default UBOOT script by the official, refer to the boot.scr file in the project image directory.</p>
-<p>Since hvisor requires a separate UBOOT command and a custom-made fitImage to boot, please refer to <a href="chap02/subchap01/../../chap02/subchap01/UbootFitImage-ZCU102.html">UBOOT FIT Image Creation, Loading, and Booting</a>.</p>
-<p>After creating the fitImage, replace the files in the petalinux images generation directory (Image.ub), so that JTAG loads our custom-made fitImage to the default FIT image load address configured in the petalinux project. This way, when JTAG boots, our fitImage will be loaded through the JTAG line to the corresponding address in the board memory, then extracted and booted through the uboot command line.</p>
-<p>Another UART cable can be used to observe the output from the ZCU102 board (including FSBL, UBOOT, linux, etc.), which can be viewed through serial port tools such as <code>screen</code>, <code>gtkterm</code>, <code>termius</code>, or <code>minicom</code>.</p>
+<p>Then, JTAG will download the corresponding files to the board (saving to specified memory addresses) and start the corresponding bootloader. For the official UBOOT default script, refer to the boot.scr file in the project image directory.</p>
+<p>Since hvisor requires separate UBOOT commands and a custom-made fitImage to boot, please refer to <a href="chap02/subchap01/../../chap02/subchap01/UbootFitImage-ZCU102.html">UBOOT FIT Image Creation, Loading, and Booting</a>.</p>
+<p>After creating the fitImage, replace the file (Image.ub) in the petalinux images generation directory so that JTAG loads our custom-made fitImage to the default FIT image loading address configured in the petalinux project. This way, JTAG will load our fitImage through the JTAG line to the corresponding address in the board memory, then extract and bootm through the uboot command line.</p>
+<p>Another UART line can be used to observe the output of the ZCU102 board (including FSBL, UBOOT, Linux, etc.), which can be viewed through serial port tools like <code>screen</code>, <code>gtkterm</code>, <code>termius</code>, <code>minicom</code>.</p>
 <div class="warning">
     <h3 id="please-note-3"><a class="header" href="#please-note-3">Please Note</a></h3>
-    <p> Since petalinux has designated some fixed memory addresses, such as the default loading addresses for the linux kernel, fitImage, and DTB (configurable during petalinux project compilation), because we need to load and boot a custom-made fitImage, a problem currently identified is if the root linux dtb's load address in its matches the petalinux compilation load address, it will cause the dtb to be overwritten by the default petalinux dtb, leading to the root linux receiving an incorrect dtb and failing to boot. Therefore, it is necessary to specify a different address from the petalinux default dtb/fitImage load address during compilation to prevent other issues.
+    <p> Since petalinux has specified some fixed memory addresses, such as the default loading addresses for the Linux kernel, fitImage, DTB (configurable during petalinux compilation), since we need to load and boot a custom-made fitImage, a problem discovered is that if the root Linux dtb's loading address in its matches the loading address during petalinux compilation, it will cause the dtb to be overwritten by the default petalinux dtb, thereby causing root Linux to receive an incorrect dtb and fail to boot. Therefore, it is necessary to specify a different address from the default petalinux dtb/fitImage loading address during compilation to prevent other issues.
 </div>
 <h1 id="references"><a class="header" href="#references">References</a></h1>
 <p>[1] PetaLinux Tools Documentation: Reference Guide (UG1144).<a href="https://docs.amd.com/r/2023.1-English/ug1144-petalinux-tools-reference-guide/Booting-a-PetaLinux-Image-on-Hardware-with-JTAG">https://docs.amd.com/r/2023.1-English/ug1144-petalinux-tools-reference-guide/Booting-a-PetaLinux-Image-on-Hardware-with-JTAG</a>
 [2] Trusted Firmware-A Documentation.<a href="https://trustedfirmware-a.readthedocs.io/en/latest/">https://trustedfirmware-a.readthedocs.io/en/latest/</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="zcu102-nonroot-boot"><a class="header" href="#zcu102-nonroot-boot">ZCU102 NonRoot Boot</a></h2>
+<p>Ren Hangqi (2572131118@qq.com)</p>
 <ol>
-<li>Use the Linux kernel source code used during the Root boot to compile <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, and the detailed compilation process can be found in <a href="https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md">Readme</a>.</li>
-<li>Prepare the <code>virtio_cfg.json</code> and <code>zone1_linux.json</code> needed to boot NonRoot. You can directly use the <code>example/zcu102-aarch64</code> in the hvisor-tool directory, which has been verified to ensure it can boot.</li>
-<li>Prepare the Linux kernel Image, file system rootfs, and device tree linux1.dtb needed for NonRoot. The kernel and file system can be the same as Root, and Linux1.dtb can be configured as needed, or you can use the <code>images/aarch64/devicetree/zcu102-nonroot-aarch64.dts</code> in the hvisor directory.</li>
-<li>Copy <code>hvisor.ko, hvisor, virtio_cfg, zone1_linux.json, linux1.dtb, Image, rootfs.ext4</code> to the file system used by Root Linux.</li>
+<li>Use the Linux kernel source code used during the Root boot to compile <a href="https://github.com/syswonder/hvisor-tool">hvisor-tool</a>, the detailed compilation process can refer to <a href="https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md">Readme</a>.</li>
+<li>Prepare the <code>virtio_cfg.json</code> and <code>zone1_linux.json</code> needed to boot NonRoot, you can directly use the <code>example/zcu102-aarch64</code> under the hvisor-tool directory, the content has been verified to ensure it can boot.</li>
+<li>Prepare the Linux kernel Image, filesystem rootfs, and device tree linux1.dtb required for NonRoot. The kernel and filesystem can be the same as Root, Linux1.dtb is configured as needed, you can also use <code>images/aarch64/devicetree/zcu102-nonroot-aarch64.dts</code> under the hvisor directory.</li>
+<li>Copy <code>hvisor.ko, hvisor, virtio_cfg, zone1_linux.json, linux1.dtb, Image, rootfs.ext4</code> to the filesystem used by Root Linux.</li>
 <li>Enter the following commands in RootLinux to start NonRoot:</li>
 </ol>
 <pre><code># Load the kernel module
 insmod hvisor.ko
 # Create virtio device
 nohup ./hvisor virtio start virtio_cfg.json &amp;
-# Start NonRoot based on the json configuration file
+# Start NonRoot according to the json configuration file
 ./hvisor zone start zone1_linux.json 
 # View the output of NonRoot and interact.
 screen /dev/pts/0
 </code></pre>
-<p>For more operation details, refer to <a href="https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md">hvisor-tool Readme</a></p>
+<p>For more operational details refer to <a href="https://github.com/syswonder/hvisor-tool/blob/main/README-zh.md">hvisor-tool Readme</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="uboot-fit-image-creation-loading-and-booting"><a class="header" href="#uboot-fit-image-creation-loading-and-booting">UBOOT FIT Image Creation, Loading, and Booting</a></h1>
 <p>wheatfox (wheatfox17@icloud.com)</p>
 <p>This article introduces the basic knowledge related to FIT images, as well as how to create, load, and boot FIT images.</p>
@@ -1155,7 +1158,106 @@ imxtract ${fit_addr} root_linux ${root_linux_load}; bootm ${fit_addr};
 </code></pre>
 <h1 id="references-1"><a class="header" href="#references-1">References</a></h1>
 <p>[1] Flat Image Tree (FIT). <a href="https://docs.u-boot.org/en/stable/usage/fit/">https://docs.u-boot.org/en/stable/usage/fit/</a></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><p>Ren Hangqi (2572131118@qq.com)</p>
+<p>Update Time: 2025.4.23</p>
+<h1 id="operations-needed-for-the-new-board"><a class="header" href="#operations-needed-for-the-new-board">Operations needed for the new board</a></h1>
+<p>If the board is a newly acquired RK3588, it may not have anything written inside, including the bootloader, so you first need to preliminarily write to the board, writing Uboot, Linux, Rootfs, etc. It is recommended to write using <a href="https://download.t-firefly.com/product/Board/RK3588/Tool/Window/RKDevTool_Release_v3.31.zip">RKDevTool</a> on Windows.</p>
+<p>You can directly download the update.img from <a href="https://bhpan.buaa.edu.cn/link/AA6F31C943712347DEB8D04FF1E5975F86">this link</a>. This image packages all the above content. Directly writing this image can achieve everything in one step, the specific operations are as follows:</p>
+<ol>
+<li>Connect the board to the computer via USB using the Type-C port.</li>
+<li>First, put the board in MaskRoom or Loader mode (can be recognized in RKDevTool)
+<ul>
+<li>Loader mode: While powered on, press RST and BOOT buttons simultaneously, or enter <code>reboot loader</code> in Uboot, Linux.</li>
+<li>MaskRoom mode: New boards default to this mode.</li>
+</ul>
+</li>
+<li>Operate in RKDevTool as shown below</li>
+</ol>
+<p><img src="chap02/./img/update.png" alt="update.png" /></p>
+<h1 id="obtain-rk3588-kernel-image"><a class="header" href="#obtain-rk3588-kernel-image">Obtain RK3588 Kernel Image</a></h1>
+<p>RK3588 has a dedicated kernel image, the source code can be obtained through <a href="https://bhpan.buaa.edu.cn/link/AA7E3F2C1C703F48A7A6CE1FF74741753D">this link</a>.</p>
+<p>For ease and quick start, this kernel is already compiled, so the file is large. You can directly obtain the image through <code>kernel/arch/arm64/boot/Image</code> or use the existing <code>.config</code> to customize the required image.</p>
+<p>Of course, if you are not concerned about the kernel source code, you can directly obtain the Image through <a href="https://bhpan.buaa.edu.cn/link/AAAAF1803AEC0F4710BF322C54804F72DC">this link</a>.</p>
+<h1 id="serial-port-connection"><a class="header" href="#serial-port-connection">Serial Port Connection</a></h1>
+<p>RK3588's serial port is quite special, you need to purchase a USB to TTL converter for connection.</p>
+<p><img src="chap02/./img/usb%E8%BD%ACttl.png" alt="usb转ttl" /></p>
+<p>Connect RT-TX, TX-RD, GND-GND when connecting, and the baud rate of the serial port is 1500000 after connecting to the computer.</p>
+<h1 id="re-write-uboot"><a class="header" href="#re-write-uboot">Re-write Uboot</a></h1>
+<p>To start hvisor, the original Uboot has no waiting time and will directly start Linux. Uboot needs to be rewritten, and a copy of Uboot and its writing tool is already prepared, which can be obtained through <a href="https://bhpan.buaa.edu.cn/link/AA6220C0C619A840DEAC44F1F813FC0109">Uboot</a>, <a href="https://bhpan.buaa.edu.cn/link/AA285131D2DDD14AD79A030AB2A38F4D63">Upgrade-tool</a>.</p>
+<p>Under the Linux system, also connect the board and the computer with USB and put it in Loader mode:</p>
+<pre><code>chmod +777 /path/to/upgrade_tool
+sudo upgrade_tool di -u /path/to/uboot.img
+</code></pre>
+<h1 id="compile-hvisor-and-device-tree"><a class="header" href="#compile-hvisor-and-device-tree">Compile Hvisor and Device Tree</a></h1>
+<ol>
+<li>Similar to other development boards, pull the latest code of hvisor from the repository: https://github.com/syswonder/hvisor. Enter the directory and compile hvisor:
+<pre><code>make BID=aarch64/rk3588
+</code></pre>
+</li>
+<li>Enter <code>/images/aarch64/devicetree/</code>, <code>rk3588-root-aarch64-sdmmc.dts</code> is the device tree used by RK3588 RootLinux, <code>rk3588-nonroot-aarch64.dts</code> is the device tree used by RK3588 NonRootLinux. You can compile them using the following commands:
+<pre><code>dtc -I dts -O dtb rk3588-nonroot-aarch64.dts -o ./linux1.dtb
+dtc -I dts -O dtb rk3588-root-aarch64-sdmmc.dts -o ./zone0.dtb
+</code></pre>
+</li>
+</ol>
+<h1 id="create-file-system"><a class="header" href="#create-file-system">Create File System</a></h1>
+<p>Prepare an SD card, partition it into two, the first one in FAT32 format, size 1GB; the second one in EXT4 format.</p>
+<p>Download the <a href="https://bhpan.buaa.edu.cn/link/AA91FB720EDBF949FA909538CC6093C8D0">file system</a>, unzip this file system to the EXT4 formatted partition.</p>
+<p>Of course, you can also make it yourself, refer to <a href="https://foreveryolo.top/posts/60156/">Building a file system based on ubuntu_base</a>.</p>
+<h1 id="start-rootlinux"><a class="header" href="#start-rootlinux">Start RootLinux</a></h1>
+<h1 id="tftp"><a class="header" href="#tftp">TFTP</a></h1>
+<p>If a TFTP server is already set up, then you can start RootLinux in a convenient way, specifically:</p>
+<ol>
+<li>Copy Image, zone0.dtb, hvisor.bin to the ~/tftp folder</li>
+<li>Connect the host and the development board with an Ethernet cable, configure the host IP to <code>192.168.137.2</code>, subnet mask <code>255.255.255.0</code>.</li>
+<li>Simply power on and connect the serial port, uboot will automatically download the content from the tftp folder and start.</li>
+</ol>
+<p>If you need to set up, you can refer to <a href="https://foreveryolo.top/posts/17937/">Rapid Development on Embedded Platforms - Tftp Server Setup and Configuration</a>.</p>
+<h1 id="without-tftp"><a class="header" href="#without-tftp">Without TFTP</a></h1>
+<p>At this time, the first FAT32 partition on the SD card comes into play, copy Image, zone0.dtb, hvisor.bin to this partition</p>
+<ol>
+<li>Start the development board, connect the serial port.</li>
+<li>Interrupt Uboot's automatic start.</li>
+<li>Enter the following commands to start RootLinux
+<pre><code>fatload mmc 0:1 0x00480000 hvisor.bin;fatload mmc 0:1 0x10000000 zone0.dtb;fatload mmc 0:1 0x09400000 Image;bootm 0x00480000 - 0x10000000
+</code></pre>
+</li>
+</ol>
+<h1 id="start-nonrootlinux"><a class="header" href="#start-nonrootlinux">Start NonRootLinux</a></h1>
+<h1 id="download-ready-made-configuration-files"><a class="header" href="#download-ready-made-configuration-files">Download Ready-Made Configuration Files</a></h1>
+<p>Through <a href="https://bhpan.buaa.edu.cn/link/AAC7FF42BDBBE44ABEBB512459C379BCE4">this link</a> you can download usable NonRoot configurations, including Image, configuration files, rootfs, etc., unzip them to the RootLinux file system, which can help quickly start Nonroot, mainly starting devices like virtio-blk and virtio-console, or you can pass through devices according to your own needs.</p>
+<div class="warning">
+    <h1 id="tips"><a class="header" href="#tips"> Tips: </a></h1>
+    <p> Please do not arbitrarily change the Image used for Rootlinux, as this will cause Nonroot to fail to start! </p>
+</div>
+<h1 id="compile-hvisor-tool"><a class="header" href="#compile-hvisor-tool">Compile hvisor-tool</a></h1>
+<p>Pull the latest code of Hvisor-tool: https://github.com/syswonder/hvisor-tool/tree/main, and compile:</p>
+<pre><code>make all ARCH=aarch64 LOG=LOG_WARN KDIR=RK3588 kernel source VIRTIO_GPU=n
+</code></pre>
+<p>For more details, please refer to the Readme.md of hvisor-tool.</p>
+<p>Note, the kernel source must have been compiled, otherwise hvisor-tool will report an error because it cannot find the compiled product.</p>
+<div class="warning">
+    <h1 id="tips-1"><a class="header" href="#tips-1"> Tips: </a></h1>
+    <p> The glibc version used when compiling hvisor-tool needs to ensure that the Rootlinux file system also supports it, otherwise hvisor-tool will not work properly! </p>
+</div>
+<p>For example, the Rootlinux Rootfs given in this article is Ubuntu 24.04. The Glibc version of the compiling machine should not be higher than the Glibc version of Ubuntu24.04, which is generally satisfied here since Ubuntu24.04 is newer.</p>
+<p>Of course, the above operation is completed by aligning the glibc versions used by the two file systems, or you can directly compile hvisor-tool in the Rootlinux file system, or specify the Rootlinux file system directory on the compiling machine, so that the compilation link directly links the glibc of the Rootlinux file system, specifically as follows:</p>
+<pre><code>make all ARCH=aarch64 LOG=LOG_WARN KDIR=RK3588 kernel source VIRTIO_GPU=n \
+ROOT=/path/to/target_rootfs
+</code></pre>
+<h1 id="start"><a class="header" href="#start">Start</a></h1>
+<p>Execute the following commands under Rootlinux</p>
+<pre><code>insmod hvisor.ko
+nohup ./hvisor virtio start virtio_cfg.json &amp;
+./hvisor zone start zone1_linux.json
+screen /dev/pts/0
+</code></pre>
+<p>You can then see the output of the second virtual machine (Nonroot).</p>
+<div class="warning">
+    <h1 id="tips-2"><a class="header" href="#tips-2"> Tips: </a></h1>
+    <p> If you do not configure the Rootlinux file system according to the above process, or with version iterations, there may be situations where the ready-made configuration files are not usable, in which case you need to update the configuration yourself, and we will also follow up as soon as possible.
+    <p> For the latest configuration format, you can refer to the example under hvisor-tool.</p>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-compile"><a class="header" href="#how-to-compile">How to Compile</a></h1>
 <h2 id="compile-using-docker"><a class="header" href="#compile-using-docker">Compile using Docker</a></h2>
 <h3 id="1-install-docker"><a class="header" href="#1-install-docker">1. Install Docker</a></h3>
 <pre><code class="language-bash">sudo snap install docker
